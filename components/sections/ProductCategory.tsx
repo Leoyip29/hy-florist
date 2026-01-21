@@ -60,16 +60,18 @@ export default function ProductCategory({
             <button
               key={cat.name}
               onClick={() => onSelect(cat.name)}
-              className={`group flex flex-col items-center gap-2 w-[82px] sm:w-[100px] transition-all duration-300 ${
-                selectedCategory === cat.name ? "opacity-100" : "opacity-90"
+              className={`group flex flex-col items-center gap-2 w-[82px] sm:w-[100px] transition-all duration-300 transform ${
+                selectedCategory === cat.name
+                  ? "scale-105"
+                  : "hover:scale-105 active:scale-95"
               }`}
             >
               <div
-                className={`w-20 h-14 sm:w-24 sm:h-16 rounded-2xl overflow-hidden border border-neutral-200 bg-neutral-50 transition-all duration-300 flex items-center justify-center ${
+                className={`w-20 h-14 sm:w-24 sm:h-16 rounded-2xl overflow-hidden border-2 transition-all duration-300 flex items-center justify-center shadow-sm ${
                   selectedCategory === cat.name
-                    ? "border-neutral-900 shadow-md"
-                    : "group-hover:border-neutral-400"
-                }`}
+                    ? "border-neutral-800 shadow-lg"
+                    : "border-neutral-200 group-hover:border-neutral-400 group-hover:shadow-md"
+                } bg-stone-50`}
               >
                 {cat.image ? (
                   <Image
@@ -77,15 +79,17 @@ export default function ProductCategory({
                     alt={cat.name}
                     width={80}
                     height={56}
-                    className="object-contain p-2"
+                    className={`object-contain p-2 transition-transform duration-300 ${
+                      selectedCategory === cat.name ? "scale-110" : "group-hover:scale-110"
+                    }`}
                   />
                 ) : null}
               </div>
               <span
-                className={`text-xs sm:text-sm font-semibold tracking-wide text-center leading-tight ${
+                className={`text-xs sm:text-sm font-medium text-center leading-tight transition-colors duration-300 ${
                   selectedCategory === cat.name
                     ? "text-neutral-900"
-                    : "text-neutral-500 group-hover:text-neutral-800"
+                    : "text-neutral-500 group-hover:text-neutral-700"
                 }`}
               >
                 {cat.name}
