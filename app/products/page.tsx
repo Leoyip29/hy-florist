@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { Playfair_Display } from "next/font/google"
 import ProductCategory from "@/components/sections/ProductCategory"
@@ -104,6 +105,9 @@ export default function ShopPage() {
   const [scrollOffset, setScrollOffset] = useState(0)
   const [itemsInView, setItemsInView] = useState<boolean[]>([])
   const sectionRef = useRef<HTMLDivElement>(null)
+  const [sortOption, setSortOption] = useState<"recommended" | "price_asc" | "price_desc">(
+    "recommended"
+  )
 
   useEffect(() => {
     const run = async () => {
@@ -172,17 +176,23 @@ export default function ShopPage() {
 
   // Filter products by category
   useEffect(() => {
-    setFilteredProducts(
-      products.filter((p) => {
-        const matchCategory =
-          selectedCategory === "全部" || p.categories.includes(selectedCategory)
-        const matchLocation =
-          selectedLocation === "全部" || p.locations.includes(selectedLocation)
-        return matchCategory && matchLocation
-      })
-    )
+    const filtered = products.filter((p) => {
+      const matchCategory =
+        selectedCategory === "全部" || p.categories.includes(selectedCategory)
+      const matchLocation =
+        selectedLocation === "全部" || p.locations.includes(selectedLocation)
+      return matchCategory && matchLocation
+    })
+
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortOption === "price_asc") return a.price - b.price
+      if (sortOption === "price_desc") return b.price - a.price
+      return 0
+    })
+
+    setFilteredProducts(sorted)
     setCurrentPage(1)
-  }, [selectedCategory, selectedLocation, products])
+  }, [selectedCategory, selectedLocation, products, sortOption])
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
   const paginatedProducts = filteredProducts.slice(
@@ -225,13 +235,23 @@ export default function ShopPage() {
     <main className="bg-white">
       {/* ===== HERO SECTION ===== */}
       <section
-        className="relative py-24 md:py-32 bg-gradient-to-r from-rose-50 via-purple-50 to-transparent overflow-hidden"
+        className="relative py-24 md:py-32 overflow-hidden"
         ref={sectionRef}
         style={{
           transform: `translateY(-${scrollOffset * 0.2}px)`,
         }}
       >
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
+        <Image
+          src="/store.png"
+          alt="Store background"
+          fill
+          priority
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/60 to-transparent" />
+        <div className="absolute inset-0 bg-black/10" />
+
+        <div className="relative mx-auto max-w-7xl px-4 md:px-8">
           <div className="max-w-2xl">
             <h1 className={`${playfair.className} text-5xl md:text-7xl font-light mb-6 text-neutral-900 leading-tight`}>
               花藝商城
@@ -253,8 +273,28 @@ export default function ShopPage() {
       />
 
       {/* ===== PRODUCTS GRID ===== */}
-      <section className="py-20 bg-white">
+      <section className="py-10 bg-white">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <p className="text-xs sm:text-sm text-neutral-500">
+              共 {filteredProducts.length} 件商品
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-neutral-500">排序</span>
+              <select
+                value={sortOption}
+                onChange={(e) =>
+                  setSortOption(e.target.value as "recommended" | "price_asc" | "price_desc")
+                }
+                className="text-xs sm:text-sm border border-neutral-200 rounded-full px-3 py-1.5 bg-white text-neutral-800 focus:outline-none focus:ring-1 focus:ring-neutral-400"
+              >
+                <option value="recommended">預設排序</option>
+                <option value="price_asc">價格：由低至高</option>
+                <option value="price_desc">價格：由高至低</option>
+              </select>
+            </div>
+          </div>
+
           {isLoading ? (
             <div className="text-center py-16">
               <p className="text-neutral-500 text-lg">載入中...</p>
@@ -272,7 +312,7 @@ export default function ShopPage() {
               <p className="text-neutral-500 text-lg">暫無該分類的商品</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {paginatedProducts.map((product, index) => (
                 <ProductCard
                   key={product.id}

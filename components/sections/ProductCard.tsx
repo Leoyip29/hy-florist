@@ -18,26 +18,26 @@ export default function ProductCard({
 
   return (
     <div
-      className="product-card group"
+      className="product-card group h-full"
       style={{
         opacity: inView ? 1 : 0.6,
         transform: inView ? "translateY(0) scale(1)" : "translateY(20px) scale(0.98)",
         transition: `all 0.6s ease-out ${index * 80}ms`,
       }}
     >
-      <div className="bg-white rounded-lg overflow-hidden border border-neutral-200 hover:border-neutral-400 transition-all duration-500 hover:shadow-xl">
-        <div className="relative w-full aspect-square overflow-hidden bg-neutral-100">
+      <div className="bg-white rounded-xl overflow-hidden border border-neutral-200 hover:border-neutral-400 transition-all duration-500 hover:shadow-xl h-full flex flex-col">
+        <div className="relative w-full aspect-[4/5] sm:aspect-square overflow-hidden bg-neutral-100">
           <Image
             src={product.image || "/hy_01.webp"}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-110 transition-transform duration-500"
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/15 opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
 
-          <button className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-110">
+          <button className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 bg-white/90 hover:bg-white rounded-full p-1.5 sm:p-2 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-110">
             <svg
-              className="w-5 h-5 text-neutral-900"
+              className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-900"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -51,52 +51,58 @@ export default function ProductCard({
             </svg>
           </button>
 
-          <div className="absolute top-4 left-4 bg-neutral-900 text-white px-3 py-1 rounded-full text-xs font-medium">
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-neutral-900 text-white px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-medium shadow-md">
             {product.categories[0] ?? "未分類"}
           </div>
+
+          {(product.rating ?? 0) > 0 && (
+            <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-neutral-900 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-medium shadow-md flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5 text-yellow-500 fill-yellow-400" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              <span>{(product.rating ?? 0).toFixed(1)}</span>
+              <span className="text-neutral-500">·</span>
+              <span>{product.reviews ?? 0}</span>
+            </div>
+          )}
         </div>
 
-        <div className="p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="flex gap-1">
-              {[...Array(5)].map((_, i) => (
-                <svg
-                  key={i}
-                  className={`w-4 h-4 ${
-                    i < Math.floor(product.rating ?? 0)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "fill-neutral-300 text-neutral-300"
-                  }`}
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-              ))}
-            </div>
-            <span className="text-xs text-neutral-600">({product.reviews ?? 0})</span>
-          </div>
-
+        <div className="p-4 sm:p-5 flex flex-col gap-3 sm:gap-4 flex-1">
           <h3
-            className={`${playfairClassName} text-base font-light leading-snug text-neutral-900 mb-3 line-clamp-2`}
+            className={`${playfairClassName} text-sm sm:text-base font-light leading-snug text-neutral-900 line-clamp-2`}
           >
             {product.name}
           </h3>
 
           {locations.length > 0 && (
-            <p className="text-xs text-neutral-600 mb-3 line-clamp-1">
-              地點: {locations.join(" / ")}
-            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {locations.slice(0, 3).map((loc) => (
+                <span
+                  key={loc}
+                  className="px-2 py-1 rounded-full bg-neutral-100 text-[11px] sm:text-xs text-neutral-700 border border-neutral-200"
+                >
+                  {loc}
+                </span>
+              ))}
+              {locations.length > 3 && (
+                <span className="px-2 py-1 rounded-full bg-neutral-100 text-[11px] sm:text-xs text-neutral-500 border border-dashed border-neutral-200">
+                  +{locations.length - 3}
+                </span>
+              )}
+            </div>
           )}
 
-          <div className="mb-4">
-            <p className="text-lg font-semibold text-neutral-900">
-              ${product.price.toLocaleString()}
-            </p>
+          <div className="flex items-center justify-between gap-2 mt-auto">
+            <div className="flex flex-col">
+              <span className="text-[11px] sm:text-xs text-neutral-500">起價</span>
+              <p className="text-base sm:text-lg font-semibold text-neutral-900">
+                ${product.price.toLocaleString()}
+              </p>
+            </div>
+              <button className="inline-flex items-center justify-center px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-neutral-900 text-white text-xs sm:text-sm font-medium hover:bg-neutral-800 transition-colors duration-300 group-hover:shadow-lg">
+                加入購物車
+              </button>
           </div>
-
-          <button className="w-full bg-neutral-900 text-white py-3 rounded-lg font-medium text-sm hover:bg-neutral-800 transition-colors duration-300 group-hover:shadow-lg">
-            加入購物車
-          </button>
         </div>
       </div>
     </div>
