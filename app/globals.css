@@ -1,14 +1,13 @@
 @import "tailwindcss";
 @plugin "daisyui" {
   themes: light --default;
- }
+}
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
+  --background-start-rgb: 245, 245, 245;
   --background-end-rgb: 255, 255, 255;
 }
-
 
 a {
   color: inherit;
@@ -17,5 +16,5 @@ a {
 
 body {
   color: rgb(var(--foreground-rgb));
-  padding: 1rem;
+  background-color: rgb(var(--background-start-rgb));
 }

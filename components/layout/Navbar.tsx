@@ -8,33 +8,36 @@ const cartCount = 0
 const hoverLink =
   "no-underline inline-block transition-transform duration-200 ease-out hover:-rotate-6"
   
-export default function Navbar() {
+export default function Navbar({ isScrolled }: { isScrolled: boolean }) {
   const [open, setOpen] = useState(false)
+
+  // Text color changes based on scroll position
+  const linkColor = isScrolled ? "text-gray-800" : "text-white"
 
   return (
     <>
       {/* DESKTOP */}
       <nav className="hidden md:flex items-center gap-8 text-lg">
-        <Link href="/" className={hoverLink}>首頁</Link>
-        <Link href="/about" className={hoverLink}>關於我們</Link>
-        <Link href="/process" className={hoverLink}>訂購流程</Link>
-        <Link href="/contact" className={hoverLink}>聯絡我們</Link>
+        <Link href="/" className={`${hoverLink} ${linkColor}`}>首頁</Link>
+        <Link href="/about" className={`${hoverLink} ${linkColor}`}>關於我們</Link>
+        <Link href="/process" className={`${hoverLink} ${linkColor}`}>訂購流程</Link>
+        <Link href="/contact" className={`${hoverLink} ${linkColor}`}>聯絡我們</Link>
 
         <Link
-        href="/cart"
-        className="relative inline-flex h-[30px] w-[30px] items-center justify-center"
+          href="/cart"
+          className="relative inline-flex h-[30px] w-[30px] items-center justify-center"
         >
-        {/* Cart Icon */}
-        <Image
+          {/* Cart Icon */}
+          <Image
             src="/cart1.png"
             alt="Cart"
             width={25}
             height={25}
-            className="relative z-10 cursor-pointer"
-        />
+            className={`relative z-10 cursor-pointer ${isScrolled ? "" : "brightness-0 invert"}`}
+          />
 
-        {/* Badge */}
-        <span
+          {/* Badge */}
+          <span
             className="
             absolute
             -top-2 -right-2
@@ -45,9 +48,9 @@ export default function Navbar() {
             leading-none
             pointer-events-none
             "
-        >
+          >
             {cartCount}
-        </span>
+          </span>
         </Link>
       </nav>
 
@@ -64,7 +67,7 @@ export default function Navbar() {
             alt="Cart"
             width={25}
             height={25}
-            className="relative z-10"
+            className={`relative z-10 ${isScrolled ? "" : "brightness-0 invert"}`}
             />
             <span
             className="
@@ -81,7 +84,7 @@ export default function Navbar() {
 
         {/* HAMBURGER */}
         <button
-            className="text-2xl"
+            className={`text-2xl ${isScrolled ? "text-gray-800" : "text-white"}`}
             onClick={() => setOpen(!open)}
         >
             ☰
