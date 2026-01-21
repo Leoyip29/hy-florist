@@ -53,43 +53,47 @@ export default function ProductCategory({
   const visibleCategories = categories
 
   return (
-    <section className="bg-white border-b border-neutral-200 shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 md:px-8 py-6">
-        <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+    <section className="bg-white border-b border-neutral-100">
+      <div className="mx-auto max-w-7xl px-4 md:px-8 py-8">
+        {/* Category Icons - Elegant Minimal */}
+        <div className="flex flex-wrap justify-center gap-4 md:gap-5">
           {visibleCategories.map((cat) => (
             <button
               key={cat.name}
               onClick={() => onSelect(cat.name)}
-              className={`group flex flex-col items-center gap-2 w-[82px] sm:w-[100px] transition-all duration-300 transform ${
-                selectedCategory === cat.name
-                  ? "scale-105"
-                  : "hover:scale-105 active:scale-95"
+              className={`group flex flex-col items-center gap-3 transition-all duration-200 ${
+                selectedCategory === cat.name ? "" : "opacity-70 hover:opacity-100"
               }`}
             >
               <div
-                className={`w-20 h-14 sm:w-24 sm:h-16 rounded-2xl overflow-hidden border-2 transition-all duration-300 flex items-center justify-center shadow-sm ${
-                  selectedCategory === cat.name
-                    ? "border-neutral-800 shadow-lg"
-                    : "border-neutral-200 group-hover:border-neutral-400 group-hover:shadow-md"
-                } bg-stone-50`}
+                className={`relative overflow-hidden transition-all duration-300 ${
+                  selectedCategory === cat.name ? "" : "grayscale-[30%] group-hover:grayscale-0"
+                }`}
+                style={{
+                  width: selectedCategory === cat.name ? 68 : 60,
+                  height: selectedCategory === cat.name ? 68 : 60,
+                  borderRadius: selectedCategory === cat.name ? 20 : 14,
+                }}
               >
-                {cat.image ? (
+                {cat.image && (
                   <Image
                     src={cat.image}
                     alt={cat.name}
-                    width={80}
-                    height={56}
-                    className={`object-contain p-2 transition-transform duration-300 ${
-                      selectedCategory === cat.name ? "scale-110" : "group-hover:scale-110"
-                    }`}
+                    fill
+                    sizes="60px"
+                    className="object-contain p-2"
                   />
-                ) : null}
+                )}
+                {/* Subtle active indicator bar */}
+                {selectedCategory === cat.name && (
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-neutral-900 rounded-full" />
+                )}
               </div>
               <span
-                className={`text-xs sm:text-sm font-medium text-center leading-tight transition-colors duration-300 ${
+                className={`text-sm font-medium transition-colors duration-200 tracking-wide ${
                   selectedCategory === cat.name
                     ? "text-neutral-900"
-                    : "text-neutral-500 group-hover:text-neutral-700"
+                    : "text-neutral-500"
                 }`}
               >
                 {cat.name}
@@ -98,43 +102,53 @@ export default function ProductCategory({
           ))}
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pt-4 pb-1 snap-x snap-mandatory">
-          {locations.map((loc) => (
-            <button
-              key={loc}
-              onClick={() => onSelectLocation(loc)}
-              className={`
-                px-4 sm:px-6 py-2 rounded-full text-xs sm:text-sm font-medium tracking-wide
-                transition-all duration-300 whitespace-nowrap border snap-start
-                ${
-                  selectedLocation === loc
-                    ? "bg-neutral-900 text-white border-neutral-900 shadow-md"
-                    : "bg-white text-neutral-900 border-neutral-200 hover:bg-neutral-50"
-                }
-              `}
-            >
-              {(() => {
-                const logoFile = LOCATION_LOGOS[loc]
-                const logoSrc = logoFile ? publicLogo(logoFile) : undefined
-                return (
-                  <span className="flex items-center gap-3">
-                    {logoSrc && (
-                      <span className="relative w-9 h-9 rounded-full overflow-hidden bg-neutral-50 flex items-center justify-center">
-                        <Image
-                          src={logoSrc}
-                          alt={loc}
-                          width={36}
-                          height={36}
-                          className="object-contain p-1"
-                        />
-                      </span>
-                    )}
-                    <span>{loc === "全部" ? "全部地點" : loc}</span>
+        {/* Location Tabs - With Elegant Icons */}
+        <div className="flex items-center gap-3 overflow-x-auto pt-8 pb-2">
+          {locations.map((loc) => {
+            const logoFile = LOCATION_LOGOS[loc]
+            const logoSrc = logoFile ? publicLogo(logoFile) : undefined
+
+            return (
+              <button
+                key={loc}
+                onClick={() => onSelectLocation(loc)}
+                className={`
+                  group flex items-center gap-3 px-6 py-3.5
+                  text-base font-medium tracking-wide transition-all duration-200
+                  whitespace-nowrap snap-start rounded-lg
+                  ${
+                    selectedLocation === loc
+                      ? "bg-neutral-900 text-white"
+                      : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900"
+                  }
+                `}
+              >
+                {logoSrc && (
+                  <span
+                    className={`relative overflow-hidden transition-all duration-200 ${
+                      selectedLocation === loc ? "opacity-100" : "opacity-60 group-hover:opacity-100"
+                    }`}
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 6,
+                    }}
+                  >
+                    <Image
+                      src={logoSrc}
+                      alt={loc}
+                      fill
+                      sizes="28px"
+                      className="object-contain"
+                    />
                   </span>
-                )
-              })()}
-            </button>
-          ))}
+                )}
+                <span>{loc === "全部" ? "全部地點" : loc}</span>
+              </button>
+            )
+          })}
+          {/* Active indicator line */}
+          <div className="flex-1 border-b border-neutral-100 ml-2" />
         </div>
       </div>
     </section>
