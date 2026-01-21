@@ -1,10 +1,8 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { Playfair_Display } from "next/font/google"
-import ProductCategory from "@/components/sections/ProductCategory"
-import ProductCard from "@/components/sections/ProductCard"
-import type { CategoryItem } from "@/components/sections/ProductCategory"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -29,11 +27,10 @@ type ApiProduct = {
   images: ApiProductImage[]
 }
 
-export type UiProduct = {
+type UiProduct = {
   id: number
   name: string
   categories: string[]
-  locations: string[]
   price: number
   image: string
   rating?: number
@@ -42,35 +39,6 @@ export type UiProduct = {
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000"
-
-function publicLogo(fileName: string) {
-  // Handles spaces in filenames like "Funeral Home.png"
-  return encodeURI(`/CategoriesLogo/${fileName}`)
-}
-
-// Map your category names to files in `public/CategoriesLogo/`
-// Add/remove keys here to match the names coming from your backend.
-const CATEGORY_LOGOS: Record<string, string> = {
-  全部: "All.png",
-
-  // Chinese -> English filenames (examples)
-  花束: "Bouquets.png",
-  花籃: "Flower Baskets.png",
-  花束多買優惠: "Bouquet Bundle Offers.png",
-  花牌: "Funeral Flower Boards.png",
-  心型花牌: "Heart-Shaped Funeral Wreaths.png",
-  棺面花: "Coffin Flower Arrangements.png",
-  圓形花牌: "Round Funeral Wreaths.png",
-  十字架花牌: "Cross Funeral Wreaths.png",
-  場地裝飾: "Venue Decorations.png",
-  台花: "Table Flower Arrangements.png",
-  場地系列: "Venue Flower Series.png",
-  櫈花: "Chair Flower Arrangements.png",
-  講台花: "Podium Flower Arrangements.png",
-  花牌套餐: "Funeral Flower Set.png",
-
-
-}
 
 function pickPrimaryImage(images: ApiProductImage[]) {
   const primary = images.find((img) => img.is_primary && img.url)
@@ -82,7 +50,6 @@ function toUiProduct(p: ApiProduct): UiProduct {
     id: p.id,
     name: p.name,
     categories: p.categories?.map((c) => c.name) ?? ["未分類"],
-    locations: p.suitable_locations?.map((l) => l.name) ?? [],
     price: Number(p.price),
     image: pickPrimaryImage(p.images),
   }
@@ -90,11 +57,7 @@ function toUiProduct(p: ApiProduct): UiProduct {
 
 export default function ShopPage() {
   const [selectedCategory, setSelectedCategory] = useState("全部")
-  const [categories, setCategories] = useState<CategoryItem[]>([
-    { name: "全部" },
-  ])
-  const [selectedLocation, setSelectedLocation] = useState("全部")
-  const [locations, setLocations] = useState<string[]>(["全部"])
+  const [categories, setCategories] = useState<string[]>(["全部"])
   const [products, setProducts] = useState<UiProduct[]>([])
   const [filteredProducts, setFilteredProducts] = useState<UiProduct[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -128,37 +91,10 @@ export default function ShopPage() {
               .filter(Boolean)
           )
         )
-        const uniqueLocations = Array.from(
-          new Set(
-            data
-              .flatMap((p) => p.suitable_locations?.map((l) => l.name) ?? [])
-              .filter((name) => Boolean(name) && name !== "不適用")
-          )
-        )
-
-        // Prefer static logos from /public/CategoriesLogo, fallback to the first product image found.
-        const categoryToImage = new Map<string, string>()
-        for (const name of uniqueCategories) {
-          const logoFile = CATEGORY_LOGOS[name]
-          if (logoFile) categoryToImage.set(name, publicLogo(logoFile))
-        }
-        for (const p of uiProducts) {
-          for (const cat of p.categories) {
-            if (!categoryToImage.has(cat) && p.image)
-              categoryToImage.set(cat, p.image)
-          }
-        }
 
         setProducts(uiProducts)
         setFilteredProducts(uiProducts)
-        setCategories([
-          { name: "全部", image: publicLogo(CATEGORY_LOGOS["全部"] ?? "All.png") },
-          ...uniqueCategories.map((name) => ({
-            name,
-            image: categoryToImage.get(name),
-          })),
-        ])
-        setLocations(["全部", ...uniqueLocations])
+        setCategories(["全部", ...uniqueCategories])
         setCurrentPage(1)
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to load products")
@@ -172,17 +108,15 @@ export default function ShopPage() {
 
   // Filter products by category
   useEffect(() => {
-    setFilteredProducts(
-      products.filter((p) => {
-        const matchCategory =
-          selectedCategory === "全部" || p.categories.includes(selectedCategory)
-        const matchLocation =
-          selectedLocation === "全部" || p.locations.includes(selectedLocation)
-        return matchCategory && matchLocation
-      })
-    )
+    if (selectedCategory === "全部") {
+      setFilteredProducts(products)
+    } else {
+      setFilteredProducts(
+        products.filter((p) => p.categories.includes(selectedCategory))
+      )
+    }
     setCurrentPage(1)
-  }, [selectedCategory, selectedLocation, products])
+  }, [selectedCategory, products])
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
   const paginatedProducts = filteredProducts.slice(
@@ -243,14 +177,30 @@ export default function ShopPage() {
         </div>
       </section>
 
-      <ProductCategory
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelect={setSelectedCategory}
-        locations={locations}
-        selectedLocation={selectedLocation}
-        onSelectLocation={setSelectedLocation}
-      />
+      {/* ===== CATEGORY FILTER ===== */}
+      <section className="sticky top-0 z-40 bg-white border-b border-neutral-200 shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 md:px-8 py-6">
+          <div className="flex items-center gap-4 overflow-x-auto pb-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`
+                  px-6 py-2.5 rounded-full text-sm font-medium tracking-wide
+                  transition-all duration-300 whitespace-nowrap
+                  ${
+                    selectedCategory === cat
+                      ? "bg-neutral-900 text-white shadow-lg"
+                      : "bg-neutral-100 text-neutral-900 hover:bg-neutral-200"
+                  }
+                `}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ===== PRODUCTS GRID ===== */}
       <section className="py-20 bg-white">
@@ -274,13 +224,96 @@ export default function ShopPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {paginatedProducts.map((product, index) => (
-                <ProductCard
+                <div
                   key={product.id}
-                  product={product}
-                  playfairClassName={playfair.className}
-                  inView={itemsInView[index] ?? true}
-                  index={index}
-                />
+                  className="product-card group"
+                  style={{
+                    opacity: (itemsInView[index] ?? true) ? 1 : 0.6,
+                    transform: (itemsInView[index] ?? true)
+                      ? "translateY(0) scale(1)"
+                      : "translateY(20px) scale(0.98)",
+                    transition: `all 0.6s ease-out ${index * 80}ms`,
+                  }}
+                >
+                  {/* Product Card */}
+                  <div className="bg-white rounded-lg overflow-hidden border border-neutral-200 hover:border-neutral-400 transition-all duration-500 hover:shadow-xl">
+                    {/* Image Container */}
+                    <div className="relative w-full aspect-square overflow-hidden bg-neutral-100">
+                      <Image
+                        src={product.image || "/hy_01.webp"}
+                        alt={product.name}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300" />
+
+                      {/* Favorite Button */}
+                      <button className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-110">
+                        <svg
+                          className="w-5 h-5 text-neutral-900"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                          />
+                        </svg>
+                      </button>
+
+                      {/* Category Badge */}
+                      <div className="absolute top-4 left-4 bg-neutral-900 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        {product.categories[0] ?? "未分類"}
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-5">
+                      {/* Rating */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="flex gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <svg
+                              key={i}
+                              className={`w-4 h-4 ${
+                                i < Math.floor(product.rating ?? 0)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "fill-neutral-300 text-neutral-300"
+                              }`}
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                          ))}
+                        </div>
+                        <span className="text-xs text-neutral-600">
+                          ({product.reviews ?? 0})
+                        </span>
+                      </div>
+
+                      {/* Product Name */}
+                      <h3 className={`${playfair.className} text-base font-light leading-snug text-neutral-900 mb-3 line-clamp-2`}>
+                        {product.name}
+                      </h3>
+
+                      {/* Price */}
+                      <div className="mb-4">
+                        <p className="text-lg font-semibold text-neutral-900">
+                          ${product.price.toLocaleString()}
+                        </p>
+                      </div>
+
+                      {/* Add to Cart Button */}
+                      <button className="w-full bg-neutral-900 text-white py-3 rounded-lg font-medium text-sm hover:bg-neutral-800 transition-colors duration-300 group-hover:shadow-lg">
+                        加入購物車
+                      </button>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           )}
