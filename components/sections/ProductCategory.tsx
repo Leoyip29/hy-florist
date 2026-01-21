@@ -39,7 +39,6 @@ export default function ProductCategory({
   selectedLocation,
   onSelectLocation,
 }: Props) {
-  const [showAllCategories, setShowAllCategories] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -51,39 +50,39 @@ export default function ProductCategory({
     return () => media.removeEventListener("change", handle)
   }, [])
 
-  const visibleCategories =
-    !isMobile || showAllCategories ? categories : categories.slice(0, 6)
+  const visibleCategories = categories
 
   return (
     <section className="bg-white border-b border-neutral-200 shadow-sm">
       <div className="mx-auto max-w-7xl px-4 md:px-8 py-6">
-        <div className="grid grid-cols-4 xs:grid-cols-5 sm:grid-cols-6 md:grid-flow-col md:grid-rows-2 md:auto-cols-max gap-3 sm:gap-5 overflow-x-auto md:overflow-visible pb-2 justify-center justify-items-center snap-x snap-mandatory">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
           {visibleCategories.map((cat) => (
             <button
               key={cat.name}
               onClick={() => onSelect(cat.name)}
-              className={`group flex flex-col items-center gap-2 sm:gap-3 min-w-[82px] sm:min-w-[100px] transition-all duration-300 snap-start ${
+              className={`group flex flex-col items-center gap-2 w-[82px] sm:w-[100px] transition-all duration-300 ${
                 selectedCategory === cat.name ? "opacity-100" : "opacity-90"
               }`}
             >
               <div
-                className={`relative w-20 h-14 sm:w-24 sm:h-16 rounded-2xl overflow-hidden border bg-neutral-50 transition-all duration-300 ${
+                className={`w-20 h-14 sm:w-24 sm:h-16 rounded-2xl overflow-hidden border border-neutral-200 bg-neutral-50 transition-all duration-300 flex items-center justify-center ${
                   selectedCategory === cat.name
                     ? "border-neutral-900 shadow-md"
-                    : "border-neutral-200 group-hover:border-neutral-400"
+                    : "group-hover:border-neutral-400"
                 }`}
               >
                 {cat.image ? (
                   <Image
                     src={cat.image}
                     alt={cat.name}
-                    fill
+                    width={80}
+                    height={56}
                     className="object-contain p-2"
                   />
                 ) : null}
               </div>
               <span
-                className={`text-xs sm:text-sm font-semibold tracking-wide ${
+                className={`text-xs sm:text-sm font-semibold tracking-wide text-center leading-tight ${
                   selectedCategory === cat.name
                     ? "text-neutral-900"
                     : "text-neutral-500 group-hover:text-neutral-800"
@@ -94,20 +93,6 @@ export default function ProductCategory({
             </button>
           ))}
         </div>
-        {isMobile && categories.length > 6 && (
-          <div className="flex justify-center pt-3">
-            <button
-              onClick={() => setShowAllCategories((v) => !v)}
-              className="px-3 py-1.5 text-sm font-medium text-neutral-900 border border-neutral-200 rounded-full hover:border-neutral-400 transition-colors flex items-center gap-2"
-              aria-label={showAllCategories ? "收合分類" : "顯示全部分類"}
-            >
-              <span className="text-lg leading-none">
-                {showAllCategories ? "▲" : "▼"}
-              </span>
-              <span className="text-xs">分類</span>
-            </button>
-          </div>
-        )}
 
         <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pt-4 pb-1 snap-x snap-mandatory">
           {locations.map((loc) => (
@@ -130,11 +115,12 @@ export default function ProductCategory({
                 return (
                   <span className="flex items-center gap-3">
                     {logoSrc && (
-                      <span className="relative w-9 h-9 rounded-full overflow-hidden bg-neutral-50">
+                      <span className="relative w-9 h-9 rounded-full overflow-hidden bg-neutral-50 flex items-center justify-center">
                         <Image
                           src={logoSrc}
                           alt={loc}
-                          fill
+                          width={36}
+                          height={36}
                           className="object-contain p-1"
                         />
                       </span>
