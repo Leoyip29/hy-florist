@@ -19,10 +19,7 @@ const LOCATION_LOGOS: Record<string, string> = {
   殯儀館: "Funeral Home.png",
   醫院: "Hospital.png",
 
-  // English examples (if your suitable_locations are English)
-  Church: "Church.png",
-  "Funeral Home": "Funeral Home.png",
-  Hospital: "Hospital.png",
+
 }
 
 type Props = {
