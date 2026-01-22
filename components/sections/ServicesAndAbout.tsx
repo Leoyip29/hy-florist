@@ -44,40 +44,7 @@ export default function ServicesAndAbout() {
         </div>
       </div>
 
-      {/* Services Icons */}
-      <div className="bg-neutral-50 py-16 md:py-24">
-        <div className="mx-auto px-4 md:px-8 max-w-7xl">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 text-center">
-            <div className="space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-white flex items-center justify-center text-2xl shadow-sm">
-                🚚
-              </div>
-              <h3 className="text-lg font-light text-neutral-900">香港送花服務</h3>
-              <p className="text-sm text-neutral-500 font-light">
-                全港送花服務送到醫院、教堂、殯儀館
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-white flex items-center justify-center text-2xl shadow-sm">
-                💐
-              </div>
-              <h3 className="text-lg font-light text-neutral-900">專業花藝設計</h3>
-              <p className="text-sm text-neutral-500 font-light">
-                為不同場合定制專屬花藝佈置
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-white flex items-center justify-center text-2xl shadow-sm">
-                📦
-              </div>
-              <h3 className="text-lg font-light text-neutral-900">精美包裝</h3>
-              <p className="text-sm text-neutral-500 font-light">
-                每一束花都用心包裝，傳遞真摯心意
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </section>
   )
 }

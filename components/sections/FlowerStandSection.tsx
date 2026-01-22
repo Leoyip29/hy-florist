@@ -35,7 +35,7 @@ const flowerStandProducts: FlowerStandProduct[] = [
 export default function FlowerStandSection() {
   return (
     <section className="py-24 md:py-32 bg-[#5c4d3c]">
-      <div className="mx-auto px-4 md:px-8 max-w-7xl">
+      <div className="mx-auto px-4 md:px-8 ">
         {/* Section Header - Elegant & Minimal */}
         <div className="text-center mb-16">
           <p className="text-xs md:text-sm tracking-[0.25em] text-stone-300 uppercase mb-4">
@@ -44,18 +44,24 @@ export default function FlowerStandSection() {
           <h2 className="text-3xl md:text-4xl font-light tracking-wide text-stone-100 font-serif">
             永恆告別花牌
           </h2>
+                    {/* Decorative line */}
+          <div className="flex items-center justify-center gap-2 mt-6">
+            <div className="w-8 h-px bg-[#D4C8B8]" />
+            <div className="w-1.5 h-1.5 rotate-45 bg-[#9CAFA3]" />
+            <div className="w-8 h-px bg-[#D4C8B8]" />
+          </div>
           <p className="mt-4 text-stone-400 font-light text-sm tracking-wide max-w-lg mx-auto leading-relaxed">
             以優雅花藝傳遞最深切的慰問與敬意，為每一段珍貴的記憶送上永恆的祝福。
           </p>
         </div>
 
         {/* Product Grid - Clean & Spacious */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {flowerStandProducts.map((product, index) => (
             <Link href="/products" key={index}>
               <div className="group cursor-pointer">
                 {/* Image */}
-                <div className="relative aspect-[3/4] overflow-hidden bg-[#4a3f32]">
+                <div className="relative aspect-[2/3] overflow-hidden bg-[#4a3f32]">
                   <Image
                     src={product.image}
                     alt={product.name}
@@ -68,10 +74,10 @@ export default function FlowerStandSection() {
 
                 {/* Info */}
                 <div className="mt-6 text-center">
-                  <h3 className="text-lg font-light text-stone-200 tracking-wide group-hover:text-white transition-colors">
+                  <h3 className="text-xl font-light text-stone-200 tracking-wide group-hover:text-white transition-colors">
                     {product.name}
                   </h3>
-                  <p className="mt-2 text-stone-400 font-light text-base">
+                  <p className="mt-2 text-stone-400 font-light text-lg">
                     {product.price}
                   </p>
                 </div>

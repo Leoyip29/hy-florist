@@ -45,21 +45,25 @@ const featuredProducts: Product[] = [
 export default function FeaturedProducts() {
   return (
     <section className="py-24 md:py-36">
-      <div className="mx-auto px-4 md:px-8 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-16 items-start">
+      <div className="mx-auto px-4 md:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 md:gap-12 items-start">
           {/* Section Title - Left */}
           <div className="lg:col-span-1">
             <h2 className="text-5xl md:text-6xl font-light tracking-wide text-neutral-900 font-serif">
-              熱賣花藝
+              熱賣
+            </h2>
+            <h2 className="text-5xl md:text-6xl font-light tracking-wide text-neutral-900 font-serif">
+             花藝
             </h2>
             <p className="mt-4 text-neutral-500 font-light text-sm tracking-widest">
               SEASON&apos;S BESTSELLERS
             </p>
+            
           </div>
 
           {/* Product Grid - Right */}
           <div className="lg:col-span-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-2">
               {featuredProducts.map((product, index) => (
                 <Link href="/products" key={index}>
                   <div className="group cursor-pointer">

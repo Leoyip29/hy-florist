@@ -99,7 +99,7 @@ export default function ShopPage() {
   const [products, setProducts] = useState<UiProduct[]>([])
   const [filteredProducts, setFilteredProducts] = useState<UiProduct[]>([])
   const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 8
+  const pageSize = 12
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [scrollOffset, setScrollOffset] = useState(0)
@@ -235,7 +235,7 @@ export default function ShopPage() {
     <main className="bg-white">
       {/* ===== HERO SECTION ===== */}
       <section
-        className="relative py-24 md:py-32 overflow-hidden"
+        className="relative py-24 md:py-50 overflow-hidden"
         ref={sectionRef}
         style={{
           transform: `translateY(-${scrollOffset * 0.2}px)`,
@@ -274,7 +274,7 @@ export default function ShopPage() {
 
       {/* ===== PRODUCTS GRID ===== */}
       <section className="py-10 bg-white">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
+        <div className="mx-auto px-4">
           <div className="flex items-center justify-between gap-3 mb-4">
             <p className="text-xs sm:text-sm text-neutral-500">
               共 {filteredProducts.length} 件商品

@@ -70,9 +70,9 @@ export default function ProductCategory({
                   selectedCategory === cat.name ? "" : "grayscale-[30%] group-hover:grayscale-0"
                 }`}
                 style={{
-                  width: selectedCategory === cat.name ? 68 : 60,
-                  height: selectedCategory === cat.name ? 68 : 60,
-                  borderRadius: selectedCategory === cat.name ? 20 : 14,
+                  width: selectedCategory === cat.name ? 56 : 50,
+                  height: selectedCategory === cat.name ? 56 : 50,
+                  borderRadius: selectedCategory === cat.name ? 16 : 12,
                 }}
               >
                 {cat.image && (
@@ -113,8 +113,8 @@ export default function ProductCategory({
                 key={loc}
                 onClick={() => onSelectLocation(loc)}
                 className={`
-                  group flex items-center gap-3 px-6 py-3.5
-                  text-base font-medium tracking-wide transition-all duration-200
+                  group flex items-center gap-2.5 px-5 py-3
+                  text-sm font-medium tracking-wide transition-all duration-200
                   whitespace-nowrap snap-start rounded-lg
                   ${
                     selectedLocation === loc
@@ -129,9 +129,9 @@ export default function ProductCategory({
                       selectedLocation === loc ? "opacity-100" : "opacity-60 group-hover:opacity-100"
                     }`}
                     style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 6,
+                      width: 24,
+                      height: 24,
+                      borderRadius: 5,
                     }}
                   >
                     <Image

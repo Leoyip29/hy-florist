@@ -21,8 +21,8 @@ export default function AboutPage() {
         bg-[right_center]
     "
     >
-    {/* Optional soft overlay ONLY on left for readability */}
-    <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/40 to-transparent" />
+    {/* Gradient overlay to soften the background image */}
+    <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/40 to-transparent" />
 
     <div className="relative mx-auto max-w-[1140px] px-8">
         <div className="max-w-xl">

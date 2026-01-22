@@ -8,6 +8,7 @@ import ServicesAndAbout from '@/components/sections/ServicesAndAbout'
 import SeriesSection from "@/components/sections/SeriesSection"
 import SectionDivider from '@/components/sections/SectionDivider'
 import FlowerStandSection from '@/components/sections/FlowerStandSection'
+import MarqueeBanner from '@/components/sections/MarqueeBanner'
 import Link from "next/link"
 
 const playfair = Playfair_Display({
@@ -84,8 +85,10 @@ export default function Home() {
 
       <FeaturedProducts />
       <FlowerStandSection />
-      <SectionDivider />
+      <MarqueeBanner />
+
       <SeriesSection />
+      <SectionDivider />
       <ServicesAndAbout />
     </main>
   )
