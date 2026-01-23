@@ -1,7 +1,8 @@
 "use client"
 
 import Image from "next/image"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { Playfair_Display } from "next/font/google"
 import ProductCategory from "@/components/sections/ProductCategory"
 import ProductCard from "@/components/sections/ProductCard"
@@ -90,7 +91,17 @@ function toUiProduct(p: ApiProduct): UiProduct {
 }
 
 export default function ShopPage() {
-  const [selectedCategory, setSelectedCategory] = useState("全部")
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">載入中...</div>}>
+      <ShopPageContent />
+    </Suspense>
+  )
+}
+
+function ShopPageContent() {
+  const searchParams = useSearchParams()
+  const initialCategory = searchParams.get("category") || "全部"
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [categories, setCategories] = useState<CategoryItem[]>([
     { name: "全部" },
   ])
