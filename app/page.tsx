@@ -8,6 +8,8 @@ import ServicesAndAbout from '@/components/sections/ServicesAndAbout'
 import SeriesSection from "@/components/sections/SeriesSection"
 import SectionDivider from '@/components/sections/SectionDivider'
 import FlowerStandSection from '@/components/sections/FlowerStandSection'
+import HeartFlowerSection from "@/components/sections/HeartFlowerSection"
+import SplitScreenShowcase from "@/components/sections/SplitScreenShowcase"
 import MarqueeBanner from '@/components/sections/MarqueeBanner'
 import Link from "next/link"
 
@@ -86,7 +88,8 @@ export default function Home() {
       <FeaturedProducts />
       <FlowerStandSection />
       <MarqueeBanner />
-
+      <HeartFlowerSection />
+      <SplitScreenShowcase />
       <SeriesSection />
       <SectionDivider />
       <ServicesAndAbout />

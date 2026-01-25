@@ -19,8 +19,7 @@ interface Product {
   images: ProductImage[]
 }
 
-// Configure which product IDs to display as featured products
-const FEATURED_PRODUCT_IDS = [10, 2, 3, 4, 5, 6]
+
 
 // Backend API URL - change this to match your backend address
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
@@ -33,9 +32,8 @@ export default function FeaturedProducts() {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const idsParam = FEATURED_PRODUCT_IDS.join(",")
         const response = await fetch(
-          `${API_URL}/products/by-ids/?ids=${idsParam}`
+          `${API_URL}/products/?sort=hot`
         )
 
         if (!response.ok) {
@@ -131,12 +129,12 @@ export default function FeaturedProducts() {
                         />
                       )}
                     </div>
-                    <div className="mt-6 text-center">
-                      <h3 className="text-lg font-light text-neutral-900 tracking-wide group-hover:text-neutral-600 transition-colors">
+                    <div className="mt-3">
+                      <h3 className="text-lg font-light text-neutral-900 font-serif tracking-wide group-hover:text-neutral-600 transition-colors">
                         {product.name}
                       </h3>
-                      <p className="mt-2 text-neutral-500 font-light text-lg">
-                        ${Number(product.price).toLocaleString()}
+                      <p className="mt-1 text-neutral-500 font-light text-base">
+                        HK$ {Number(product.price).toLocaleString()}
                       </p>
                     </div>
                   </div>
