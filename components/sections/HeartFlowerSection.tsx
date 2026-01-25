@@ -6,7 +6,7 @@ import Link from "next/link"
 
 interface ProductImage {
   id: number
-  url: string
+  image: string  // Local file path (e.g., /media/products/xxx.jpg)
   alt_text: string
   is_primary: boolean
 }
@@ -56,9 +56,13 @@ export default function HeartFlowerSection() {
     fetchHeartFlowerProducts()
   }, [])
 
+  // Get primary image - ONLY use local image, no URL fallback
   const getPrimaryImage = (images: ProductImage[]): string => {
-    const primary = images.find((img) => img.is_primary)
-    return primary?.url || (images.length > 0 ? images[0].url : "")
+    const primary = images.find((img) => img.is_primary && img.image)
+    if (primary?.image) return primary.image
+
+    const anyWithImage = images.find((img) => img.image)
+    return anyWithImage?.image ?? ""
   }
 
   // Loading skeleton

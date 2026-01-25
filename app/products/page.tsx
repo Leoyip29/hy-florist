@@ -17,7 +17,7 @@ type ApiCategory = { id: number; name: string }
 type ApiLocation = { id: number; name: string }
 type ApiProductImage = {
   id: number
-  url: string | null
+  image: string | null  // Local file path (e.g., /media/products/xxx.jpg)
   alt_text: string
   is_primary: boolean
 }
@@ -74,9 +74,13 @@ const CATEGORY_LOGOS: Record<string, string> = {
 
 }
 
+// Only use local image, no URL fallback
 function pickPrimaryImage(images: ApiProductImage[]) {
-  const primary = images.find((img) => img.is_primary && img.url)
-  return primary?.url ?? images.find((img) => img.url)?.url ?? ""
+  const primary = images.find((img) => img.is_primary && img.image)
+  if (primary?.image) return primary.image
+
+  const anyWithImage = images.find((img) => img.image)
+  return anyWithImage?.image ?? ""
 }
 
 function toUiProduct(p: ApiProduct): UiProduct {
