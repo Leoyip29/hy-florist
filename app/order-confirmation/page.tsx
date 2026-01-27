@@ -31,7 +31,6 @@ interface Order {
     customer_email: string
     customer_phone: string
     delivery_address: string
-    delivery_date: string
     delivery_notes: string
     payment_method: string
     payment_status: string
@@ -171,19 +170,6 @@ function OrderConfirmationContent() {
                                 <div>
                                     <p className="text-neutral-600 text-xs mb-1">送貨地址</p>
                                     <p className="font-medium">{order.delivery_address}</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-2">
-                                <Calendar className="w-4 h-4 text-neutral-600 flex-shrink-0 mt-0.5"/>
-                                <div>
-                                    <p className="text-neutral-600 text-xs mb-1">送貨日期</p>
-                                    <p className="font-medium">
-                                        {new Date(order.delivery_date).toLocaleDateString("zh-HK", {
-                                            year: "numeric",
-                                            month: "long",
-                                            day: "numeric",
-                                        })}
-                                    </p>
                                 </div>
                             </div>
                             {order.delivery_notes && (
