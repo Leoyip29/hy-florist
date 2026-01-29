@@ -5,6 +5,8 @@ import Navigation from "@/components/layout/Navigation"  // Add this import
 import Footer from "@/components/layout/Footer"          // Add this import if not already there
 import {CartProvider} from "@/contexts/CartContext"
 import CartDrawer from "@/components/cart/CartDrawer"
+import Header from "@/components/layout/Header"
+
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -32,7 +34,7 @@ export default function RootLayout({
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
         <CartProvider>
-            <Navigation/>
+            <Header/>
             {children}
             <Footer/>
             <CartDrawer/>

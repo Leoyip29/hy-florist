@@ -87,9 +87,9 @@ export default function Home() {
 
       <FeaturedProducts />
       <FlowerStandSection />
-      <MarqueeBanner />
-      <HeartFlowerSection />
       <SplitScreenShowcase />
+      <HeartFlowerSection />
+
       <SeriesSection />
       <SectionDivider />
       <ServicesAndAbout />
