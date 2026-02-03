@@ -274,7 +274,7 @@ function OrderConfirmationContent() {
                         className="flex-1 text-center py-3 px-6 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors font-medium"
                     >
                         繼續購物
-                    </Link>a
+                    </Link>
                     <button
                         onClick={() => window.print()}
                         className="flex-1 text-center py-3 px-6 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors font-medium"

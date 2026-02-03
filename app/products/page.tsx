@@ -34,6 +34,7 @@ type ApiProduct = {
 export type UiProduct = {
   id: number
   name: string
+  description: string
   categories: string[]
   locations: string[]
   price: number
@@ -87,6 +88,7 @@ function toUiProduct(p: ApiProduct): UiProduct {
   return {
     id: p.id,
     name: p.name,
+    description: p.description,
     categories: p.categories?.map((c) => c.name) ?? ["未分類"],
     locations: p.suitable_locations?.map((l) => l.name) ?? [],
     price: Number(p.price),
@@ -105,7 +107,9 @@ export default function ShopPage() {
 function ShopPageContent() {
   const searchParams = useSearchParams()
   const initialCategory = searchParams.get("category") || "全部"
+  const searchQuery = searchParams.get("search") || ""
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
+  const [searchKeyword, setSearchKeyword] = useState(searchQuery)
   const [categories, setCategories] = useState<CategoryItem[]>([
     { name: "全部" },
   ])
@@ -189,14 +193,22 @@ function ShopPageContent() {
     run()
   }, [])
 
-  // Filter products by category
+  // Sync searchKeyword with URL when navigating
+  useEffect(() => {
+    setSearchKeyword(searchParams.get("search") || "")
+  }, [searchParams])
+
+  // Filter products by category, location, and search keyword
   useEffect(() => {
     const filtered = products.filter((p) => {
       const matchCategory =
         selectedCategory === "全部" || p.categories.includes(selectedCategory)
       const matchLocation =
         selectedLocation === "全部" || p.locations.includes(selectedLocation)
-      return matchCategory && matchLocation
+      const matchSearch = !searchKeyword ||
+        p.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchKeyword.toLowerCase())
+      return matchCategory && matchLocation && matchSearch
     })
 
     const sorted = [...filtered].sort((a, b) => {
@@ -207,7 +219,7 @@ function ShopPageContent() {
 
     setFilteredProducts(sorted)
     setCurrentPage(1)
-  }, [selectedCategory, selectedLocation, products, sortOption])
+  }, [selectedCategory, selectedLocation, products, sortOption, searchKeyword])
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
   const paginatedProducts = filteredProducts.slice(
@@ -290,10 +302,32 @@ function ShopPageContent() {
       {/* ===== PRODUCTS GRID ===== */}
       <section className="py-10 bg-white">
         <div className="mx-auto px-4">
+          {/* Search bar and results info */}
           <div className="flex items-center justify-between gap-3 mb-4">
-            <p className="text-xs sm:text-sm text-neutral-500">
-              共 {filteredProducts.length} 件商品
-            </p>
+            {searchKeyword ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-neutral-500">
+                  搜尋 "<span className="font-medium text-neutral-800">{searchKeyword}</span>"
+                  ，共 {filteredProducts.length} 件商品
+                </span>
+                <button
+                  onClick={() => {
+                    setSearchKeyword("")
+                    // Remove search param from URL
+                    const params = new URLSearchParams(searchParams.toString())
+                    params.delete("search")
+                    window.history.replaceState(null, "", `?${params.toString()}`)
+                  }}
+                  className="text-sm text-neutral-500 hover:text-neutral-800 underline"
+                >
+                  清除
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs sm:text-sm text-neutral-500">
+                共 {filteredProducts.length} 件商品
+              </p>
+            )}
             <div className="flex items-center gap-2">
               <span className="text-xs sm:text-sm text-neutral-500">排序</span>
               <select

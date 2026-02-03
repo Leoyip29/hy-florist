@@ -3,10 +3,15 @@
 import Link from "next/link"
 import Image from "next/image"
 import Navbar from "@/components/layout/Navbar"
-import { useState, useEffect } from "react"
-
+import { useState, useEffect, useRef } from "react"
+import CartButton from "@/components/cart/CartButton"
+import { useRouter } from "next/navigation"
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,6 +21,22 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  // Focus input when search opens
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus()
+    }
+  }, [searchOpen])
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchOpen(false)
+      setSearchQuery("")
+    }
+  }
 
   return (
     <header
@@ -55,7 +76,7 @@ export default function Header() {
           </Link>
 
           {/* Products Dropdown */}
-          <div className="relative group px-4 py-2">
+          <div className="relative group px-4 py-2 z-30">
             <div className={`flex items-center gap-1 cursor-pointer hover:opacity-100 transition-all duration-300 ${
               isScrolled ? "text-neutral-700" : "text-white"
             }`}>
@@ -79,7 +100,7 @@ export default function Header() {
             </div>
 
             {/* Dropdown Menu */}
-            <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2">
+            <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 z-50">
               <div className="bg-white rounded-lg shadow-xl py-2 min-w-[180px]">
                 {[
                   { name: "所有商品", category: "全部" },
@@ -144,7 +165,7 @@ export default function Header() {
           >
             繁體中文
           </button>
-          <Link
+          {/* <Link
             href="/account"
             className={`p-2 hover:bg-white/10 rounded-full transition-colors ${
               isScrolled ? "" : "hover:bg-black/10"
@@ -165,57 +186,52 @@ export default function Header() {
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-          </Link>
-          <button
-            className={`p-2 hover:bg-white/10 rounded-full transition-colors ${
-              isScrolled ? "" : "hover:bg-black/10"
-            }`}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={isScrolled ? "text-neutral-700" : "text-white"}
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-          </button>
-          <Link
-            href="/cart"
-            className={`p-2 hover:bg-white/10 rounded-full transition-colors relative ${
-              isScrolled ? "" : "hover:bg-black/10"
-            }`}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={isScrolled ? "text-neutral-700" : "text-white"}
-            >
-              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-              <path d="M3 6h18" />
-              <path d="M16 10a4 4 0 0 1-8 0" />
-            </svg>
-            {/* Cart Badge */}
-            <span className={`absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold ${
-              isScrolled ? "bg-neutral-800 text-white" : "bg-white text-neutral-900"
-            }`}>
-              0
-            </span>
-          </Link>
+          </Link> */}
+          {/* Search */}
+          <div className="relative">
+            {searchOpen ? (
+              <form onSubmit={handleSearch} className="flex items-center">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="搜尋商品..."
+                  className="w-40 sm:w-60 px-3 py-1.5 text-sm bg-white/90 border border-neutral-200 rounded-full focus:outline-none focus:ring-2 focus:ring-neutral-400"
+                  onBlur={(e) => {
+                    // Delay closing to allow form submission
+                    if (!e.currentTarget.contains(document.activeElement)) {
+                      setSearchOpen(false)
+                    }
+                  }}
+                />
+              </form>
+            ) : (
+              <button
+                onClick={() => setSearchOpen(true)}
+                className={`p-2 hover:bg-white/10 rounded-full transition-colors ${
+                  isScrolled ? "" : "hover:bg-black/10"
+                }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={isScrolled ? "text-neutral-700" : "text-white"}
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+              </button>
+            )}
+          </div>
+          <CartButton isScrolled={isScrolled}/>
 
           {/* Mobile Navigation */}
           <div className="md:hidden">
