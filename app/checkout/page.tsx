@@ -12,22 +12,233 @@ import {
 import {useCart} from "@/contexts/CartContext"
 import Image from "next/image"
 import {Playfair_Display} from "next/font/google"
-import {Loader2, CheckCircle, X, AlertCircle} from "lucide-react"
-
+import {Loader2, CheckCircle, X, AlertCircle, Calendar} from "lucide-react"
 
 const playfair = Playfair_Display({
     subsets: ["latin"],
     weight: ["400", "600", "700"],
 })
-console.log(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY)
+
 const stripePromise = loadStripe(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "pk_test_51PAbDZHo0Q90Btn2nAS78EbMz38WSaTqKO9BvueD21X6vb47I8IzhAtpx3U7UN48fdsNdWRJ0UQ7aOkJsTKiD69f00c2Ih5irM"
+    process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
 )
 
 const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000"
 
-// Success Notification Component
+// ---------------------------------------------------------------------------
+// Date Picker Component with 3-day advance rule
+// ---------------------------------------------------------------------------
+function DatePicker({
+                        value,
+                        onChange,
+                        minDaysAdvance = 3,
+                    }: {
+    value: string
+    onChange: (date: string) => void
+    minDaysAdvance?: number
+}) {
+    const [isOpen, setIsOpen] = useState(false)
+    const [currentMonth, setCurrentMonth] = useState(new Date())
+
+    // Calculate minimum selectable date (today + minDaysAdvance)
+    const getMinDate = () => {
+        const date = new Date()
+        date.setDate(date.getDate() + minDaysAdvance)
+        date.setHours(0, 0, 0, 0)
+        return date
+    }
+
+    // Calculate maximum selectable date (90 days from today)
+    const getMaxDate = () => {
+        const date = new Date()
+        date.setDate(date.getDate() + 90)
+        date.setHours(0, 0, 0, 0)
+        return date
+    }
+
+    const minDate = getMinDate()
+    const maxDate = getMaxDate()
+
+    const isDateDisabled = (date: Date) => {
+        const compareDate = new Date(date)
+        compareDate.setHours(0, 0, 0, 0)
+        return compareDate < minDate || compareDate > maxDate
+    }
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return "請選擇送貨日期"
+        const date = new Date(dateString)
+        return date.toLocaleDateString("zh-HK", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+    }
+
+    const getDaysInMonth = (date: Date) => {
+        const year = date.getFullYear()
+        const month = date.getMonth()
+        const firstDay = new Date(year, month, 1)
+        const lastDay = new Date(year, month + 1, 0)
+        const daysInMonth = lastDay.getDate()
+        const startingDayOfWeek = firstDay.getDay()
+
+        return {daysInMonth, startingDayOfWeek, year, month}
+    }
+
+    const handleDateSelect = (day: number) => {
+        const selected = new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth(),
+            day
+        )
+
+        if (!isDateDisabled(selected)) {
+            // Format as YYYY-MM-DD for the backend
+            const formatted = selected.toISOString().split("T")[0]
+            onChange(formatted)
+            setIsOpen(false)
+        }
+    }
+
+    const navigateMonth = (direction: "prev" | "next") => {
+        setCurrentMonth((prev) => {
+            const newDate = new Date(prev)
+            if (direction === "prev") {
+                newDate.setMonth(newDate.getMonth() - 1)
+            } else {
+                newDate.setMonth(newDate.getMonth() + 1)
+            }
+            return newDate
+        })
+    }
+
+    const {daysInMonth, startingDayOfWeek, year, month} =
+        getDaysInMonth(currentMonth)
+
+    const monthName = currentMonth.toLocaleDateString("zh-HK", {
+        year: "numeric",
+        month: "long",
+    })
+
+    // Create array of day cells including empty cells for alignment
+    const dayCells = []
+    for (let i = 0; i < startingDayOfWeek; i++) {
+        dayCells.push(<div key={`empty-${i}`} className="h-10"/>)
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day)
+        const isDisabled = isDateDisabled(date)
+        const isSelected =
+            value === date.toISOString().split("T")[0]
+
+        dayCells.push(
+            <button
+                key={day}
+                type="button"
+                onClick={() => handleDateSelect(day)}
+                disabled={isDisabled}
+                className={`
+                    h-10 rounded-lg text-sm font-medium transition-all
+                    ${
+                    isSelected
+                        ? "bg-neutral-900 text-white shadow-md"
+                        : isDisabled
+                            ? "text-neutral-300 cursor-not-allowed"
+                            : "hover:bg-neutral-100 text-neutral-700"
+                }
+                `}
+            >
+                {day}
+            </button>
+        )
+    }
+
+    return (
+        <div className="relative">
+            <label className="block text-sm font-medium mb-2">
+                送貨日期 / Delivery Date <span className="text-red-600">*</span>
+            </label>
+
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-left flex items-center justify-between"
+            >
+                <span className={value ? "text-neutral-900" : "text-neutral-400"}>
+                    {formatDate(value)}
+                </span>
+                <Calendar className="w-5 h-5 text-neutral-400"/>
+            </button>
+
+            <p className="text-xs text-neutral-500 mt-1">
+                最少需提前 {minDaysAdvance} 天訂購
+            </p>
+
+            {isOpen && (
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setIsOpen(false)}
+                    />
+
+                    {/* Calendar Popup */}
+                    <div
+                        className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-neutral-200 p-4 z-50 w-80">
+                        {/* Month Navigation */}
+                        <div className="flex items-center justify-between mb-4">
+                            <button
+                                type="button"
+                                onClick={() => navigateMonth("prev")}
+                                className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                            >
+                                ←
+                            </button>
+                            <span className={`${playfair.className} font-semibold`}>
+                                {monthName}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => navigateMonth("next")}
+                                className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                            >
+                                →
+                            </button>
+                        </div>
+
+                        {/* Weekday Headers */}
+                        <div className="grid grid-cols-7 gap-1 mb-2">
+                            {["日", "一", "二", "三", "四", "五", "六"].map((day) => (
+                                <div
+                                    key={day}
+                                    className="h-8 flex items-center justify-center text-xs font-medium text-neutral-500"
+                                >
+                                    {day}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Calendar Grid */}
+                        <div className="grid grid-cols-7 gap-1">{dayCells}</div>
+
+                        {/* Helper Text */}
+                        <div className="mt-4 pt-4 border-t border-neutral-200">
+                            <p className="text-xs text-neutral-600 text-center">
+                                灰色日期不可選擇（需提前 {minDaysAdvance} 天）
+                            </p>
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
+    )
+}
+
+// ---------------------------------------------------------------------------
+// Success Notification
+// ---------------------------------------------------------------------------
 function SuccessNotification({
                                  onClose,
                                  orderNumber,
@@ -81,7 +292,9 @@ function SuccessNotification({
     )
 }
 
-// Error Alert Component
+// ---------------------------------------------------------------------------
+// Error Alert
+// ---------------------------------------------------------------------------
 function ErrorAlert({message, onClose}: { message: string; onClose: () => void }) {
     return (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 mb-4">
@@ -100,7 +313,9 @@ function ErrorAlert({message, onClose}: { message: string; onClose: () => void }
     )
 }
 
-// Payment Form Component
+// ---------------------------------------------------------------------------
+// Payment Form
+// ---------------------------------------------------------------------------
 function CheckoutForm({
                           clientSecret,
                           initialFormData,
@@ -112,6 +327,7 @@ function CheckoutForm({
         customer_email: string
         customer_phone: string
         delivery_address: string
+        delivery_date: string
         delivery_notes: string
     }
     expectedAmount: number
@@ -131,6 +347,19 @@ function CheckoutForm({
     const [showSuccess, setShowSuccess] = useState(false)
     const [orderNumber, setOrderNumber] = useState("")
 
+    const buildConfirmationUrl = (orderNum: string) =>
+        `/order-confirmation?order_number=${orderNum}&email=${encodeURIComponent(formData.customer_email)}`
+
+    const formatDisplayDate = (dateString: string) => {
+        if (!dateString) return ""
+        const date = new Date(dateString)
+        return date.toLocaleDateString("zh-HK", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -142,7 +371,6 @@ function CheckoutForm({
         setErrorMessage("")
 
         try {
-            // Submit payment to Stripe
             const {error, paymentIntent} = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
@@ -152,7 +380,6 @@ function CheckoutForm({
             })
 
             if (error) {
-                // Handle card errors
                 if (error.type === 'card_error') {
                     setErrorMessage(error.message || '付款卡被拒絕，請檢查卡片資料')
                 } else if (error.type === 'validation_error') {
@@ -165,7 +392,6 @@ function CheckoutForm({
             }
 
             if (paymentIntent && paymentIntent.status === "succeeded") {
-                // Verify amount matches (client-side check)
                 const paidAmount = paymentIntent.amount / 100
                 if (Math.abs(paidAmount - expectedAmount) > 0.01) {
                     setErrorMessage('付款金額不符，請聯絡客服')
@@ -173,7 +399,6 @@ function CheckoutForm({
                     return
                 }
 
-                // Prepare order data
                 const orderData = {
                     ...formData,
                     items: items.map((item) => ({
@@ -183,7 +408,6 @@ function CheckoutForm({
                     payment_intent_id: paymentIntent.id,
                 }
 
-                // Confirm order with backend
                 const response = await fetch(`${API_BASE_URL}/api/orders/confirm/`, {
                     method: "POST",
                     headers: {
@@ -195,7 +419,6 @@ function CheckoutForm({
                 if (!response.ok) {
                     const errorData = await response.json()
 
-                    // Handle specific error cases
                     if (response.status === 400) {
                         setErrorMessage(errorData.error || '訂單資料無效，請稍後再試')
                     } else if (response.status === 500) {
@@ -209,16 +432,13 @@ function CheckoutForm({
 
                 const order = await response.json()
 
-                // Show success notification
                 setOrderNumber(order.order_number)
                 setShowSuccess(true)
 
-                // Clear cart
                 clearCart()
 
-                // Redirect after showing notification (3 seconds)
                 setTimeout(() => {
-                    router.push(`/order-confirmation?order_number=${order.order_number}`)
+                    router.push(buildConfirmationUrl(order.order_number))
                 }, 3000)
             }
         } catch (error) {
@@ -232,7 +452,7 @@ function CheckoutForm({
 
     const handleCloseSuccess = () => {
         setShowSuccess(false)
-        router.push(`/order-confirmation?order_number=${orderNumber}`)
+        router.push(buildConfirmationUrl(orderNumber))
     }
 
     return (
@@ -245,7 +465,6 @@ function CheckoutForm({
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Error Message */}
                 {errorMessage && (
                     <ErrorAlert
                         message={errorMessage}
@@ -253,7 +472,7 @@ function CheckoutForm({
                     />
                 )}
 
-                {/* Customer Information Display (Read-only) */}
+                {/* Customer Information (read-only) */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
                     <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>
                         客戶資料 / Customer Information
@@ -274,6 +493,12 @@ function CheckoutForm({
                         <div>
                             <span className="text-neutral-600">送貨地址：</span>
                             <span className="font-medium">{formData.delivery_address}</span>
+                        </div>
+                        <div>
+                            <span className="text-neutral-600">送貨日期：</span>
+                            <span className="font-medium">
+                                {formatDisplayDate(formData.delivery_date)}
+                            </span>
                         </div>
                         {formData.delivery_notes && (
                             <div>
@@ -299,7 +524,7 @@ function CheckoutForm({
                     </p>
                 </div>
 
-                {/* Submit Button */}
+                {/* Submit */}
                 <button
                     type="submit"
                     disabled={!stripe || isProcessing}
@@ -323,7 +548,9 @@ function CheckoutForm({
     )
 }
 
+// ---------------------------------------------------------------------------
 // Main Checkout Wrapper
+// ---------------------------------------------------------------------------
 function CheckoutWrapper() {
     const {items, totalPrice} = useCart()
     const router = useRouter()
@@ -337,10 +564,10 @@ function CheckoutWrapper() {
         customer_email: "",
         customer_phone: "",
         delivery_address: "",
+        delivery_date: "",
         delivery_notes: "",
     })
 
-    // Redirect if cart is empty
     useEffect(() => {
         if (items.length === 0) {
             router.push("/products")
@@ -356,33 +583,42 @@ function CheckoutWrapper() {
         })
     }
 
+    const handleDateChange = (date: string) => {
+        setTempFormData({
+            ...tempFormData,
+            delivery_date: date,
+        })
+    }
+
     const handleProceedToPayment = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsCreatingIntent(true)
         setErrorMessage("")
 
         try {
-            // Validate form data client-side
+            // Client-side validation
             if (tempFormData.customer_name.length < 2) {
                 setErrorMessage('請輸入有效的姓名')
                 setIsCreatingIntent(false)
                 return
             }
-
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tempFormData.customer_email)) {
                 setErrorMessage('請輸入有效的電郵地址')
                 setIsCreatingIntent(false)
                 return
             }
-
             if (tempFormData.customer_phone.length < 8) {
                 setErrorMessage('請輸入有效的電話號碼')
                 setIsCreatingIntent(false)
                 return
             }
-
             if (tempFormData.delivery_address.length < 10) {
                 setErrorMessage('請輸入完整的送貨地址')
+                setIsCreatingIntent(false)
+                return
+            }
+            if (!tempFormData.delivery_date) {
+                setErrorMessage('請選擇送貨日期')
                 setIsCreatingIntent(false)
                 return
             }
@@ -400,9 +636,7 @@ function CheckoutWrapper() {
                 `${API_BASE_URL}/api/orders/create-payment-intent/`,
                 {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    headers: {"Content-Type": "application/json"},
                     body: JSON.stringify(orderData),
                 }
             )
@@ -434,7 +668,6 @@ function CheckoutWrapper() {
         }
     }
 
-    // Return null while redirecting (cart is empty)
     if (items.length === 0) {
         return null
     }
@@ -534,6 +767,12 @@ function CheckoutWrapper() {
                                                 placeholder="請輸入完整送貨地址"
                                             />
                                         </div>
+
+                                        <DatePicker
+                                            value={tempFormData.delivery_date}
+                                            onChange={handleDateChange}
+                                            minDaysAdvance={3}
+                                        />
 
                                         <div>
                                             <label className="block text-sm font-medium mb-2">
