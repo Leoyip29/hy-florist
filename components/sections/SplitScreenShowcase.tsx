@@ -20,7 +20,7 @@ interface Product {
 }
 
 // Configure which product IDs to display
-const SHOWCASE_PRODUCT_IDS = [439, 12, 15, 439]
+const SHOWCASE_PRODUCT_IDS = [439, 12, 15]
 
 // Backend API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
@@ -29,6 +29,7 @@ export default function SplitScreenShowcase() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
 
   useEffect(() => {
     const fetchShowcaseProducts = async () => {
@@ -54,6 +55,17 @@ export default function SplitScreenShowcase() {
 
     fetchShowcaseProducts()
   }, [])
+
+  // Auto-rotate main product every 5 seconds
+  useEffect(() => {
+    if (products.length <= 1) return
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % products.length)
+    }, 10000)
+
+    return () => clearInterval(interval)
+  }, [products.length])
 
   // Get primary image - ONLY use local image, no URL fallback
   const getPrimaryImage = (images: ProductImage[]): string => {
@@ -91,22 +103,46 @@ export default function SplitScreenShowcase() {
     return null
   }
 
-  // Use first product for the main showcase
-  const mainProduct = products[0]
+  // Use current product for the main showcase (auto-rotates)
+  const mainProduct = products[currentIndex]
 
   return (
     <section className="min-h-screen">
+      {/* Top: Scrolling Marquee Banner */}
+      <div className="relative w-full overflow-hidden py-12 md:py-16 bg-[#E2E4F0]">
+        {/* Fade masks on both sides */}
+        <div className="absolute left-0 top-0 bottom-0 w-20 md:w-24 bg-gradient-to-r from-[#E2E4F0] via-[#E2E4F0]/60 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-20 md:w-24 bg-gradient-to-l from-[#E2E4F0] via-[#E2E4F0]/60 to-transparent z-10 pointer-events-none" />
+
+        {/* Scrolling text with subtle letter spacing animation */}
+        <div className="flex w-max animate-marquee">
+          {[...Array(12)].map((_, i) => (
+            <span
+              key={i}
+              className="text-3xl md:text-4xl font-light tracking-[0.2em] text-stone-600/50 mx-8 md:mx-10 font-serif italic"
+            >
+               HYACINTH FLORIST
+            </span>
+          ))}
+        </div>
+      </div>
+
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Left: Lifestyle Image */}
-        <div className="w-full lg:w-1/2 relative aspect-[4/5] lg:aspect-auto lg:min-h-screen">
+        <div className="w-full lg:w-1/2 relative aspect-[4/5] lg:aspect-auto lg:min-h-screen overflow-hidden">
           {mainProduct && getPrimaryImage(mainProduct.images) && (
-            <Image
-              src={getPrimaryImage(mainProduct.images)}
-              alt="Hand holding elegant flower bouquet"
-              fill
-              className="object-cover"
-              priority
-            />
+            <div
+              key={`image-${currentIndex}`}
+              className="absolute inset-0 animate-soft-scale"
+            >
+              <Image
+                src={getPrimaryImage(mainProduct.images)}
+                alt="Hand holding elegant flower bouquet"
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
           )}
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent" />
@@ -114,9 +150,9 @@ export default function SplitScreenShowcase() {
 
         {/* Right: Product Info Section */}
         <div className="w-full lg:w-1/2 bg-[#E2E4F0] flex items-center justify-center p-8 lg:p-16">
-          <div className="max-w-md w-full">
+          <div key={`info-${currentIndex}`} className="max-w-md w-full animate-delicate-reveal">
             {/* Decorative Element */}
-            <div className="flex justify-center mb-8">
+            <div className="flex justify-center mb-8 animate-fade-in" style={{ animationDelay: '0.08s' }}>
               <div className="w-8 h-px bg-neutral-400/50" />
               <div className="mx-4">
                 <svg
@@ -131,12 +167,12 @@ export default function SplitScreenShowcase() {
             </div>
 
             {/* Main Title */}
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-center tracking-[0.15em] text-white mb-8">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-center tracking-[0.15em] text-white mb-8 animate-fade-in" style={{ animationDelay: '0.16s' }}>
               PEARLESCENT WHISPER
             </h2>
 
             {/* Product Image */}
-            <div className="relative aspect-[4/5] bg-neutral-800/80 rounded-lg overflow-hidden mb-6 shadow-xl">
+            <div className="relative aspect-[4/5] bg-neutral-800/80 rounded-lg overflow-hidden mb-6 shadow-xl animate-fade-in" style={{ animationDelay: '0.24s' }}>
               {mainProduct && getPrimaryImage(mainProduct.images) && (
                 <Image
                   src={getPrimaryImage(mainProduct.images)}
@@ -148,7 +184,7 @@ export default function SplitScreenShowcase() {
             </div>
 
             {/* Product Name & Price */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-8 animate-fade-in" style={{ animationDelay: '0.32s' }}>
               <h3 className="text-xl font-light text-white tracking-wide mb-2">
                 {mainProduct?.name}
               </h3>
@@ -158,7 +194,7 @@ export default function SplitScreenShowcase() {
             </div>
 
             {/* CTA Button */}
-            <div className="flex justify-center">
+            <div className="flex justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
               <Link
                 href={mainProduct ? `/products?id=${mainProduct.id}` : "/products"}
                 className="inline-block px-12 py-4 bg-[#E8B4B8] hover:bg-[#d49fa3] transition-all duration-300 text-neutral-800 font-serif text-sm tracking-widest"
@@ -177,16 +213,17 @@ export default function SplitScreenShowcase() {
         </div>
       </div>
 
-      {/* Additional Products Grid Below */}
+      {/* Additional Products Grid - Shows remaining products excluding current main product */}
       {products.length > 1 && (
         <div className="bg-[#E2E4F0] py-16 lg:py-24">
           <div className="mx-auto px-4 md:px-8 max-w-6xl">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-              {products.slice(1).map((product) => (
+              {products.filter((_, index) => index !== currentIndex).map((product, i) => (
                 <Link
                   href={`/products?id=${product.id}`}
                   key={product.id}
-                  className="group block"
+                  className="group block animate-fade-in"
+                  style={{ animationDelay: `${0.48 + i * 0.08}s` }}
                 >
                   <div className="relative aspect-[4/5] bg-neutral-800/80 rounded-lg overflow-hidden mb-3">
                     {getPrimaryImage(product.images) && (

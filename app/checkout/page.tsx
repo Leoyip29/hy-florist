@@ -14,13 +14,14 @@ import Image from "next/image"
 import {Playfair_Display} from "next/font/google"
 import {Loader2, CheckCircle, X, AlertCircle} from "lucide-react"
 
+
 const playfair = Playfair_Display({
     subsets: ["latin"],
     weight: ["400", "600", "700"],
 })
-
+console.log(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY)
 const stripePromise = loadStripe(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
+    process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "pk_test_51PAbDZHo0Q90Btn2nAS78EbMz38WSaTqKO9BvueD21X6vb47I8IzhAtpx3U7UN48fdsNdWRJ0UQ7aOkJsTKiD69f00c2Ih5irM"
 )
 
 const API_BASE_URL =
