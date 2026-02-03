@@ -12,7 +12,7 @@ import {
 import {useCart} from "@/contexts/CartContext"
 import Image from "next/image"
 import {Playfair_Display} from "next/font/google"
-import {Loader2, CheckCircle, X} from "lucide-react"
+import {Loader2, CheckCircle, X, AlertCircle} from "lucide-react"
 
 const playfair = Playfair_Display({
     subsets: ["latin"],
@@ -40,6 +40,7 @@ function SuccessNotification({
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600"
+                    aria-label="關閉"
                 >
                     <X className="w-5 h-5"/>
                 </button>
@@ -79,10 +80,30 @@ function SuccessNotification({
     )
 }
 
-// Form Component
+// Error Alert Component
+function ErrorAlert({message, onClose}: { message: string; onClose: () => void }) {
+    return (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 mb-4">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"/>
+            <div className="flex-1">
+                <p className="text-sm text-red-800">{message}</p>
+            </div>
+            <button
+                onClick={onClose}
+                className="text-red-400 hover:text-red-600"
+                aria-label="關閉"
+            >
+                <X className="w-4 h-4"/>
+            </button>
+        </div>
+    )
+}
+
+// Payment Form Component
 function CheckoutForm({
                           clientSecret,
-                          initialFormData
+                          initialFormData,
+                          expectedAmount
                       }: {
     clientSecret: string
     initialFormData: {
@@ -92,13 +113,14 @@ function CheckoutForm({
         delivery_address: string
         delivery_notes: string
     }
+    expectedAmount: number
 }) {
     const stripe = useStripe()
     const elements = useElements()
     const router = useRouter()
-    const {items, clearCart, totalPrice} = useCart()
+    const {items, clearCart} = useCart()
 
-    const [formData, setFormData] = useState({
+    const [formData] = useState({
         ...initialFormData,
         payment_method: "stripe",
     })
@@ -107,15 +129,6 @@ function CheckoutForm({
     const [errorMessage, setErrorMessage] = useState("")
     const [showSuccess, setShowSuccess] = useState(false)
     const [orderNumber, setOrderNumber] = useState("")
-
-    const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        })
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -128,7 +141,7 @@ function CheckoutForm({
         setErrorMessage("")
 
         try {
-            // Submit payment
+            // Submit payment to Stripe
             const {error, paymentIntent} = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
@@ -138,12 +151,27 @@ function CheckoutForm({
             })
 
             if (error) {
-                setErrorMessage(error.message || "付款失敗，請稍後再試")
+                // Handle card errors
+                if (error.type === 'card_error') {
+                    setErrorMessage(error.message || '付款卡被拒絕，請檢查卡片資料')
+                } else if (error.type === 'validation_error') {
+                    setErrorMessage('請填寫完整的付款資料')
+                } else {
+                    setErrorMessage(error.message || '付款失敗，請稍後再試')
+                }
                 setIsProcessing(false)
                 return
             }
 
             if (paymentIntent && paymentIntent.status === "succeeded") {
+                // Verify amount matches (client-side check)
+                const paidAmount = paymentIntent.amount / 100
+                if (Math.abs(paidAmount - expectedAmount) > 0.01) {
+                    setErrorMessage('付款金額不符，請聯絡客服')
+                    setIsProcessing(false)
+                    return
+                }
+
                 // Prepare order data
                 const orderData = {
                     ...formData,
@@ -165,7 +193,17 @@ function CheckoutForm({
 
                 if (!response.ok) {
                     const errorData = await response.json()
-                    throw new Error(errorData.error || "訂單確認失敗")
+
+                    // Handle specific error cases
+                    if (response.status === 400) {
+                        setErrorMessage(errorData.error || '訂單資料無效，請稍後再試')
+                    } else if (response.status === 500) {
+                        setErrorMessage('系統錯誤，但您的付款已完成。請聯絡客服並提供訂單編號。')
+                    } else {
+                        setErrorMessage('訂單確認失敗，請聯絡客服')
+                    }
+                    setIsProcessing(false)
+                    return
                 }
 
                 const order = await response.json()
@@ -185,7 +223,7 @@ function CheckoutForm({
         } catch (error) {
             console.error("Payment error:", error)
             setErrorMessage(
-                error instanceof Error ? error.message : "付款失敗，請稍後再試"
+                error instanceof Error ? error.message : "付款處理失敗，請稍後再試"
             )
             setIsProcessing(false)
         }
@@ -195,11 +233,6 @@ function CheckoutForm({
         setShowSuccess(false)
         router.push(`/order-confirmation?order_number=${orderNumber}`)
     }
-
-    // Get tomorrow's date for min date
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    const minDate = tomorrow.toISOString().split("T")[0]
 
     return (
         <>
@@ -211,93 +244,42 @@ function CheckoutForm({
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Customer Information */}
+                {/* Error Message */}
+                {errorMessage && (
+                    <ErrorAlert
+                        message={errorMessage}
+                        onClose={() => setErrorMessage("")}
+                    />
+                )}
+
+                {/* Customer Information Display (Read-only) */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
                     <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>
                         客戶資料 / Customer Information
                     </h2>
-                    <div className="space-y-4">
+                    <div className="space-y-3 text-sm">
                         <div>
-                            <label className="block text-sm font-medium mb-2">
-                                姓名 / Name <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="customer_name"
-                                value={formData.customer_name}
-                                onChange={handleInputChange}
-                                required
-                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                                placeholder="請輸入您的姓名"
-                            />
+                            <span className="text-neutral-600">姓名：</span>
+                            <span className="font-medium">{formData.customer_name}</span>
                         </div>
-
                         <div>
-                            <label className="block text-sm font-medium mb-2">
-                                電郵 / Email <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="email"
-                                name="customer_email"
-                                value={formData.customer_email}
-                                onChange={handleInputChange}
-                                required
-                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                                placeholder="your@email.com"
-                            />
+                            <span className="text-neutral-600">電郵：</span>
+                            <span className="font-medium">{formData.customer_email}</span>
                         </div>
-
                         <div>
-                            <label className="block text-sm font-medium mb-2">
-                                電話 / Phone <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="tel"
-                                name="customer_phone"
-                                value={formData.customer_phone}
-                                onChange={handleInputChange}
-                                required
-                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                                placeholder="9123 4567"
-                            />
+                            <span className="text-neutral-600">電話：</span>
+                            <span className="font-medium">{formData.customer_phone}</span>
                         </div>
-                    </div>
-                </div>
-
-                {/* Delivery Information */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
-                    <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>
-                        送貨資料 / Delivery Address
-                    </h2>
-                    <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium mb-2">
-                                送貨地址 <span className="text-red-600">*</span>
-                            </label>
-                            <textarea
-                                name="delivery_address"
-                                value={formData.delivery_address}
-                                onChange={handleInputChange}
-                                required
-                                rows={3}
-                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent resize-none"
-                                placeholder="請輸入完整送貨地址"
-                            />
+                            <span className="text-neutral-600">送貨地址：</span>
+                            <span className="font-medium">{formData.delivery_address}</span>
                         </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                備註 (選填) / Delivery Notes
-                            </label>
-                            <textarea
-                                name="delivery_notes"
-                                value={formData.delivery_notes}
-                                onChange={handleInputChange}
-                                rows={2}
-                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent resize-none"
-                                placeholder="特別要求或備註"
-                            />
-                        </div>
+                        {formData.delivery_notes && (
+                            <div>
+                                <span className="text-neutral-600">備註：</span>
+                                <span className="font-medium">{formData.delivery_notes}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -309,12 +291,12 @@ function CheckoutForm({
                     <PaymentElement/>
                 </div>
 
-                {/* Error Message */}
-                {errorMessage && (
-                    <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-                        {errorMessage}
-                    </div>
-                )}
+                {/* Security Notice */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+                    <p className="text-blue-800">
+                        🔒 您的付款資料受到 Stripe 加密保護，我們不會儲存您的信用卡資料。
+                    </p>
+                </div>
 
                 {/* Submit Button */}
                 <button
@@ -328,23 +310,26 @@ function CheckoutForm({
                             處理中...
                         </>
                     ) : (
-                        `確認付款 HK$${totalPrice.toFixed(2)}`
+                        `確認付款 HK$${expectedAmount.toFixed(2)}`
                     )}
                 </button>
+
+                <p className="text-xs text-center text-neutral-500">
+                    點擊「確認付款」即表示您同意我們的服務條款及私隱政策
+                </p>
             </form>
         </>
     )
 }
 
+// Main Checkout Wrapper
 function CheckoutWrapper() {
     const {items, totalPrice} = useCart()
     const router = useRouter()
     const [clientSecret, setClientSecret] = useState("")
     const [isCreatingIntent, setIsCreatingIntent] = useState(false)
     const [showForm, setShowForm] = useState(false)
-
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
+    const [errorMessage, setErrorMessage] = useState("")
 
     const [tempFormData, setTempFormData] = useState({
         customer_name: "",
@@ -354,7 +339,7 @@ function CheckoutWrapper() {
         delivery_notes: "",
     })
 
-    // Move redirect logic to useEffect
+    // Redirect if cart is empty
     useEffect(() => {
         if (items.length === 0) {
             router.push("/products")
@@ -373,8 +358,34 @@ function CheckoutWrapper() {
     const handleProceedToPayment = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsCreatingIntent(true)
+        setErrorMessage("")
 
         try {
+            // Validate form data client-side
+            if (tempFormData.customer_name.length < 2) {
+                setErrorMessage('請輸入有效的姓名')
+                setIsCreatingIntent(false)
+                return
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tempFormData.customer_email)) {
+                setErrorMessage('請輸入有效的電郵地址')
+                setIsCreatingIntent(false)
+                return
+            }
+
+            if (tempFormData.customer_phone.length < 8) {
+                setErrorMessage('請輸入有效的電話號碼')
+                setIsCreatingIntent(false)
+                return
+            }
+
+            if (tempFormData.delivery_address.length < 10) {
+                setErrorMessage('請輸入完整的送貨地址')
+                setIsCreatingIntent(false)
+                return
+            }
+
             const orderData = {
                 ...tempFormData,
                 payment_method: "stripe",
@@ -398,7 +409,18 @@ function CheckoutWrapper() {
             if (!response.ok) {
                 const errorData = await response.json()
                 console.error("Payment intent error:", errorData)
-                throw new Error("無法建立付款")
+
+                if (response.status === 429) {
+                    setErrorMessage('請求過於頻繁，請稍後再試')
+                } else if (errorData.error) {
+                    setErrorMessage(typeof errorData.error === 'string'
+                        ? errorData.error
+                        : '無法建立付款，請檢查資料後再試')
+                } else {
+                    setErrorMessage('無法建立付款，請稍後再試')
+                }
+                setIsCreatingIntent(false)
+                return
             }
 
             const data = await response.json()
@@ -406,8 +428,7 @@ function CheckoutWrapper() {
             setShowForm(true)
         } catch (error) {
             console.error("Error creating payment intent:", error)
-            alert("無法建立付款，請檢查資料後再試")
-        } finally {
+            setErrorMessage('網絡錯誤，請檢查連接後再試')
             setIsCreatingIntent(false)
         }
     }
@@ -429,6 +450,13 @@ function CheckoutWrapper() {
                     <div className="lg:col-span-2">
                         {!showForm ? (
                             <form onSubmit={handleProceedToPayment} className="space-y-6">
+                                {errorMessage && (
+                                    <ErrorAlert
+                                        message={errorMessage}
+                                        onClose={() => setErrorMessage("")}
+                                    />
+                                )}
+
                                 <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
                                     <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>
                                         客戶資料 / Customer Information
@@ -444,6 +472,8 @@ function CheckoutWrapper() {
                                                 value={tempFormData.customer_name}
                                                 onChange={handleTempInputChange}
                                                 required
+                                                minLength={2}
+                                                maxLength={255}
                                                 className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
                                                 placeholder="請輸入您的姓名"
                                             />
@@ -474,6 +504,8 @@ function CheckoutWrapper() {
                                                 value={tempFormData.customer_phone}
                                                 onChange={handleTempInputChange}
                                                 required
+                                                minLength={8}
+                                                maxLength={20}
                                                 className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
                                                 placeholder="9123 4567"
                                             />
@@ -495,6 +527,7 @@ function CheckoutWrapper() {
                                                 value={tempFormData.delivery_address}
                                                 onChange={handleTempInputChange}
                                                 required
+                                                minLength={10}
                                                 rows={3}
                                                 className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent resize-none"
                                                 placeholder="請輸入完整送貨地址"
@@ -509,6 +542,7 @@ function CheckoutWrapper() {
                                                 name="delivery_notes"
                                                 value={tempFormData.delivery_notes}
                                                 onChange={handleTempInputChange}
+                                                maxLength={500}
                                                 rows={2}
                                                 className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent resize-none"
                                                 placeholder="特別要求或備註"
@@ -549,6 +583,7 @@ function CheckoutWrapper() {
                                     <CheckoutForm
                                         clientSecret={clientSecret}
                                         initialFormData={tempFormData}
+                                        expectedAmount={totalPrice}
                                     />
                                 </Elements>
                             )
