@@ -3,7 +3,7 @@
 import {useEffect, useState, Suspense} from "react"
 import {useSearchParams} from "next/navigation"
 import {Playfair_Display} from "next/font/google"
-import {CheckCircle, Loader2, Mail, MapPin, Calendar} from "lucide-react"
+import {CheckCircle, Loader2, Mail, MapPin} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -46,6 +46,9 @@ interface Order {
 function OrderConfirmationContent() {
     const searchParams = useSearchParams()
     const orderNumber = searchParams.get("order_number")
+    // GAP 1 FIX: email is passed as a query param so we can send it back
+    // to the backend for order-detail verification.
+    const email = searchParams.get("email")
 
     const [order, setOrder] = useState<Order | null>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -58,10 +61,17 @@ function OrderConfirmationContent() {
             return
         }
 
+        if (!email) {
+            setError("電郵地址未提供")
+            setIsLoading(false)
+            return
+        }
+
         const fetchOrder = async () => {
             try {
+                // GAP 1 FIX: append ?email= for server-side verification
                 const response = await fetch(
-                    `${API_BASE_URL}/api/orders/${orderNumber}/`
+                    `${API_BASE_URL}/api/orders/${orderNumber}/?email=${encodeURIComponent(email)}`
                 )
 
                 if (!response.ok) {
@@ -79,7 +89,7 @@ function OrderConfirmationContent() {
         }
 
         fetchOrder()
-    }, [orderNumber])
+    }, [orderNumber, email])
 
     if (isLoading) {
         return (
@@ -261,8 +271,8 @@ function OrderConfirmationContent() {
                             <p className="text-sm text-neutral-600 mb-1">付款狀態</p>
                             <span
                                 className="inline-block bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
-        已付款
-        </span>
+                                已付款
+                            </span>
                         </div>
                     </div>
                 </div>

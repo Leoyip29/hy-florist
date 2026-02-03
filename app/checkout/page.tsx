@@ -14,20 +14,21 @@ import Image from "next/image"
 import {Playfair_Display} from "next/font/google"
 import {Loader2, CheckCircle, X, AlertCircle} from "lucide-react"
 
-
 const playfair = Playfair_Display({
     subsets: ["latin"],
     weight: ["400", "600", "700"],
 })
-console.log(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY)
+
 const stripePromise = loadStripe(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "pk_test_51PAbDZHo0Q90Btn2nAS78EbMz38WSaTqKO9BvueD21X6vb47I8IzhAtpx3U7UN48fdsNdWRJ0UQ7aOkJsTKiD69f00c2Ih5irM"
+    process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || ""
 )
 
 const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000"
 
-// Success Notification Component
+// ---------------------------------------------------------------------------
+// Success Notification
+// ---------------------------------------------------------------------------
 function SuccessNotification({
                                  onClose,
                                  orderNumber,
@@ -81,7 +82,9 @@ function SuccessNotification({
     )
 }
 
-// Error Alert Component
+// ---------------------------------------------------------------------------
+// Error Alert
+// ---------------------------------------------------------------------------
 function ErrorAlert({message, onClose}: { message: string; onClose: () => void }) {
     return (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 mb-4">
@@ -100,7 +103,9 @@ function ErrorAlert({message, onClose}: { message: string; onClose: () => void }
     )
 }
 
-// Payment Form Component
+// ---------------------------------------------------------------------------
+// Payment Form
+// ---------------------------------------------------------------------------
 function CheckoutForm({
                           clientSecret,
                           initialFormData,
@@ -131,6 +136,12 @@ function CheckoutForm({
     const [showSuccess, setShowSuccess] = useState(false)
     const [orderNumber, setOrderNumber] = useState("")
 
+    // ---------------------------------------------------------------------------
+    // GAP 1 FIX helper: build the confirmation-page URL with email included
+    // ---------------------------------------------------------------------------
+    const buildConfirmationUrl = (orderNum: string) =>
+        `/order-confirmation?order_number=${orderNum}&email=${encodeURIComponent(formData.customer_email)}`
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -146,13 +157,14 @@ function CheckoutForm({
             const {error, paymentIntent} = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
+                    // return_url is only used if Stripe redirects (e.g. 3D Secure).
+                    // We append email here too so the redirect lands correctly.
                     return_url: `${window.location.origin}/order-confirmation`,
                 },
                 redirect: "if_required",
             })
 
             if (error) {
-                // Handle card errors
                 if (error.type === 'card_error') {
                     setErrorMessage(error.message || '付款卡被拒絕，請檢查卡片資料')
                 } else if (error.type === 'validation_error') {
@@ -165,7 +177,7 @@ function CheckoutForm({
             }
 
             if (paymentIntent && paymentIntent.status === "succeeded") {
-                // Verify amount matches (client-side check)
+                // Client-side amount sanity check
                 const paidAmount = paymentIntent.amount / 100
                 if (Math.abs(paidAmount - expectedAmount) > 0.01) {
                     setErrorMessage('付款金額不符，請聯絡客服')
@@ -173,7 +185,11 @@ function CheckoutForm({
                     return
                 }
 
-                // Prepare order data
+                // Confirm order with backend.
+                // NOTE: items are still sent here for the serializer's product
+                // existence check, but ConfirmOrderView will use the cart
+                // snapshot stored in the PaymentIntent metadata as the
+                // authoritative source (GAP 7).
                 const orderData = {
                     ...formData,
                     items: items.map((item) => ({
@@ -183,7 +199,6 @@ function CheckoutForm({
                     payment_intent_id: paymentIntent.id,
                 }
 
-                // Confirm order with backend
                 const response = await fetch(`${API_BASE_URL}/api/orders/confirm/`, {
                     method: "POST",
                     headers: {
@@ -195,7 +210,6 @@ function CheckoutForm({
                 if (!response.ok) {
                     const errorData = await response.json()
 
-                    // Handle specific error cases
                     if (response.status === 400) {
                         setErrorMessage(errorData.error || '訂單資料無效，請稍後再試')
                     } else if (response.status === 500) {
@@ -216,9 +230,9 @@ function CheckoutForm({
                 // Clear cart
                 clearCart()
 
-                // Redirect after showing notification (3 seconds)
+                // GAP 1 FIX: redirect includes email
                 setTimeout(() => {
-                    router.push(`/order-confirmation?order_number=${order.order_number}`)
+                    router.push(buildConfirmationUrl(order.order_number))
                 }, 3000)
             }
         } catch (error) {
@@ -230,9 +244,10 @@ function CheckoutForm({
         }
     }
 
+    // GAP 1 FIX: modal close also uses the helper
     const handleCloseSuccess = () => {
         setShowSuccess(false)
-        router.push(`/order-confirmation?order_number=${orderNumber}`)
+        router.push(buildConfirmationUrl(orderNumber))
     }
 
     return (
@@ -245,7 +260,6 @@ function CheckoutForm({
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Error Message */}
                 {errorMessage && (
                     <ErrorAlert
                         message={errorMessage}
@@ -253,7 +267,7 @@ function CheckoutForm({
                     />
                 )}
 
-                {/* Customer Information Display (Read-only) */}
+                {/* Customer Information (read-only) */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
                     <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>
                         客戶資料 / Customer Information
@@ -299,7 +313,7 @@ function CheckoutForm({
                     </p>
                 </div>
 
-                {/* Submit Button */}
+                {/* Submit */}
                 <button
                     type="submit"
                     disabled={!stripe || isProcessing}
@@ -323,7 +337,9 @@ function CheckoutForm({
     )
 }
 
+// ---------------------------------------------------------------------------
 // Main Checkout Wrapper
+// ---------------------------------------------------------------------------
 function CheckoutWrapper() {
     const {items, totalPrice} = useCart()
     const router = useRouter()
@@ -340,7 +356,6 @@ function CheckoutWrapper() {
         delivery_notes: "",
     })
 
-    // Redirect if cart is empty
     useEffect(() => {
         if (items.length === 0) {
             router.push("/products")
@@ -362,25 +377,22 @@ function CheckoutWrapper() {
         setErrorMessage("")
 
         try {
-            // Validate form data client-side
+            // Client-side validation
             if (tempFormData.customer_name.length < 2) {
                 setErrorMessage('請輸入有效的姓名')
                 setIsCreatingIntent(false)
                 return
             }
-
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tempFormData.customer_email)) {
                 setErrorMessage('請輸入有效的電郵地址')
                 setIsCreatingIntent(false)
                 return
             }
-
             if (tempFormData.customer_phone.length < 8) {
                 setErrorMessage('請輸入有效的電話號碼')
                 setIsCreatingIntent(false)
                 return
             }
-
             if (tempFormData.delivery_address.length < 10) {
                 setErrorMessage('請輸入完整的送貨地址')
                 setIsCreatingIntent(false)
@@ -400,9 +412,7 @@ function CheckoutWrapper() {
                 `${API_BASE_URL}/api/orders/create-payment-intent/`,
                 {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    headers: {"Content-Type": "application/json"},
                     body: JSON.stringify(orderData),
                 }
             )
@@ -434,7 +444,6 @@ function CheckoutWrapper() {
         }
     }
 
-    // Return null while redirecting (cart is empty)
     if (items.length === 0) {
         return null
     }
