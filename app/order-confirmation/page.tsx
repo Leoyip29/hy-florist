@@ -3,7 +3,7 @@
 import {useEffect, useState, Suspense} from "react"
 import {useSearchParams} from "next/navigation"
 import {Playfair_Display} from "next/font/google"
-import {CheckCircle, Loader2, Mail, MapPin} from "lucide-react"
+import {CheckCircle, Loader2, Mail, MapPin, Calendar} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -31,6 +31,7 @@ interface Order {
     customer_email: string
     customer_phone: string
     delivery_address: string
+    delivery_date: string
     delivery_notes: string
     payment_method: string
     payment_status: string
@@ -46,8 +47,6 @@ interface Order {
 function OrderConfirmationContent() {
     const searchParams = useSearchParams()
     const orderNumber = searchParams.get("order_number")
-    // GAP 1 FIX: email is passed as a query param so we can send it back
-    // to the backend for order-detail verification.
     const email = searchParams.get("email")
 
     const [order, setOrder] = useState<Order | null>(null)
@@ -69,7 +68,6 @@ function OrderConfirmationContent() {
 
         const fetchOrder = async () => {
             try {
-                // GAP 1 FIX: append ?email= for server-side verification
                 const response = await fetch(
                     `${API_BASE_URL}/api/orders/${orderNumber}/?email=${encodeURIComponent(email)}`
                 )
@@ -90,6 +88,16 @@ function OrderConfirmationContent() {
 
         fetchOrder()
     }, [orderNumber, email])
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return ""
+        const date = new Date(dateString)
+        return date.toLocaleDateString("zh-HK", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+    }
 
     if (isLoading) {
         return (
@@ -180,6 +188,13 @@ function OrderConfirmationContent() {
                                 <div>
                                     <p className="text-neutral-600 text-xs mb-1">送貨地址</p>
                                     <p className="font-medium">{order.delivery_address}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <Calendar className="w-4 h-4 text-neutral-600 flex-shrink-0 mt-0.5"/>
+                                <div>
+                                    <p className="text-neutral-600 text-xs mb-1">送貨日期</p>
+                                    <p className="font-medium">{formatDate(order.delivery_date)}</p>
                                 </div>
                             </div>
                             {order.delivery_notes && (
