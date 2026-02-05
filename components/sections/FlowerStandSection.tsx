@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import ProductCard from "@/components/product/ProductCard"
+import type { UiProduct } from "@/app/products/page"
 
 interface ProductImage {
   id: number
@@ -16,7 +18,12 @@ interface Product {
   name: string
   description: string
   price: string
+  categories: { id: number; name: string }[]
   images: ProductImage[]
+}
+
+interface FlowerStandSectionProps {
+  onProductClick?: (product: UiProduct) => void
 }
 
 // Configure which product IDs to display as flower stand products
@@ -26,7 +33,7 @@ const FLOWER_STAND_PRODUCT_IDS = [97, 98, 101, 	109]
 // Backend API URL - change this to match your backend address
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
-export default function FlowerStandSection() {
+export default function FlowerStandSection({ onProductClick }: FlowerStandSectionProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -64,6 +71,17 @@ export default function FlowerStandSection() {
     const anyWithImage = images.find((img) => img.image)
     return anyWithImage?.image ?? ""
   }
+
+  // Transform API product to UiProduct format
+  const toUiProduct = (p: Product): UiProduct => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    categories: p.categories?.map((c) => c.name) ?? [],
+    locations: [],
+    price: Number(p.price),
+    image: getPrimaryImage(p.images),
+  })
 
   // Loading skeleton
   if (loading) {
@@ -128,34 +146,15 @@ export default function FlowerStandSection() {
 
         {/* Product Grid - Clean & Spacious */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          {products.map((product) => (
-            <Link href={`/products?id=${product.id}`} key={product.id}>
-              <div className="group cursor-pointer">
-                {/* Image */}
-                <div className="relative aspect-[2/3] overflow-hidden bg-[#4a3f32]">
-                  {getPrimaryImage(product.images) && (
-                    <Image
-                      src={getPrimaryImage(product.images)}
-                      alt={product.images[0]?.alt_text || product.name}
-                      fill
-                      className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
-                    />
-                  )}
-                  {/* Subtle overlay on hover */}
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all duration-500" />
-                </div>
-
-                {/* Info */}
-                <div className="mt-6 text-center">
-                  <h3 className="text-xl font-light text-stone-200 tracking-wide group-hover:text-white transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="mt-2 text-stone-400 font-light text-lg">
-                    HK$ {Number(product.price).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </Link>
+          {products.map((product, index) => (
+            <ProductCard
+              key={product.id}
+              product={toUiProduct(product)}
+              playfairClassName="font-serif"
+              inView={true}
+              index={index}
+              onClick={onProductClick}
+            />
           ))}
         </div>
 

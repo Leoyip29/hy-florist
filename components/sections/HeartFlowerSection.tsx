@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import ProductCard from "@/components/product/ProductCard"
+import type { UiProduct } from "@/app/products/page"
 
 interface ProductImage {
   id: number
@@ -16,7 +18,12 @@ interface Product {
   name: string
   description: string
   price: string
+  categories: { id: number; name: string }[]
   images: ProductImage[]
+}
+
+interface HeartFlowerSectionProps {
+  onProductClick?: (product: UiProduct) => void
 }
 
 // Configure which product IDs to display as heart flower wreath products
@@ -26,7 +33,7 @@ const HEART_FLOWER_PRODUCT_IDS = [244, 265, 267, 283]
 // Backend API URL - change this to match your backend address
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
-export default function HeartFlowerSection() {
+export default function HeartFlowerSection({ onProductClick }: HeartFlowerSectionProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -64,6 +71,17 @@ export default function HeartFlowerSection() {
     const anyWithImage = images.find((img) => img.image)
     return anyWithImage?.image ?? ""
   }
+
+  // Transform API product to UiProduct format
+  const toUiProduct = (p: Product): UiProduct => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    categories: p.categories?.map((c) => c.name) ?? [],
+    locations: [],
+    price: Number(p.price),
+    image: getPrimaryImage(p.images),
+  })
 
   // Loading skeleton
   if (loading) {
@@ -144,42 +162,15 @@ export default function HeartFlowerSection() {
 
         {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          {products.map((product) => (
-            <Link href={`/products?id=${product.id}`} key={product.id}>
-              <div className="group cursor-pointer">
-                {/* Image */}
-                <div className="relative aspect-[2/3] overflow-hidden bg-[#7a5a5a] rounded-lg">
-                  {getPrimaryImage(product.images) && (
-                    <Image
-                      src={getPrimaryImage(product.images)}
-                      alt={product.images[0]?.alt_text || product.name}
-                      fill
-                      className="object-cover opacity-85 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
-                    />
-                  )}
-                  {/* Heart overlay on hover */}
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all duration-500" />
-                  {/* Heart Icon on Hover */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="w-12 h-12">
-                      <svg viewBox="0 0 24 24" fill="white" className="w-full h-full opacity-80">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Info */}
-                <div className="mt-6 text-center">
-                  <h3 className="text-xl font-light text-rose-100 tracking-wide group-hover:text-white transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="mt-2 text-rose-300 font-light text-lg">
-                    HK$ {Number(product.price).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </Link>
+          {products.map((product, index) => (
+            <ProductCard
+              key={product.id}
+              product={toUiProduct(product)}
+              playfairClassName="font-serif"
+              inView={true}
+              index={index}
+              onClick={onProductClick}
+            />
           ))}
         </div>
 

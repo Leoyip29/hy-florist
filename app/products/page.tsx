@@ -4,9 +4,10 @@ import Image from "next/image"
 import { useState, useEffect, useRef, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Playfair_Display } from "next/font/google"
-import ProductCategory from "@/components/sections/ProductCategory"
-import ProductCard from "@/components/sections/ProductCard"
-import type { CategoryItem } from "@/components/sections/ProductCategory"
+import ProductCategory from "@/components/product/ProductCategory"
+import ProductCard from "@/components/product/ProductCard"
+import ProductDetail from "@/components/product/ProductDetail"
+import type { CategoryItem } from "@/components/product/ProductCategory"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -127,6 +128,7 @@ function ShopPageContent() {
   const [sortOption, setSortOption] = useState<"recommended" | "price_asc" | "price_desc">(
     "recommended"
   )
+  const [selectedProduct, setSelectedProduct] = useState<UiProduct | null>(null)
 
   useEffect(() => {
     const run = async () => {
@@ -369,6 +371,7 @@ function ShopPageContent() {
                   playfairClassName={playfair.className}
                   inView={itemsInView[index] ?? true}
                   index={index}
+                  onClick={setSelectedProduct}
                 />
               ))}
             </div>
@@ -379,19 +382,21 @@ function ShopPageContent() {
       {/* ===== PAGINATION ===== */}
       {!isLoading && !error && filteredProducts.length > 0 && (
         <section className="pb-16">
-          <div className="mx-auto max-w-7xl px-4 md:px-8 flex items-center justify-center gap-2">
+          <div className="mx-auto max-w-7xl px-4 md:px-8 flex items-center justify-center gap-3">
             <button
-              className="btn btn-sm"
+              className="px-4 py-2 text-sm border border-neutral-200 rounded-full bg-white text-neutral-700 hover:bg-[#E8B4B8] hover:text-neutral-800 hover:border-[#E8B4B8] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-neutral-200"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             >
               上一頁
             </button>
-            <span className="text-sm text-neutral-600">
-              第 {currentPage} / {totalPages} 頁
-            </span>
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-neutral-600 px-2">
+                第 {currentPage} / {totalPages} 頁
+              </span>
+            </div>
             <button
-              className="btn btn-sm"
+              className="px-4 py-2 text-sm border border-neutral-200 rounded-full bg-white text-neutral-700 hover:bg-[#E8B4B8] hover:text-neutral-800 hover:border-[#E8B4B8] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-neutral-200"
               disabled={currentPage === totalPages}
               onClick={() =>
                 setCurrentPage((p) => Math.min(totalPages, p + 1))
@@ -403,20 +408,14 @@ function ShopPageContent() {
         </section>
       )}
 
-      {/* ===== CTA SECTION =====
-      <section className="py-20 bg-neutral-900 text-white">
-        <div className="mx-auto max-w-4xl px-4 md:px-8 text-center">
-          <h2 className={`${playfair.className} text-4xl md:text-5xl font-light mb-6 leading-tight`}>
-            需要客製化服務？
-          </h2>
-          <p className="text-lg text-neutral-300 mb-8 font-light">
-            我們提供專業的花藝設計與諮詢服務，為您的特殊時刻打造獨特的作品。
-          </p>
-          <button className="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-neutral-900 font-medium">
-            聯絡我們
-          </button>
-        </div>
-      </section> */}
+
+      {/* Product Detail Modal */}
+      {selectedProduct && (
+        <ProductDetail
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
     </main>
   )
 }

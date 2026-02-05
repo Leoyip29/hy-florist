@@ -12,6 +12,9 @@ import HeartFlowerSection from "@/components/sections/HeartFlowerSection"
 import SplitScreenShowcase from "@/components/sections/SplitScreenShowcase"
 import MarqueeBanner from '@/components/sections/MarqueeBanner'
 import Link from "next/link"
+import ProductCard from "@/components/product/ProductCard"
+import ProductDetail from "@/components/product/ProductDetail"
+import type { UiProduct } from "@/app/products/page"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -35,6 +38,7 @@ const slides = [
 
 export default function Home() {
   const [index, setIndex] = useState(0)
+  const [selectedProduct, setSelectedProduct] = useState<UiProduct | null>(null)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -85,14 +89,22 @@ export default function Home() {
         ))}
       </section>
 
-      <FeaturedProducts />
-      <FlowerStandSection />
-      <SplitScreenShowcase />
-      <HeartFlowerSection />
+      <FeaturedProducts onProductClick={setSelectedProduct} />
+      <FlowerStandSection onProductClick={setSelectedProduct} />
+      <SplitScreenShowcase onProductClick={setSelectedProduct} />
+      <HeartFlowerSection onProductClick={setSelectedProduct} />
 
       <SeriesSection />
       <SectionDivider />
       <ServicesAndAbout />
+
+      {/* Product Detail Modal */}
+      {selectedProduct && (
+        <ProductDetail
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
     </main>
   )
 }
