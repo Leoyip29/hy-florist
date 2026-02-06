@@ -1,6 +1,9 @@
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 export default function Footer() {
+  const t = useTranslations("Footer");
+
   return (
     <footer className=" bg-[#d9d9d9]">
       {/* MAIN FOOTER */}
@@ -20,9 +23,7 @@ export default function Footer() {
             />
 
             <p className="text-sm text-gray-700 leading-relaxed text-center max-w-md">
-                我們相信，每一束花都有其獨特的意義，能夠完美傳遞出我們的心意和關懷。
-                在這充滿挑戰的時代，我們承諾與你攜手同行，無論逆境或疫情，
-                我們將一路相伴，讓關愛傳遞到每一個角落。
+                {t("description")}
             </p>
         </div>
 
@@ -31,19 +32,20 @@ export default function Footer() {
         
         <div className="flex items-start gap-3">
             <span className="text-base leading-none">📞</span>
-            <span>電話：+852 9684 6901</span>
+            <span>{t("phone")}: +852 9684 6901</span>
         </div>
 
         <div className="flex items-start gap-3">
             <span className="text-base leading-none">✉️</span>
-            <span>電郵：info@hy-florist.hk</span>
+            <span>{t("email")}: info@hy-florist.hk</span>
         </div>
 
         <div className="flex items-start gap-3">
             <span className="text-base leading-none">📍</span>
             <span className="leading-relaxed">
-            地址：九龍 紅磡 必嘉街18號<br />
-            嘉麗閣 地下3號舖
+            {t("address")}:<br />
+            {t("addressLine1")}<br />
+            {t("addressLine2")}
             </span>
         </div>
 
@@ -65,15 +67,10 @@ export default function Footer() {
       {/* BOTTOM BAR */}
       <div className="bg-gray-800 py-4">
         <p className="text-center text-xs text-gray-300">
-          Copyright © 2026 Hyacinth Florist ｜風信子花店. All rights reserved.
+          {t("copyright")}
         </p>
       </div>
     </footer>
   );
 }
-
-
-
-
-
 

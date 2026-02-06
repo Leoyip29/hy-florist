@@ -1,0 +1,70 @@
+{
+  "Navigation": {
+    "home": "首頁",
+    "products": "所有商品",
+    "about": "關於我們",
+    "contact": "聯絡我們",
+    "allProducts": "所有商品",
+    "flowerBasket": "花籃",
+    "bouquet": "花束",
+    "flowerBoard": "花牌",
+    "heartShapedBoard": "心型花牌",
+    "roundBoard": "圓型花牌",
+    "crossBoard": "十字架花牌",
+    "casketDecoration": "棺面花",
+    "venueDecoration": "場地裝飾",
+    "standFlower": "台花",
+    "venueSeries": "場地系列",
+    "benchFlower": "櫈花",
+    "podiumFlower": "講台花",
+    "boardSet": "花牌套餐",
+    "bouquetDeal": "花束多買優惠",
+    "searchPlaceholder": "搜尋商品..."
+  },
+  "Common": {
+    "searchPlaceholder": "搜尋商品...",
+    "chineseTraditional": "繁體中文",
+    "english": "English",
+    "cart": "購物車"
+  },
+  "Home": {
+    "title": "HY Florist - 香港花藝專門店",
+    "subtitle": "專業花藝設計，為生活的每一刻增添美麗與溫度"
+  },
+  "HomePage": {
+    "heroSlide1Title": "以花傳意\n致敬生命",
+    "heroSlide1Desc": "用心意與專業，為每一個珍重時刻送上真摯的祝福。",
+    "heroSlide2Title": "真摯的慰問\n永恆的紀念",
+    "heroSlide2Desc": "以優雅花藝，表達最深切的敬意與關懷。",
+    "exploreButton": "探索花藝"
+  },
+  "Products": {
+    "pageTitle": "花藝商城",
+    "pageSubtitle": "探索我們精心挑選的花藝作品，為生活的每一刻增添美麗與溫度。",
+    "loading": "載入中...",
+    "errorLoadProducts": "無法載入商品",
+    "errorBackendCheck": "確認後端已啟動：",
+    "noProductsInCategory": "暫無該分類的商品",
+    "all": "全部",
+    "notApplicable": "不適用",
+    "searchResults": "搜尋 \"{searchKeyword}\" ，共 {count} 件商品",
+    "totalProducts": "共 {count} 件商品",
+    "clear": "清除",
+    "sort": "排序",
+    "sortDefault": "預設排序",
+    "sortPriceAsc": "價格：由低至高",
+    "sortPriceDesc": "價格：由高至低",
+    "previousPage": "上一頁",
+    "nextPage": "下一頁",
+    "pageOf": "第 {current} / {total} 頁"
+  },
+  "Footer": {
+    "description": "我們相信，每一束花都有其獨特的意義，能夠完美傳遞出我們的心意和關懷。在這充滿挑戰的時代，我們承諾與你攜手同行，無論逆境或疫情，我們將一路相伴，讓關愛傳遞到每一個角落。",
+    "phone": "電話",
+    "email": "電郵",
+    "address": "地址",
+    "addressLine1": "九龍 紅磡 必嘉街18號",
+    "addressLine2": "嘉麗閣 地下3號舖",
+    "copyright": "Copyright © 2026 風信子花店. All rights reserved."
+  }
+}

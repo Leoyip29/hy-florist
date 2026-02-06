@@ -1,0 +1,70 @@
+{
+  "Navigation": {
+    "home": "Home",
+    "products": "Products",
+    "about": "About Us",
+    "contact": "Contact",
+    "allProducts": "All Products",
+    "flowerBasket": "Flower Basket",
+    "bouquet": "Bouquet",
+    "flowerBoard": "Flower Board",
+    "heartShapedBoard": "Heart-shaped Board",
+    "roundBoard": "Round Board",
+    "crossBoard": "Cross Board",
+    "casketDecoration": "Casket Decoration",
+    "venueDecoration": "Venue Decoration",
+    "standFlower": "Stand Flower",
+    "venueSeries": "Venue Series",
+    "benchFlower": "Bench Flower",
+    "podiumFlower": "Podium Flower",
+    "boardSet": "Board Set",
+    "bouquetDeal": "Bouquet Deals",
+    "searchPlaceholder": "Search products..."
+  },
+  "Common": {
+    "searchPlaceholder": "Search products...",
+    "chineseTraditional": "繁體中文",
+    "english": "English",
+    "cart": "Cart"
+  },
+  "Home": {
+    "title": "HY Florist - Hong Kong Floristry Specialist",
+    "subtitle": "Professional floral designs to add beauty and warmth to every moment of your life"
+  },
+  "HomePage": {
+    "heroSlide1Title": "Honoring Life\nWith Flowers",
+    "heroSlide1Desc": "With heartfelt devotion and professional artistry, we deliver sincere blessings for every precious moment.",
+    "heroSlide2Title": "Sincere Condolences\nEternal Memories",
+    "heroSlide2Desc": "Expressing deepest respect and care through elegant floral designs.",
+    "exploreButton": "Explore Floristry"
+  },
+  "Products": {
+    "pageTitle": "Floral Shop",
+    "pageSubtitle": "Explore our carefully selected floral works, adding beauty and warmth to every moment of your life.",
+    "loading": "Loading...",
+    "errorLoadProducts": "Unable to load products",
+    "errorBackendCheck": "Please confirm the backend is running at:",
+    "noProductsInCategory": "No products available in this category",
+    "all": "All",
+    "notApplicable": "Not Applicable",
+    "searchResults": "Search results for \"{searchKeyword}\", {count} products found",
+    "totalProducts": "{count} products",
+    "clear": "Clear",
+    "sort": "Sort",
+    "sortDefault": "Default",
+    "sortPriceAsc": "Price: Low to High",
+    "sortPriceDesc": "Price: High to Low",
+    "previousPage": "Previous",
+    "nextPage": "Next",
+    "pageOf": "Page {current} of {total}"
+  },
+  "Footer": {
+    "description": "We believe every bouquet carries a unique meaning, perfectly conveying our feelings and care. In these challenging times, we promise to stand by your side, through adversity or pandemic, accompanying you all the way and spreading love to every corner.",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "addressLine1": "Shop 3, G/F, Ka Lai Court",
+    "addressLine2": "18 Pictorial Street, Hung Hom, Kowloon",
+    "copyright": "Copyright © 2026 Hyacinth Florist. All rights reserved."
+  }
+}
