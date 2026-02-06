@@ -31,6 +31,7 @@ interface Order {
     customer_email: string
     customer_phone: string
     delivery_address: string
+    delivery_date: string
     delivery_notes: string
     payment_method: string
     payment_status: string
@@ -46,6 +47,7 @@ interface Order {
 function OrderConfirmationContent() {
     const searchParams = useSearchParams()
     const orderNumber = searchParams.get("order_number")
+    const email = searchParams.get("email")
 
     const [order, setOrder] = useState<Order | null>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -58,10 +60,16 @@ function OrderConfirmationContent() {
             return
         }
 
+        if (!email) {
+            setError("電郵地址未提供")
+            setIsLoading(false)
+            return
+        }
+
         const fetchOrder = async () => {
             try {
                 const response = await fetch(
-                    `${API_BASE_URL}/api/orders/${orderNumber}/`
+                    `${API_BASE_URL}/api/orders/${orderNumber}/?email=${encodeURIComponent(email)}`
                 )
 
                 if (!response.ok) {
@@ -79,7 +87,17 @@ function OrderConfirmationContent() {
         }
 
         fetchOrder()
-    }, [orderNumber])
+    }, [orderNumber, email])
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return ""
+        const date = new Date(dateString)
+        return date.toLocaleDateString("zh-HK", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+    }
 
     if (isLoading) {
         return (
@@ -172,6 +190,13 @@ function OrderConfirmationContent() {
                                     <p className="font-medium">{order.delivery_address}</p>
                                 </div>
                             </div>
+                            <div className="flex gap-2">
+                                <Calendar className="w-4 h-4 text-neutral-600 flex-shrink-0 mt-0.5"/>
+                                <div>
+                                    <p className="text-neutral-600 text-xs mb-1">送貨日期</p>
+                                    <p className="font-medium">{formatDate(order.delivery_date)}</p>
+                                </div>
+                            </div>
                             {order.delivery_notes && (
                                 <div>
                                     <p className="text-neutral-600 text-xs mb-1">備註</p>
@@ -261,8 +286,8 @@ function OrderConfirmationContent() {
                             <p className="text-sm text-neutral-600 mb-1">付款狀態</p>
                             <span
                                 className="inline-block bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
-        已付款
-        </span>
+                                已付款
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -274,7 +299,7 @@ function OrderConfirmationContent() {
                         className="flex-1 text-center py-3 px-6 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors font-medium"
                     >
                         繼續購物
-                    </Link>a
+                    </Link>
                     <button
                         onClick={() => window.print()}
                         className="flex-1 text-center py-3 px-6 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors font-medium"
