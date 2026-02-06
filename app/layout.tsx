@@ -1,7 +1,6 @@
 import type {Metadata} from "next"
 import {Geist, Geist_Mono} from "next/font/google"
 import "./globals.css"
-import Navigation from "@/components/layout/Navigation"  // Add this import
 import Footer from "@/components/layout/Footer"          // Add this import if not already there
 import {CartProvider} from "@/contexts/CartContext"
 import CartDrawer from "@/components/cart/CartDrawer"
