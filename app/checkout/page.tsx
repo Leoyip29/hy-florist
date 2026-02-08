@@ -12,7 +12,7 @@ import {
 import {useCart} from "@/contexts/CartContext"
 import Image from "next/image"
 import {Playfair_Display} from "next/font/google"
-import {Loader2, CheckCircle, X, AlertCircle, Calendar} from "lucide-react"
+import {Loader2, CheckCircle, X, AlertCircle, Calendar, CreditCard} from "lucide-react"
 
 const playfair = Playfair_Display({
     subsets: ["latin"],
@@ -95,7 +95,6 @@ function DatePicker({
         )
 
         if (!isDateDisabled(selected)) {
-            // Format as YYYY-MM-DD for the backend
             const formatted = selected.toISOString().split("T")[0]
             onChange(formatted)
             setIsOpen(false)
@@ -122,7 +121,6 @@ function DatePicker({
         month: "long",
     })
 
-    // Create array of day cells including empty cells for alignment
     const dayCells = []
     for (let i = 0; i < startingDayOfWeek; i++) {
         dayCells.push(<div key={`empty-${i}`} className="h-10"/>)
@@ -178,16 +176,13 @@ function DatePicker({
 
             {isOpen && (
                 <>
-                    {/* Backdrop */}
                     <div
                         className="fixed inset-0 z-40"
                         onClick={() => setIsOpen(false)}
                     />
 
-                    {/* Calendar Popup */}
                     <div
                         className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-neutral-200 p-4 z-50 w-80">
-                        {/* Month Navigation */}
                         <div className="flex items-center justify-between mb-4">
                             <button
                                 type="button"
@@ -208,7 +203,6 @@ function DatePicker({
                             </button>
                         </div>
 
-                        {/* Weekday Headers */}
                         <div className="grid grid-cols-7 gap-1 mb-2">
                             {["日", "一", "二", "三", "四", "五", "六"].map((day) => (
                                 <div
@@ -220,13 +214,11 @@ function DatePicker({
                             ))}
                         </div>
 
-                        {/* Calendar Grid */}
                         <div className="grid grid-cols-7 gap-1">{dayCells}</div>
 
-                        {/* Helper Text */}
                         <div className="mt-4 pt-4 border-t border-neutral-200">
                             <p className="text-xs text-neutral-600 text-center">
-                                灰色日期不可選擇（需提前 {minDaysAdvance} 天）
+                                灰色日期不可選擇(需提前 {minDaysAdvance} 天)
                             </p>
                         </div>
                     </div>
@@ -265,7 +257,7 @@ function SuccessNotification({
                     </div>
 
                     <h2 className={`${playfair.className} text-2xl font-semibold mb-2`}>
-                        付款成功！
+                        付款成功!
                     </h2>
                     <p className="text-neutral-600 mb-4">
                         您的訂單已確認
@@ -314,6 +306,31 @@ function ErrorAlert({message, onClose}: { message: string; onClose: () => void }
 }
 
 // ---------------------------------------------------------------------------
+// Payment Method Info Badge
+// ---------------------------------------------------------------------------
+function PaymentMethodInfo() {
+    return (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3">
+                <CreditCard className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"/>
+                <div>
+                    <p className="text-sm font-medium text-blue-900 mb-1">
+                        支援多種付款方式
+                    </p>
+                    <p className="text-xs text-blue-800">
+                        • 信用卡 / 扣賬卡 (Visa, Mastercard, American Express)
+                        <br/>
+                        • Apple Pay (適用於 iPhone, iPad, Mac)
+                        <br/>
+                        • Google Pay (適用於 Android 及支援的瀏覽器)
+                    </p>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// ---------------------------------------------------------------------------
 // Payment Form
 // ---------------------------------------------------------------------------
 function CheckoutForm({
@@ -339,7 +356,7 @@ function CheckoutForm({
 
     const [formData] = useState({
         ...initialFormData,
-        payment_method: "stripe",
+        payment_method: "card_pay",
     })
 
     const [isProcessing, setIsProcessing] = useState(false)
@@ -371,6 +388,7 @@ function CheckoutForm({
         setErrorMessage("")
 
         try {
+            // Confirm payment with Stripe
             const {error, paymentIntent} = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
@@ -380,25 +398,28 @@ function CheckoutForm({
             })
 
             if (error) {
+                // Handle different error types
                 if (error.type === 'card_error') {
-                    setErrorMessage(error.message || '付款卡被拒絕，請檢查卡片資料')
+                    setErrorMessage(error.message || '付款卡被拒絕,請檢查卡片資料')
                 } else if (error.type === 'validation_error') {
                     setErrorMessage('請填寫完整的付款資料')
                 } else {
-                    setErrorMessage(error.message || '付款失敗，請稍後再試')
+                    setErrorMessage(error.message || '付款失敗,請稍後再試')
                 }
                 setIsProcessing(false)
                 return
             }
 
             if (paymentIntent && paymentIntent.status === "succeeded") {
+                // Verify amount matches
                 const paidAmount = paymentIntent.amount / 100
                 if (Math.abs(paidAmount - expectedAmount) > 0.01) {
-                    setErrorMessage('付款金額不符，請聯絡客服')
+                    setErrorMessage('付款金額不符,請聯絡客服')
                     setIsProcessing(false)
                     return
                 }
 
+                // Prepare order data
                 const orderData = {
                     ...formData,
                     items: items.map((item) => ({
@@ -408,6 +429,7 @@ function CheckoutForm({
                     payment_intent_id: paymentIntent.id,
                 }
 
+                // Confirm order with backend
                 const response = await fetch(`${API_BASE_URL}/api/orders/confirm/`, {
                     method: "POST",
                     headers: {
@@ -420,11 +442,11 @@ function CheckoutForm({
                     const errorData = await response.json()
 
                     if (response.status === 400) {
-                        setErrorMessage(errorData.error || '訂單資料無效，請稍後再試')
+                        setErrorMessage(errorData.error || '訂單資料無效,請稍後再試')
                     } else if (response.status === 500) {
-                        setErrorMessage('系統錯誤，但您的付款已完成。請聯絡客服並提供訂單編號。')
+                        setErrorMessage('系統錯誤,但您的付款已完成。請聯絡客服並提供訂單編號。')
                     } else {
-                        setErrorMessage('訂單確認失敗，請聯絡客服')
+                        setErrorMessage('訂單確認失敗,請聯絡客服')
                     }
                     setIsProcessing(false)
                     return
@@ -444,7 +466,7 @@ function CheckoutForm({
         } catch (error) {
             console.error("Payment error:", error)
             setErrorMessage(
-                error instanceof Error ? error.message : "付款處理失敗，請稍後再試"
+                error instanceof Error ? error.message : "付款處理失敗,請稍後再試"
             )
             setIsProcessing(false)
         }
@@ -479,48 +501,56 @@ function CheckoutForm({
                     </h2>
                     <div className="space-y-3 text-sm">
                         <div>
-                            <span className="text-neutral-600">姓名：</span>
+                            <span className="text-neutral-600">姓名:</span>
                             <span className="font-medium">{formData.customer_name}</span>
                         </div>
                         <div>
-                            <span className="text-neutral-600">電郵：</span>
+                            <span className="text-neutral-600">電郵:</span>
                             <span className="font-medium">{formData.customer_email}</span>
                         </div>
                         <div>
-                            <span className="text-neutral-600">電話：</span>
+                            <span className="text-neutral-600">電話:</span>
                             <span className="font-medium">{formData.customer_phone}</span>
                         </div>
                         <div>
-                            <span className="text-neutral-600">送貨地址：</span>
+                            <span className="text-neutral-600">送貨地址:</span>
                             <span className="font-medium">{formData.delivery_address}</span>
                         </div>
                         <div>
-                            <span className="text-neutral-600">送貨日期：</span>
+                            <span className="text-neutral-600">送貨日期:</span>
                             <span className="font-medium">
                                 {formatDisplayDate(formData.delivery_date)}
                             </span>
                         </div>
                         {formData.delivery_notes && (
                             <div>
-                                <span className="text-neutral-600">備註：</span>
+                                <span className="text-neutral-600">備註:</span>
                                 <span className="font-medium">{formData.delivery_notes}</span>
                             </div>
                         )}
                     </div>
                 </div>
 
+                {/* Payment Method Info */}
+                <PaymentMethodInfo/>
+
                 {/* Payment Method */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
                     <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>
-                        付款方式
+                        付款方式 / Payment Method
                     </h2>
-                    <PaymentElement/>
+                    <PaymentElement
+                        options={{
+                            layout: "tabs",
+                        }}
+                    />
                 </div>
 
                 {/* Security Notice */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
                     <p className="text-blue-800">
-                        🔒 您的付款資料受到 Stripe 加密保護，我們不會儲存您的信用卡資料。
+                        🔒 您的付款資料受到 Stripe 加密保護,我們不會儲存您的信用卡資料。
+                        所有交易均符合 PCI DSS 標準。
                     </p>
                 </div>
 
@@ -625,7 +655,7 @@ function CheckoutWrapper() {
 
             const orderData = {
                 ...tempFormData,
-                payment_method: "stripe",
+                payment_method: "card_pay",
                 items: items.map((item) => ({
                     product_id: item.id,
                     quantity: item.quantity,
@@ -646,13 +676,13 @@ function CheckoutWrapper() {
                 console.error("Payment intent error:", errorData)
 
                 if (response.status === 429) {
-                    setErrorMessage('請求過於頻繁，請稍後再試')
+                    setErrorMessage('請求過於頻繁,請稍後再試')
                 } else if (errorData.error) {
                     setErrorMessage(typeof errorData.error === 'string'
                         ? errorData.error
-                        : '無法建立付款，請檢查資料後再試')
+                        : '無法建立付款,請檢查資料後再試')
                 } else {
-                    setErrorMessage('無法建立付款，請稍後再試')
+                    setErrorMessage('無法建立付款,請稍後再試')
                 }
                 setIsCreatingIntent(false)
                 return
@@ -663,7 +693,7 @@ function CheckoutWrapper() {
             setShowForm(true)
         } catch (error) {
             console.error("Error creating payment intent:", error)
-            setErrorMessage('網絡錯誤，請檢查連接後再試')
+            setErrorMessage('網絡錯誤,請檢查連接後再試')
             setIsCreatingIntent(false)
         }
     }

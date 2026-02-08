@@ -99,6 +99,16 @@ function OrderConfirmationContent() {
         })
     }
 
+    const getPaymentMethodDisplay = (method: string) => {
+        const paymentMethods: Record<string, string> = {
+            'card_pay': '信用卡 / 扣賬卡',
+            'apple_pay': 'Apple Pay',
+            'google_pay': 'Google Pay',
+            'payme': 'PayMe',
+        }
+        return paymentMethods[method] || method
+    }
+
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -134,7 +144,7 @@ function OrderConfirmationContent() {
                     <h1 className={`${playfair.className} text-3xl font-semibold mb-2`}>
                         訂單確認
                     </h1>
-                    <p className="text-neutral-600 mb-4">感謝您的訂購！</p>
+                    <p className="text-neutral-600 mb-4">感謝您的訂購!</p>
                     <div className="bg-neutral-100 rounded-lg px-6 py-3 inline-block">
                         <p className="text-sm text-neutral-600 mb-1">訂單編號</p>
                         <p className="text-xl font-semibold">#{order.order_number}</p>
@@ -163,15 +173,15 @@ function OrderConfirmationContent() {
                         </h2>
                         <div className="space-y-2 text-sm">
                             <p>
-                                <span className="text-neutral-600">姓名：</span>
+                                <span className="text-neutral-600">姓名:</span>
                                 <span className="font-medium">{order.customer_name}</span>
                             </p>
                             <p>
-                                <span className="text-neutral-600">電郵：</span>
+                                <span className="text-neutral-600">電郵:</span>
                                 <span className="font-medium">{order.customer_email}</span>
                             </p>
                             <p>
-                                <span className="text-neutral-600">電話：</span>
+                                <span className="text-neutral-600">電話:</span>
                                 <span className="font-medium">{order.customer_phone}</span>
                             </p>
                         </div>
@@ -275,11 +285,7 @@ function OrderConfirmationContent() {
                         <div>
                             <p className="text-sm text-neutral-600 mb-1">付款方式</p>
                             <p className="font-medium">
-                                {order.payment_method === "stripe"
-                                    ? "信用卡 / 扣賬卡"
-                                    : order.payment_method === "apple_pay"
-                                        ? "Apple Pay"
-                                        : "PayMe"}
+                                {getPaymentMethodDisplay(order.payment_method)}
                             </p>
                         </div>
                         <div className="text-right">
