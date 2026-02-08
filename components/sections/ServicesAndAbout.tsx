@@ -36,7 +36,7 @@ export default function ServicesAndAbout() {
             </p>
             <Link
               href="/about"
-              className="inline-block text-sm tracking-widest text-neutral-900 border-b border-neutral-300 pb-1 hover:border-neutral-900 hover:text-neutral-600 transition-all duration-300"
+              className="inline-block px-8 py-3 text-sm tracking-widest text-neutral-600 border border-neutral-300 hover:bg-neutral-900 hover:text-white hover:border-neutral-900 transition-all duration-300"
             >
               關於我們
             </Link>

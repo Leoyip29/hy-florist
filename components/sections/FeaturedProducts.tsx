@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import ProductCard from "@/components/product/ProductCard"
+import type { UiProduct } from "@/app/products/page"
 
 interface ProductImage {
   id: number
@@ -16,15 +18,18 @@ interface Product {
   name: string
   description: string
   price: string
+  categories: { id: number; name: string }[]
   images: ProductImage[]
 }
 
-
+interface FeaturedProductsProps {
+  onProductClick?: (product: UiProduct) => void
+}
 
 // Backend API URL - change this to match your backend address
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
-export default function FeaturedProducts() {
+export default function FeaturedProducts({ onProductClick }: FeaturedProductsProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -62,6 +67,17 @@ export default function FeaturedProducts() {
     return anyWithImage?.image ?? ""
   }
 
+  // Transform API product to UiProduct format
+  const toUiProduct = (p: Product): UiProduct => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    categories: p.categories?.map((c) => c.name) ?? [],
+    locations: [],
+    price: Number(p.price),
+    image: getPrimaryImage(p.images),
+  })
+
   if (loading) {
     return (
       <section className="py-24 md:py-36">
@@ -75,7 +91,7 @@ export default function FeaturedProducts() {
                 花藝
               </h2>
               <p className="mt-4 text-neutral-500 font-light text-sm tracking-widest">
-                SEASON&apos;S BESTSELLERS
+                BESTSELLERS
               </p>
             </div>
             <div className="lg:col-span-4">
@@ -113,36 +129,22 @@ export default function FeaturedProducts() {
               花藝
             </h2>
             <p className="mt-4 text-neutral-500 font-light text-sm tracking-widest">
-              SEASON&apos;S BESTSELLERS
+              BESTSELLERS
             </p>
           </div>
 
           {/* Product Grid - Right */}
           <div className="lg:col-span-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-2">
-              {products.map((product) => (
-                <Link href={`/products?id=${product.id}`} key={product.id}>
-                  <div className="group cursor-pointer">
-                    <div className="relative aspect-[2/3] overflow-hidden bg-neutral-100">
-                      {getPrimaryImage(product.images) && (
-                        <Image
-                          src={getPrimaryImage(product.images)}
-                          alt={product.images[0]?.alt_text || product.name}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                        />
-                      )}
-                    </div>
-                    <div className="mt-3">
-                      <h3 className="text-lg font-light text-neutral-900 font-serif tracking-wide group-hover:text-neutral-600 transition-colors">
-                        {product.name}
-                      </h3>
-                      <p className="mt-1 text-neutral-500 font-light text-base">
-                        HK$ {Number(product.price).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+              {products.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={toUiProduct(product)}
+                  playfairClassName="font-serif"
+                  inView={true}
+                  index={index}
+                  onClick={onProductClick}
+                />
               ))}
             </div>
 
@@ -150,7 +152,7 @@ export default function FeaturedProducts() {
             <div className="mt-16 text-center">
               <Link
                 href="/products"
-                className="inline-block text-lg tracking-widest text-neutral-900 border-b border-neutral-300 pb-1 hover:border-neutral-900 hover:text-neutral-600 transition-all duration-300"
+                className="inline-block px-8 py-3 text-sm tracking-widest text-neutral-600 border border-neutral-300 hover:bg-neutral-900 hover:text-white hover:border-neutral-900 transition-all duration-300"
               >
                 查看全部
               </Link>

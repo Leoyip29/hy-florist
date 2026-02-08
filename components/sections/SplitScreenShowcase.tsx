@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import ProductCard from "@/components/product/ProductCard"
+import type { UiProduct } from "@/app/products/page"
 
 interface ProductImage {
   id: number
@@ -16,7 +18,12 @@ interface Product {
   name: string
   description: string
   price: string
+  categories: { id: number; name: string }[]
   images: ProductImage[]
+}
+
+interface SplitScreenShowcaseProps {
+  onProductClick?: (product: UiProduct) => void
 }
 
 // Configure which product IDs to display
@@ -25,7 +32,7 @@ const SHOWCASE_PRODUCT_IDS = [439, 12, 15]
 // Backend API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
-export default function SplitScreenShowcase() {
+export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowcaseProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -76,20 +83,31 @@ export default function SplitScreenShowcase() {
     return anyWithImage?.image ?? ""
   }
 
+  // Transform API product to UiProduct format
+  const toUiProduct = (p: Product): UiProduct => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    categories: p.categories?.map((c) => c.name) ?? [],
+    locations: [],
+    price: Number(p.price),
+    image: getPrimaryImage(p.images),
+  })
+
   // Loading skeleton
   if (loading) {
     return (
-      <section className="min-h-screen">
-        <div className="flex flex-col lg:flex-row min-h-screen">
+      <section className="min-h-[50vh]">
+        <div className="flex flex-col lg:flex-row min-h-[50vh]">
           {/* Left: Loading */}
           <div className="w-full lg:w-1/2 aspect-[4/5] lg:aspect-auto bg-neutral-200 animate-pulse" />
           {/* Right: Loading */}
-          <div className="w-full lg:w-1/2 bg-[#E2E4F0] flex items-center justify-center p-12">
-            <div className="text-center space-y-6">
-              <div className="h-10 bg-neutral-300 rounded w-48 mx-auto animate-pulse" />
-              <div className="h-64 bg-neutral-300 rounded w-64 mx-auto animate-pulse" />
-              <div className="h-6 bg-neutral-300 rounded w-32 mx-auto animate-pulse" />
-              <div className="h-12 bg-neutral-300 rounded w-40 mx-auto animate-pulse" />
+          <div className="w-full lg:w-1/2 bg-[#E2E4F0] flex items-center justify-center p-8">
+            <div className="text-center space-y-4">
+              <div className="h-8 bg-neutral-300 rounded w-40 mx-auto animate-pulse" />
+              <div className="h-48 bg-neutral-300 rounded w-56 mx-auto animate-pulse" />
+              <div className="h-5 bg-neutral-300 rounded w-28 mx-auto animate-pulse" />
+              <div className="h-10 bg-neutral-300 rounded w-36 mx-auto animate-pulse" />
             </div>
           </div>
         </div>
@@ -127,9 +145,9 @@ export default function SplitScreenShowcase() {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row min-h-screen">
+      <div className="flex flex-col lg:flex-row min-h-[80vh]">
         {/* Left: Lifestyle Image */}
-        <div className="w-full lg:w-1/2 relative aspect-[4/5] lg:aspect-auto lg:min-h-screen overflow-hidden">
+        <div className="w-full lg:w-1/2 relative aspect-[4/5] lg:aspect-auto lg:min-h-[80vh] overflow-hidden">
           {mainProduct && getPrimaryImage(mainProduct.images) && (
             <div
               key={`image-${currentIndex}`}
@@ -167,12 +185,12 @@ export default function SplitScreenShowcase() {
             </div>
 
             {/* Main Title */}
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-center tracking-[0.15em] text-white mb-8 animate-fade-in" style={{ animationDelay: '0.16s' }}>
-              PEARLESCENT WHISPER
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-center tracking-[0.15em] text-neutral-900 mb-6 animate-fade-in" style={{ animationDelay: '0.16s' }}>
+              永恆追思花束
             </h2>
 
             {/* Product Image */}
-            <div className="relative aspect-[4/5] bg-neutral-800/80 rounded-lg overflow-hidden mb-6 shadow-xl animate-fade-in" style={{ animationDelay: '0.24s' }}>
+            <div className="relative aspect-[4/5] bg-neutral-200 rounded-lg overflow-hidden mb-6 shadow-xl animate-fade-in" style={{ animationDelay: '0.24s' }}>
               {mainProduct && getPrimaryImage(mainProduct.images) && (
                 <Image
                   src={getPrimaryImage(mainProduct.images)}
@@ -185,22 +203,22 @@ export default function SplitScreenShowcase() {
 
             {/* Product Name & Price */}
             <div className="text-center mb-8 animate-fade-in" style={{ animationDelay: '0.32s' }}>
-              <h3 className="text-xl font-light text-white tracking-wide mb-2">
+              <h3 className="text-2xl font-light text-neutral-900 tracking-wide mb-2">
                 {mainProduct?.name}
               </h3>
-              <p className="text-lg text-white/80 font-light">
-                from HK$ {mainProduct ? Number(mainProduct.price).toLocaleString() : "0"}
+              <p className="text-xl text-neutral-700 font-light">
+                HK$ {mainProduct ? Number(mainProduct.price).toLocaleString() : "0"}
               </p>
             </div>
 
             {/* CTA Button */}
             <div className="flex justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
-              <Link
-                href={mainProduct ? `/products?id=${mainProduct.id}` : "/products"}
+              <button
+                onClick={() => mainProduct && onProductClick?.(toUiProduct(mainProduct))}
                 className="inline-block px-12 py-4 bg-[#E8B4B8] hover:bg-[#d49fa3] transition-all duration-300 text-neutral-800 font-serif text-sm tracking-widest"
               >
-                BUY NOW
-              </Link>
+                立刻購買
+              </button>
             </div>
 
             {/* Decorative bottom line */}
@@ -215,33 +233,18 @@ export default function SplitScreenShowcase() {
 
       {/* Additional Products Grid - Shows remaining products excluding current main product */}
       {products.length > 1 && (
-        <div className="bg-[#E2E4F0] py-16 lg:py-24">
+        <div className="bg-[#E2E4F0] py-12 lg:py-16">
           <div className="mx-auto px-4 md:px-8 max-w-6xl">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
               {products.filter((_, index) => index !== currentIndex).map((product, i) => (
-                <Link
-                  href={`/products?id=${product.id}`}
+                <ProductCard
                   key={product.id}
-                  className="group block animate-fade-in"
-                  style={{ animationDelay: `${0.48 + i * 0.08}s` }}
-                >
-                  <div className="relative aspect-[4/5] bg-neutral-800/80 rounded-lg overflow-hidden mb-3">
-                    {getPrimaryImage(product.images) && (
-                      <Image
-                        src={getPrimaryImage(product.images)}
-                        alt={product.images[0]?.alt_text || product.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    )}
-                  </div>
-                  <h4 className="text-white text-sm font-light tracking-wide text-center group-hover:text-white/80 transition-colors">
-                    {product.name}
-                  </h4>
-                  <p className="text-white/60 text-xs text-center mt-1">
-                    HK$ {Number(product.price).toLocaleString()}
-                  </p>
-                </Link>
+                  product={toUiProduct(product)}
+                  playfairClassName="font-serif"
+                  inView={true}
+                  index={i}
+                  onClick={onProductClick}
+                />
               ))}
             </div>
           </div>

@@ -2,27 +2,32 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useTranslations, useLocale } from 'next-intl'
 
 export default function Navbar({ isScrolled }: { isScrolled?: boolean }) {
   const [open, setOpen] = useState(false)
   const [productsOpen, setProductsOpen] = useState(false)
+  const pathname = usePathname()
+  const locale = pathname.split('/')[1] || 'zh-HK'
+  const t = useTranslations('Navigation')
 
   const productCategories = [
-    { name: "所有商品", href: "/products" },
-    { name: "花籃", href: "/products?category=花籃" },
-    { name: "花束", href: "/products?category=花束" },
-    { name: "花牌", href: "/products?category=花牌" },
-    { name: "心型花牌", href: "/products?category=心型花牌" },
-    { name: "圓型花牌", href: "/products?category=圓形花牌" },
-    { name: "十字架花牌", href: "/products?category=十字架花牌" },
-    { name: "棺面花", href: "/products?category=棺面花" },
-    { name: "場地裝飾", href: "/products?category=場地裝飾" },
-    { name: "台花", href: "/products?category=台花" },
-    { name: "場地系列", href: "/products?category=場地系列" },
-    { name: "櫈花", href: "/products?category=櫈花" },
-    { name: "講台花", href: "/products?category=講台花" },
-    { name: "花牌套餐", href: "/products?category=花牌套餐" },
-    { name: "花束多買優惠", href: "/products?category=花束多買優惠" },
+    { name: t('allProducts'), href: `/${locale}/products` },
+    { name: t('flowerBasket'), href: `/${locale}/products?category=花籃` },
+    { name: t('bouquet'), href: `/${locale}/products?category=花束` },
+    { name: t('flowerBoard'), href: `/${locale}/products?category=花牌` },
+    { name: t('heartShapedBoard'), href: `/${locale}/products?category=心型花牌` },
+    { name: t('roundBoard'), href: `/${locale}/products?category=圓形花牌` },
+    { name: t('crossBoard'), href: `/${locale}/products?category=十字架花牌` },
+    { name: t('casketDecoration'), href: `/${locale}/products?category=棺面花` },
+    { name: t('venueDecoration'), href: `/${locale}/products?category=場地裝飾` },
+    { name: t('standFlower'), href: `/${locale}/products?category=台花` },
+    { name: t('venueSeries'), href: `/${locale}/products?category=場地系列` },
+    { name: t('benchFlower'), href: `/${locale}/products?category=櫈花` },
+    { name: t('podiumFlower'), href: `/${locale}/products?category=講台花` },
+    { name: t('boardSet'), href: `/${locale}/products?category=花牌套餐` },
+    { name: t('bouquetDeal'), href: `/${locale}/products?category=花束多買優惠` },
   ]
 
   return (
@@ -67,7 +72,7 @@ export default function Navbar({ isScrolled }: { isScrolled?: boolean }) {
                 onClick={() => setProductsOpen(!productsOpen)}
                 className="w-full text-center px-4 py-3.5 text-neutral-700 hover:bg-neutral-100 border-b border-neutral-100 transition-colors flex items-center justify-center gap-2"
               >
-                所有商品
+                {t('products')}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -107,18 +112,18 @@ export default function Navbar({ isScrolled }: { isScrolled?: boolean }) {
 
             {/* 其他頁面連結 */}
             <Link
-              href="/about"
+              href={`/${locale}/about`}
               onClick={() => setOpen(false)}
               className="block w-full text-center px-4 py-3.5 text-neutral-700 hover:bg-neutral-100 border-b border-neutral-100 transition-colors"
             >
-              關於我們
+              {t('about')}
             </Link>
             <Link
-              href="/contact"
+              href={`/${locale}/contact`}
               onClick={() => setOpen(false)}
               className="block w-full text-center px-4 py-3.5 text-neutral-700 hover:bg-neutral-100 transition-colors"
             >
-              聯絡我們
+              {t('contact')}
             </Link>
           </nav>
         </div>

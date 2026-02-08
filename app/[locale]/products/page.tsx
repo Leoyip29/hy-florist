@@ -4,6 +4,7 @@ import Image from "next/image"
 import { useState, useEffect, useRef, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Playfair_Display } from "next/font/google"
+import { useTranslations } from "next-intl"
 import ProductCategory from "@/components/product/ProductCategory"
 import ProductCard from "@/components/product/ProductCard"
 import ProductDetail from "@/components/product/ProductDetail"
@@ -99,7 +100,7 @@ function toUiProduct(p: ApiProduct): UiProduct {
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">載入中...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">{useTranslations("Products")("loading")}</div>}>
       <ShopPageContent />
     </Suspense>
   )
@@ -107,6 +108,8 @@ export default function ShopPage() {
 
 function ShopPageContent() {
   const searchParams = useSearchParams()
+  const t = useTranslations("Products")
+  // Use Chinese "全部" for API comparison since backend returns Chinese category names
   const initialCategory = searchParams.get("category") || "全部"
   const searchQuery = searchParams.get("search") || ""
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
@@ -140,7 +143,7 @@ function ShopPageContent() {
           cache: "no-store",
         })
         if (!res.ok) {
-          throw new Error(`Failed to load products (${res.status})`)
+          throw new Error(`${t("errorLoadProducts")} (${res.status})`)
         }
 
         const data = (await res.json()) as ApiProduct[]
@@ -186,7 +189,7 @@ function ShopPageContent() {
         setLocations(["全部", ...uniqueLocations])
         setCurrentPage(1)
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to load products")
+        setError(e instanceof Error ? e.message : t("errorLoadProducts"))
       } finally {
         setIsLoading(false)
       }
@@ -283,10 +286,10 @@ function ShopPageContent() {
         <div className="relative mx-auto max-w-7xl px-4 md:px-8">
           <div className="max-w-2xl">
             <h1 className={`${playfair.className} text-5xl md:text-7xl font-light mb-6 text-neutral-900 leading-tight`}>
-              花藝商城
+              {t("pageTitle")}
             </h1>
             <p className="text-lg md:text-xl text-neutral-700 font-light leading-8">
-              探索我們精心挑選的花藝作品，為生活的每一刻增添美麗與溫度。
+              {t("pageSubtitle")}
             </p>
           </div>
         </div>
@@ -309,8 +312,7 @@ function ShopPageContent() {
             {searchKeyword ? (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-neutral-500">
-                  搜尋 "<span className="font-medium text-neutral-800">{searchKeyword}</span>"
-                  ，共 {filteredProducts.length} 件商品
+                  {t("searchResults", { searchKeyword, count: filteredProducts.length })}
                 </span>
                 <button
                   onClick={() => {
@@ -322,16 +324,16 @@ function ShopPageContent() {
                   }}
                   className="text-sm text-neutral-500 hover:text-neutral-800 underline"
                 >
-                  清除
+                  {t("clear")}
                 </button>
               </div>
             ) : (
               <p className="text-xs sm:text-sm text-neutral-500">
-                共 {filteredProducts.length} 件商品
+                {t("totalProducts", { count: filteredProducts.length })}
               </p>
             )}
             <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm text-neutral-500">排序</span>
+              <span className="text-xs sm:text-sm text-neutral-500">{t("sort")}</span>
               <select
                 value={sortOption}
                 onChange={(e) =>
@@ -339,28 +341,28 @@ function ShopPageContent() {
                 }
                 className="text-xs sm:text-sm border border-neutral-200 rounded-full px-3 py-1.5 bg-white text-neutral-800 focus:outline-none focus:ring-1 focus:ring-neutral-400"
               >
-                <option value="recommended">預設排序</option>
-                <option value="price_asc">價格：由低至高</option>
-                <option value="price_desc">價格：由高至低</option>
+                <option value="recommended">{t("sortDefault")}</option>
+                <option value="price_asc">{t("sortPriceAsc")}</option>
+                <option value="price_desc">{t("sortPriceDesc")}</option>
               </select>
             </div>
           </div>
 
           {isLoading ? (
             <div className="text-center py-16">
-              <p className="text-neutral-500 text-lg">載入中...</p>
+              <p className="text-neutral-500 text-lg">{t("loading")}</p>
             </div>
           ) : error ? (
             <div className="text-center py-16">
-              <p className="text-red-600 text-lg mb-4">無法載入商品</p>
+              <p className="text-red-600 text-lg mb-4">{t("errorLoadProducts")}</p>
               <p className="text-neutral-500 text-sm">{error}</p>
               <p className="text-neutral-500 text-sm mt-2">
-                確認後端已啟動：{API_BASE_URL}/api/products/
+                {t("errorBackendCheck")} {API_BASE_URL}/api/products/
               </p>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-neutral-500 text-lg">暫無該分類的商品</p>
+              <p className="text-neutral-500 text-lg">{t("noProductsInCategory")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -388,11 +390,11 @@ function ShopPageContent() {
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             >
-              上一頁
+              {t("previousPage")}
             </button>
             <div className="flex items-center gap-1">
               <span className="text-sm text-neutral-600 px-2">
-                第 {currentPage} / {totalPages} 頁
+                {t("pageOf", { current: currentPage, total: totalPages })}
               </span>
             </div>
             <button
@@ -402,7 +404,7 @@ function ShopPageContent() {
                 setCurrentPage((p) => Math.min(totalPages, p + 1))
               }
             >
-              下一頁
+              {t("nextPage")}
             </button>
           </div>
         </section>

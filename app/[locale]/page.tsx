@@ -15,6 +15,7 @@ import Link from "next/link"
 import ProductCard from "@/components/product/ProductCard"
 import ProductDetail from "@/components/product/ProductDetail"
 import type { UiProduct } from "@/app/products/page"
+import { useLocale, useTranslations } from 'next-intl'
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -39,6 +40,23 @@ const slides = [
 export default function Home() {
   const [index, setIndex] = useState(0)
   const [selectedProduct, setSelectedProduct] = useState<UiProduct | null>(null)
+  const locale = useLocale()
+  const t = useTranslations("HomePage")
+
+  const slides = [
+    {
+      id: 0,
+      image: "/hy_home_banner_02.webp",
+      title: t("heroSlide1Title"),
+      desc: t("heroSlide1Desc"),
+    },
+    {
+      id: 1,
+      image: "/hy_home_banner_02.webp",
+      title: t("heroSlide2Title"),
+      desc: t("heroSlide2Desc"),
+    },
+  ]
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -77,9 +95,9 @@ export default function Home() {
                   {slide.desc}
                 </p>
                 <div className="mt-10">
-                  <Link href="/products">
+                  <Link href={`/${locale}/products`}>
                     <button className="px-12 py-4 text-sm tracking-widest text-white border border-white/60 hover:bg-white hover:text-neutral-900 transition-all duration-500 uppercase">
-                      探索花藝
+                      {t("exploreButton")}
                     </button>
                   </Link>
                 </div>

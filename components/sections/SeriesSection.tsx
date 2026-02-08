@@ -5,32 +5,32 @@ import Link from "next/link"
 
 const series = [
   {
-    tag: "CHURCH CEREMONY",
-    title: "教堂追思花藝",
-    desc: "為教堂典禮而設的花藝佈置，以純淨而莊重的花材，陪伴摯愛走過最後的祝禱與告別時刻。",
-    image: "/church_flower.jpg",
-    cta: "了解教堂花藝",
+    tag: "BENCH FLOWERS",
+    title: "櫈花",
+    desc: "以精緻的櫈面花藝裝飾每一張椅子，為告別儀式增添溫暖與敬意，陪伴摯愛走過最後的時光。",
+    image: "/series-chair.jpg",
+    cta: "查看櫈花",
   },
   {
-    tag: "CASKET FLORAL",
-    title: "棺面花藝佈置",
+    tag: "CASKET FLOWERS",
+    title: "棺面花",
     desc: "棺面花藝以細膩的設計與溫柔的色調，表達最深切的敬意，讓思念靜靜安放於告別之中。",
     image: "/series-casket1.jpg",
-    cta: "查看棺面花藝",
+    cta: "查看棺面花",
   },
   {
-    tag: "HOSPITAL FAREWELL",
-    title: "醫院告別花藝",
-    desc: "於醫院送別摯愛時，以簡約而真誠的花藝，代替言語，傳遞陪伴、關懷與不捨。",
-    image: "/series-hospital.jpg",
-    cta: "探索告別花藝",
+    tag: "PULPIT FLOWERS",
+    title: "講台花",
+    desc: "講台花以典雅的花藝設計，為牧師或主持人的講台增添莊嚴肅穆的氣氛，傳遞深切的追思。",
+    image: "/pulpit_flower.jpg",
+    cta: "查看講台花",
   },
   {
-    tag: "FUNERAL WREATHS",
-    title: "殯儀館追思花籃",
-    desc: "專為殯儀館儀式設計的追思花籃，結合傳統與現代花藝語言，表達永恆的懷念與敬重。",
-    image: "/series-funeral.jpg",
-    cta: "瀏覽追思花籃",
+    tag: "STAND FLOWERS",
+    title: "台花",
+    desc: "優雅的台花設計，為告別廳增添溫馨與敬意，以鮮花傳遞對逝者的懷念與祝福。",
+    image: "/series_stand.jpg",
+    cta: "查看台花",
   },
 ]
 
@@ -41,10 +41,10 @@ export default function SeriesSection() {
         {/* Section Header */}
         <div className="text-center mb-20 relative z-10">
           <h2 className="text-3xl md:text-4xl font-light tracking-wide text-[#292524] font-serif">
-            系列花藝
+            告別花藝系列
           </h2>
           <p className="mt-4 text-[#78716C] font-light text-xs tracking-[0.25em] uppercase">
-            Floral Collections
+            Funeral Floral Collections
           </p>
           {/* Decorative line */}
           <div className="flex items-center justify-center gap-2 mt-6">
@@ -75,7 +75,7 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[0].desc}
             </p>
-            <Link href="#" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href="/products?category=櫈花" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[0].cta} →
             </Link>
           </div>
@@ -99,7 +99,7 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[1].desc}
             </p>
-            <Link href="#" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href="/products?category=棺面花" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[1].cta} →
             </Link>
           </div>
@@ -123,7 +123,7 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[2].desc}
             </p>
-            <Link href="#" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href="/products?category=講台花" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[2].cta} →
             </Link>
           </div>
@@ -147,7 +147,7 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[3].desc}
             </p>
-            <Link href="#" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href="/products?category=台花" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[3].cta} →
             </Link>
           </div>
