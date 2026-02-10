@@ -13,10 +13,10 @@ function publicLogo(fileName: string) {
 
 // Map location names to logo files in /public/CategoriesLogo
 const LOCATION_LOGOS: Record<string, string> = {
-  全部: "All location.png",
-  教堂: "Church.png",
-  殯儀館: "Funeral Home.png",
-  醫院: "Hospital.png",
+  All: "All location.png",
+  Church: "Church.png",
+  FuneralHome: "Funeral Home.png",
+  Hospital: "Hospital.png",
 }
 
 type Props = {
@@ -142,7 +142,7 @@ export default function ProductCategory({
                     />
                   </span>
                 )}
-                <span>{t(`locations.${loc}`)}</span>
+                <span>{loc}</span>
               </button>
             )
           })}

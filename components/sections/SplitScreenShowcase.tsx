@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import ProductCard from "@/components/product/ProductCard"
 import type { UiProduct } from "@/app/[locale]/products/page"
+import { translateProductName, translateCategory } from "@/app/[locale]/products/page"
 
 interface ProductImage {
   id: number
@@ -35,6 +36,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowcaseProps) {
   const t = useTranslations("SplitScreenShowcase")
+  const locale = useLocale()
   
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -86,12 +88,14 @@ export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowc
     return anyWithImage?.image ?? ""
   }
 
-  // Transform API product to UiProduct format
+  // Transform API product to UiProduct format with locale-aware translation
   const toUiProduct = (p: Product): UiProduct => ({
     id: p.id,
-    name: p.name,
+    name: locale === 'en' ? translateProductName(p.name) : p.name,
     description: p.description,
-    categories: p.categories?.map((c) => c.name) ?? [],
+    categories: p.categories?.map((c) => 
+      locale === 'en' ? translateCategory(c.name) : c.name
+    ) ?? [],
     locations: [],
     price: Number(p.price),
     image: getPrimaryImage(p.images),

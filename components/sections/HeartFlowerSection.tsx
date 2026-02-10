@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useTranslations, useLocale } from "next-intl"
 import ProductCard from "@/components/product/ProductCard"
 import type { UiProduct } from "@/app/[locale]/products/page"
+import { translateProductName, translateCategory } from "@/app/[locale]/products/page"
 
 interface ProductImage {
   id: number
@@ -75,12 +76,14 @@ export default function HeartFlowerSection({ onProductClick }: HeartFlowerSectio
     return anyWithImage?.image ?? ""
   }
 
-  // Transform API product to UiProduct format
+  // Transform API product to UiProduct format with locale-aware translation
   const toUiProduct = (p: Product): UiProduct => ({
     id: p.id,
-    name: p.name,
+    name: locale === 'en' ? translateProductName(p.name) : p.name,
     description: p.description,
-    categories: p.categories?.map((c) => c.name) ?? [],
+    categories: p.categories?.map((c) => 
+      locale === 'en' ? translateCategory(c.name) : c.name
+    ) ?? [],
     locations: [],
     price: Number(p.price),
     image: getPrimaryImage(p.images),

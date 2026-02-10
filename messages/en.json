@@ -298,10 +298,28 @@
   },
   "ProductCategory": {
     "locations": {
-      "全部": "All Locations",
-      "教堂": "Church",
-      "殯儀館": "Funeral Home",
-      "醫院": "Hospital"
+      "All": "All Locations",
+      "Church": "Church",
+      "FuneralHome": "Funeral Home",
+      "Hospital": "Hospital",
+      "NotApplicable": "Not Applicable"
+    },
+    "names": {
+      "全部": "All",
+      "花束": "Bouquet",
+      "花束多買優惠": "Bouquet Bundle",
+      "花籃": "Flower Basket",
+      "花牌": "Flower Board",
+      "花牌套餐": "Board Set",
+      "十字架花牌": "Cross Board",
+      "圓形花牌": "Round Board",
+      "心型花牌": "Heart-shaped Board",
+      "棺面花": "Casket Decoration",
+      "場地裝飾": "Venue Decoration",
+      "台花": "Stand Flower",
+      "講台花": "Podium Flower",
+      "櫈花": "Bench Flower",
+      "場地系列": "Venue Series"
     }
   },
   "Footer": {
