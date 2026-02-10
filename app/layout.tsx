@@ -12,27 +12,15 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 })
 
-export async function generateStaticParams() {
-    return [{locale: 'en'}, {locale: 'zh-HK'}]
-}
-
 export const metadata: Metadata = {
     title: "HY Florist - 香港花藝專門店",
-    description: "專業花藝設計，為生活的每一刻增添美麗與溫度",
+    description: "專業花藝設計,為生活的每一刻增添美麗與溫度",
 }
 
 export default function RootLayout({
-    children,
-}: Readonly<{
+                                       children,
+                                   }: {
     children: React.ReactNode
-}>) {
-    return (
-        <html lang="zh-HK">
-        <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-            {children}
-        </body>
-        </html>
-    )
+}) {
+    return children
 }

@@ -15,6 +15,7 @@ import {Playfair_Display} from "next/font/google"
 import {Loader2, CheckCircle, X, AlertCircle, Calendar} from "lucide-react"
 import {useLocale} from 'next-intl'
 
+
 const playfair = Playfair_Display({
     subsets: ["latin"],
     weight: ["400", "600", "700"],
@@ -341,7 +342,7 @@ function CheckoutForm({
 
     const [formData] = useState({
         ...initialFormData,
-        payment_method: "stripe",
+        payment_method: "card_pay",
     })
 
     const [isProcessing, setIsProcessing] = useState(false)
@@ -554,10 +555,10 @@ function CheckoutForm({
 // Main Checkout Wrapper
 // ---------------------------------------------------------------------------
 function CheckoutWrapper() {
-    const {items, totalPrice} = useCart()
+    const {items, totalPrice, isLoading} = useCart()
     const router = useRouter()
+    const locale = useLocale()
     const pathname = usePathname()
-    const locale = pathname.split('/')[1] || 'zh-HK'
     const [clientSecret, setClientSecret] = useState("")
     const [isCreatingIntent, setIsCreatingIntent] = useState(false)
     const [showForm, setShowForm] = useState(false)
@@ -573,10 +574,26 @@ function CheckoutWrapper() {
     })
 
     useEffect(() => {
-        if (items.length === 0) {
+        if (!isLoading && items.length === 0) {
             router.push(`/${locale}/products`)
         }
-    }, [items.length, router])
+    }, [items.length, router, isLoading, locale])
+
+    // Show loading state
+    if (isLoading) {
+        return (
+            <main className="min-h-screen bg-neutral-50 py-12 flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-neutral-900" />
+                    <p className="text-neutral-600">載入中...</p>
+                </div>
+            </main>
+        )
+    }
+
+    if (items.length === 0) {
+        return null
+    }
 
     const handleTempInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -629,7 +646,7 @@ function CheckoutWrapper() {
 
             const orderData = {
                 ...tempFormData,
-                payment_method: "stripe",
+                payment_method: "card_pay",
                 items: items.map((item) => ({
                     product_id: item.id,
                     quantity: item.quantity,

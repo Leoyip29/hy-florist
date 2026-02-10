@@ -3,8 +3,8 @@
 import {useCart} from "@/contexts/CartContext"
 import {X, ShoppingBag} from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import {Playfair_Display} from "next/font/google"
+import {Link} from '@/i18n/routing'
 
 const playfair = Playfair_Display({
     subsets: ["latin"],
@@ -12,8 +12,7 @@ const playfair = Playfair_Display({
 })
 
 export default function CartDrawer() {
-    const {items, removeItem, updateQuantity, totalPrice, isOpen, closeCart} =
-        useCart()
+    const {items, removeItem, updateQuantity, totalPrice, isOpen, closeCart} = useCart()
 
     if (!isOpen) return null
 
@@ -61,7 +60,6 @@ export default function CartDrawer() {
                                     key={item.id}
                                     className="flex gap-4 p-4 border border-neutral-200 rounded-lg"
                                 >
-                                    {/* Product Image */}
                                     <div className="relative w-20 h-20 flex-shrink-0">
                                         <Image
                                             src={item.image}
@@ -71,7 +69,6 @@ export default function CartDrawer() {
                                         />
                                     </div>
 
-                                    {/* Product Details */}
                                     <div className="flex-1 min-w-0">
                                         <h3 className="font-medium text-sm mb-1 truncate">
                                             {item.name}
@@ -80,7 +77,6 @@ export default function CartDrawer() {
                                             HK${item.price.toFixed(2)}
                                         </p>
 
-                                        {/* Quantity Controls */}
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() =>
@@ -92,8 +88,8 @@ export default function CartDrawer() {
                                                 -
                                             </button>
                                             <span className="text-sm font-medium w-8 text-center">
-        {item.quantity}
-        </span>
+                                                {item.quantity}
+                                            </span>
                                             <button
                                                 onClick={() =>
                                                     updateQuantity(item.id, item.quantity + 1)
@@ -106,7 +102,6 @@ export default function CartDrawer() {
                                         </div>
                                     </div>
 
-                                    {/* Remove Button */}
                                     <button
                                         onClick={() => removeItem(item.id)}
                                         className="self-start p-1 hover:bg-neutral-100 rounded transition-colors"
@@ -123,13 +118,11 @@ export default function CartDrawer() {
                 {/* Footer */}
                 {items.length > 0 && (
                     <div className="border-t p-6 space-y-4">
-                        {/* Total */}
                         <div className="flex items-center justify-between text-lg font-semibold">
                             <span>總計</span>
                             <span>HK${totalPrice.toFixed(2)}</span>
                         </div>
 
-                        {/* Checkout Button */}
                         <Link
                             href="/checkout"
                             onClick={closeCart}
@@ -138,7 +131,6 @@ export default function CartDrawer() {
                             前往結帳
                         </Link>
 
-                        {/* Continue Shopping */}
                         <button
                             onClick={closeCart}
                             className="w-full py-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
