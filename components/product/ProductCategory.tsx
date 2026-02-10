@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 
 export type CategoryItem = {
   name: string
@@ -13,13 +14,9 @@ function publicLogo(fileName: string) {
 // Map location names to logo files in /public/CategoriesLogo
 const LOCATION_LOGOS: Record<string, string> = {
   全部: "All location.png",
-
-  // Chinese examples – adjust keys to match your backend location names
   教堂: "Church.png",
   殯儀館: "Funeral Home.png",
   醫院: "Hospital.png",
-
-
 }
 
 type Props = {
@@ -39,6 +36,8 @@ export default function ProductCategory({
   selectedLocation,
   onSelectLocation,
 }: Props) {
+  const t = useTranslations("ProductCategory")
+  
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -143,7 +142,7 @@ export default function ProductCategory({
                     />
                   </span>
                 )}
-                <span>{loc === "全部" ? "全部地點" : loc}</span>
+                <span>{t(`locations.${loc}`)}</span>
               </button>
             )
           })}

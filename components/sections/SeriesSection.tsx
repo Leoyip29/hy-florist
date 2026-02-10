@@ -2,49 +2,53 @@
 
 import Image from "next/image"
 import Link from "next/link"
-
-const series = [
-  {
-    tag: "BENCH FLOWERS",
-    title: "櫈花",
-    desc: "以精緻的櫈面花藝裝飾每一張椅子，為告別儀式增添溫暖與敬意，陪伴摯愛走過最後的時光。",
-    image: "/series-chair.jpg",
-    cta: "查看櫈花",
-  },
-  {
-    tag: "CASKET FLOWERS",
-    title: "棺面花",
-    desc: "棺面花藝以細膩的設計與溫柔的色調，表達最深切的敬意，讓思念靜靜安放於告別之中。",
-    image: "/series-casket1.jpg",
-    cta: "查看棺面花",
-  },
-  {
-    tag: "PULPIT FLOWERS",
-    title: "講台花",
-    desc: "講台花以典雅的花藝設計，為牧師或主持人的講台增添莊嚴肅穆的氣氛，傳遞深切的追思。",
-    image: "/pulpit_flower.jpg",
-    cta: "查看講台花",
-  },
-  {
-    tag: "STAND FLOWERS",
-    title: "台花",
-    desc: "優雅的台花設計，為告別廳增添溫馨與敬意，以鮮花傳遞對逝者的懷念與祝福。",
-    image: "/series_stand.jpg",
-    cta: "查看台花",
-  },
-]
+import { useTranslations, useLocale } from "next-intl"
 
 export default function SeriesSection() {
+  const t = useTranslations("SeriesSection")
+  const locale = useLocale()
+
+  const series = [
+    {
+      tag: "BENCH FLOWERS",
+      title: t("items.bench.title"),
+      desc: t("items.bench.desc"),
+      image: "/series-chair.jpg",
+      cta: t("items.bench.cta"),
+    },
+    {
+      tag: "CASKET FLOWERS",
+      title: t("items.casket.title"),
+      desc: t("items.casket.desc"),
+      image: "/series-casket1.jpg",
+      cta: t("items.casket.cta"),
+    },
+    {
+      tag: "PULPIT FLOWERS",
+      title: t("items.pulpit.title"),
+      desc: t("items.pulpit.desc"),
+      image: "/pulpit_flower.jpg",
+      cta: t("items.pulpit.cta"),
+    },
+    {
+      tag: "STAND FLOWERS",
+      title: t("items.stand.title"),
+      desc: t("items.stand.desc"),
+      image: "/series_stand.jpg",
+      cta: t("items.stand.cta"),
+    },
+  ]
+
   return (
     <section className="py-20 md:py-28 bg-cream">
       <div className="mx-auto px-4 md:px-8 max-w-7xl">
         {/* Section Header */}
         <div className="text-center mb-20 relative z-10">
           <h2 className="text-3xl md:text-4xl font-light tracking-wide text-[#292524] font-serif">
-            告別花藝系列
+            {t("title")}
           </h2>
           <p className="mt-4 text-[#78716C] font-light text-xs tracking-[0.25em] uppercase">
-            Funeral Floral Collections
+            {t("subtitle")}
           </p>
           {/* Decorative line */}
           <div className="flex items-center justify-center gap-2 mt-6">
@@ -75,7 +79,7 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[0].desc}
             </p>
-            <Link href="/products?category=櫈花" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=櫈花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[0].cta} →
             </Link>
           </div>
@@ -99,7 +103,7 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[1].desc}
             </p>
-            <Link href="/products?category=棺面花" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=棺面花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[1].cta} →
             </Link>
           </div>
@@ -123,7 +127,7 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[2].desc}
             </p>
-            <Link href="/products?category=講台花" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=講台花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[2].cta} →
             </Link>
           </div>
@@ -147,7 +151,7 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[3].desc}
             </p>
-            <Link href="/products?category=台花" className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=台花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[3].cta} →
             </Link>
           </div>

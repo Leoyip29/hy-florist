@@ -3,49 +3,61 @@
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { Playfair_Display } from "next/font/google"
-import FeaturedProducts from '@/components/sections/FeaturedProducts'
-import ServicesAndAbout from '@/components/sections/ServicesAndAbout'
+import { useTranslations } from "next-intl"
+import FeaturedProducts from "@/components/sections/FeaturedProducts"
+import ServicesAndAbout from "@/components/sections/ServicesAndAbout"
 import SeriesSection from "@/components/sections/SeriesSection"
-import SectionDivider from '@/components/sections/SectionDivider'
-import FlowerStandSection from '@/components/sections/FlowerStandSection'
+import SectionDivider from "@/components/sections/SectionDivider"
+import FlowerStandSection from "@/components/sections/FlowerStandSection"
 import HeartFlowerSection from "@/components/sections/HeartFlowerSection"
 import SplitScreenShowcase from "@/components/sections/SplitScreenShowcase"
-import MarqueeBanner from '@/components/sections/MarqueeBanner'
 import Link from "next/link"
 import ProductCard from "@/components/product/ProductCard"
 import ProductDetail from "@/components/product/ProductDetail"
-import type { UiProduct } from "@/app/products/page"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
 })
 
-const slides = [
-  {
-    id: 0,
-    image: "/hy_home_banner_02.webp",
-    title: "以花傳意\n致敬生命",
-    desc: "用心意與專業，為每一個珍重時刻送上真摯的祝福。",
-  },
-  {
-    id: 1,
-    image: "/hy_home_banner_02.webp",
-    title: "真摯的慰問\n永恆的紀念",
-    desc: "以優雅花藝，表達最深切的敬意與關懷。",
-  },
-]
+export type UiProduct = {
+  id: number
+  name: string
+  description: string
+  categories: string[]
+  locations: string[]
+  price: number
+  image: string
+  rating?: number
+  reviews?: number
+}
 
 export default function Home() {
+  const t = useTranslations("Home")
   const [index, setIndex] = useState(0)
   const [selectedProduct, setSelectedProduct] = useState<UiProduct | null>(null)
+
+  const slides = [
+    {
+      id: 0,
+      image: "/hy_home_banner_02.webp",
+      title: t("hero.slides.0.title"),
+      desc: t("hero.slides.0.description"),
+    },
+    {
+      id: 1,
+      image: "/hy_home_banner_02.webp",
+      title: t("hero.slides.1.title"),
+      desc: t("hero.slides.1.description"),
+    },
+  ]
 
   useEffect(() => {
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % slides.length)
     }, 6000)
     return () => clearInterval(timer)
-  }, [])
+  }, [slides.length])
 
   return (
     <main className="min-h-screen">
@@ -79,7 +91,7 @@ export default function Home() {
                 <div className="mt-10">
                   <Link href="/products">
                     <button className="px-12 py-4 text-sm tracking-widest text-white border border-white/60 hover:bg-white hover:text-neutral-900 transition-all duration-500 uppercase">
-                      探索花藝
+                      {t("hero.ctaButton")}
                     </button>
                   </Link>
                 </div>

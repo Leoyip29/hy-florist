@@ -58,6 +58,252 @@
     "nextPage": "下一頁",
     "pageOf": "第 {current} / {total} 頁"
   },
+  "FeaturedProducts": {
+    "title": "熱賣",
+    "subtitle": "花藝",
+    "viewAll": "查看全部"
+  },
+  "FlowerStandSection": {
+    "tagline": "SYMPATHY & TRIBUTE",
+    "title": "永恆告別",
+    "subtitle": "十字架花牌",
+    "description": "以優雅花藝傳遞最深切的慰問與敬意，為每一段珍貴的記憶送上永恆的祝福。",
+    "viewAll": "探索更多十字架花牌"
+  },
+  "HeartFlowerSection": {
+    "tagline": "ETERNAL LOVE & REMEMBRANCE",
+    "title": "心型",
+    "subtitle": "花牌",
+    "description": "以心形花藝傳遞最深切的愛與思念，為珍貴的回憶送上永恆的祝福。",
+    "viewAll": "探索更多心型花牌"
+  },
+  "SectionDivider": {
+    "tagline": "以花傳意 · 致敬生命"
+  },
+  "SeriesSection": {
+    "title": "告別花藝系列",
+    "subtitle": "Funeral Floral Collections",
+    "items": {
+      "bench": {
+        "title": "櫈花",
+        "desc": "以精緻的櫈面花藝裝飾每一張椅子，為告別儀式增添溫暖與敬意，陪伴摯愛走過最後的時光。",
+        "cta": "查看櫈花"
+      },
+      "casket": {
+        "title": "棺面花",
+        "desc": "棺面花藝以細膩的設計與溫柔的色調，表達最深切的敬意，讓思念靜靜安放於告別之中。",
+        "cta": "查看棺面花"
+      },
+      "pulpit": {
+        "title": "講台花",
+        "desc": "講台花以典雅的花藝設計，為牧師或主持人的講台增添莊嚴肅穆的氣氛，傳遞深切的追思。",
+        "cta": "查看講台花"
+      },
+      "stand": {
+        "title": "台花",
+        "desc": "優雅的台花設計，為告別廳增添溫馨與敬意，以鮮花傳遞對逝者的懷念與祝福。",
+        "cta": "查看台花"
+      }
+    }
+  },
+  "ServicesAndAbout": {
+    "about": {
+      "tagline": "ABOUT US",
+      "title": "風信子花店",
+      "description1": "風信子花店以向客人提供優質的花藝服務為使命。我們的花藝師認真對待每一朵花材，細緻地製作每一件作品，珍惜每一次花藝創作的機會。",
+      "description2": "花藝不僅是裝飾，更是傳遞心意的橋樑。我們用花的姿態，為您留下最後的告白，為摯愛送行。風信子傳遞的不只是哀悼，更是愛的延續，讓思念在時間中，也能被溫柔地接住。",
+      "cta": "關於我們"
+    }
+  },
+  "SplitScreenShowcase": {
+    "title": "永恆追思花束",
+    "cta": "立刻購買"
+  },
+  "Home": {
+    "hero": {
+      "ctaButton": "探索花藝",
+      "slides": [
+        {
+          "title": "以花傳意\n致敬生命",
+          "description": "用心意與專業，為每一個珍重時刻送上真摯的祝福。"
+        },
+        {
+          "title": "真摯的慰問\n永恆的紀念",
+          "description": "以優雅花藝，表達最深切的敬意與關懷。"
+        }
+      ]
+    }
+  },
+  "About": {
+    "title": "關於我們",
+    "mainTitle": "風信子花店",
+    "subtitle": "帛事花牌專門店",
+    "hero": {
+      "paragraph1": "我們深信，花藝不僅是一種裝飾，更是一種語言。無論是對摯愛的最後致敬，還是表達慰問與關懷，我們的團隊都以細膩的心思和專業的設計，為您製作最合適的花藝作品。"
+    },
+    "main": {
+      "paragraph1": "Hyacinth Florist 是一家專業的網上花店，專注於提供帛事花牌、花籃及花束，為每一份心意傳遞最真摯的情感。",
+      "paragraph2": "我們深信，花藝不僅是一種裝飾，更是一種語言。無論是對摯愛的最後致敬，還是表達慰問與關懷，我們的團隊都以細膩的心思和專業的設計，為您製作最合適的花藝作品。",
+      "paragraph3": "我們的服務涵蓋全港送遞，確保花品準時送達，讓您的祝福與思念無間斷地傳遞。我們堅持選用最新鮮的花材，配合精湛的花藝設計，務求讓每一件作品都體現您的心意。",
+      "paragraph4": "無論您需要莊重典雅的帛事花牌，傳遞慰問的花籃，或是簡約優雅的花束，我們都能為您提供最貼心的選擇。"
+    },
+    "services": {
+      "title": "我們的服務",
+      "items": [
+        {
+          "title": "喪禮場地佈置",
+          "description": "以莊重而溫柔的花藝設計，陪伴摯愛走過最後一程。"
+        },
+        {
+          "title": "帛事花牌",
+          "description": "為表達敬意與思念，設計合適而有心意的花牌。"
+        },
+        {
+          "title": "帛事花束",
+          "description": "以簡約而真摯的花藝，傳遞深切的關懷。"
+        }
+      ]
+    }
+  },
+  "Checkout": {
+    "title": "結帳",
+    "loading": "載入中...",
+    "close": "關閉",
+    "processing": "處理中...",
+    "preparing": "準備中...",
+    "confirmPayment": "確認付款 HK${amount}",
+    "proceedToPayment": "前往付款",
+    "termsNotice": "點擊「確認付款」即表示您同意我們的服務條款及私隱政策",
+    "securityNotice": "您的付款資料受到 Stripe 加密保護，我們不會儲存您的信用卡資料。",
+    "orderSummary": "訂單摘要",
+    "quantity": "數量",
+    "subtotal": "小計",
+    "deliveryFee": "運費",
+    "free": "免費",
+    "total": "總計",
+    "optional": "選填",
+    "orderNumber": "訂單編號",
+    "customerInfo": "客戶資料",
+    "deliveryInfo": "送貨資料",
+    "name": "姓名",
+    "email": "電郵",
+    "phone": "電話",
+    "deliveryAddress": "送貨地址",
+    "deliveryDate": "送貨日期",
+    "notes": "備註",
+    "paymentMethod": "付款方式",
+    "placeholders": {
+      "name": "請輸入您的姓名",
+      "email": "your@email.com",
+      "phone": "9123 4567",
+      "address": "請輸入完整送貨地址",
+      "notes": "特別要求或備註"
+    },
+    "datePicker": {
+      "label": "送貨日期",
+      "selectDate": "請選擇送貨日期",
+      "minDaysNotice": "最少需提前 {days} 天訂購",
+      "weekdays": "日一二三四五六",
+      "disabledNotice": "灰色日期不可選擇（需提前 {days} 天）"
+    },
+    "success": {
+      "title": "付款成功！",
+      "message": "您的訂單已確認",
+      "emailSent": "確認電郵已發送至您的信箱",
+      "viewOrder": "查看訂單詳情"
+    },
+    "errors": {
+      "cardRejected": "付款卡被拒絕，請檢查卡片資料",
+      "incompletePayment": "請填寫完整的付款資料",
+      "paymentFailed": "付款失敗，請稍後再試",
+      "amountMismatch": "付款金額不符，請聯絡客服",
+      "invalidOrder": "訂單資料無效，請稍後再試",
+      "systemErrorPaid": "系統錯誤，但您的付款已完成。請聯絡客服並提供訂單編號。",
+      "orderConfirmationFailed": "訂單確認失敗，請聯絡客服",
+      "paymentProcessFailed": "付款處理失敗，請稍後再試",
+      "tooManyRequests": "請求過於頻繁，請稍後再試",
+      "createPaymentFailed": "無法建立付款，請檢查資料後再試",
+      "networkError": "網絡錯誤，請檢查連接後再試"
+    },
+    "validation": {
+      "nameRequired": "請輸入有效的姓名",
+      "emailRequired": "請輸入有效的電郵地址",
+      "phoneRequired": "請輸入有效的電話號碼",
+      "addressRequired": "請輸入完整的送貨地址",
+      "dateRequired": "請選擇送貨日期"
+    }
+  },
+  "OrderConfirmation": {
+    "orderConfirmed": "訂單確認",
+    "thankYou": "感謝您的訂購！",
+    "orderNumber": "訂單編號",
+    "emailSent": "訂單確認電郵已發送",
+    "emailSentTo": "我們已將訂單詳情發送至 ${email}",
+    "customerInfo": "客戶資料",
+    "deliveryInfo": "送貨資料",
+    "name": "姓名",
+    "email": "電郵",
+    "phone": "電話",
+    "deliveryAddress": "送貨地址",
+    "deliveryDate": "送貨日期",
+    "notes": "備註",
+    "orderDetails": "訂單詳情",
+    "quantity": "數量",
+    "subtotal": "小計",
+    "deliveryFee": "運費",
+    "discount": "折扣",
+    "total": "總計",
+    "paymentInfo": "付款資料",
+    "paymentMethod": "付款方式",
+    "paymentStatus": "付款狀態",
+    "paid": "已付款",
+    "continueShopping": "繼續購物",
+    "printOrder": "列印訂單",
+    "backToShop": "返回商城",
+    "paymentMethods": {
+      "creditCard": "信用卡 / 扣賬卡"
+    },
+    "errors": {
+      "noOrderNumber": "訂單編號未提供",
+      "noEmail": "電郵地址未提供",
+      "loadOrderFailed": "無法載入訂單",
+      "loadOrderDetailsFailed": "無法載入訂單詳情",
+      "orderNotFound": "訂單不存在"
+    }
+  },
+  "CartButton": {
+    "openCart": "打開購物車"
+  },
+  "CartDrawer": {
+    "title": "購物車",
+    "closeCart": "關閉購物車",
+    "emptyCart": "購物車是空的",
+    "continueShopping": "繼續購物",
+    "decreaseQuantity": "減少數量",
+    "increaseQuantity": "增加數量",
+    "removeItem": "移除商品",
+    "total": "總計",
+    "checkout": "前往結帳"
+  },
+  "ProductCard": {
+    "noImage": "暫無圖片",
+    "addToCart": "加入購物車"
+  },
+  "ProductDetail": {
+    "noImage": "暫無圖片",
+    "quantity": "數量",
+    "addToCart": "加入購物車",
+    "localDelivery": "香港本地送花服務",
+    "freshDaily": "當日新鮮製作"
+  },
+  "ProductCategory": {
+    "locations": {
+      "全部": "全部地點",
+      "教堂": "教堂",
+      "殯儀館": "殯儀館",
+      "醫院": "醫院"
+    }
+  },
   "Footer": {
     "description": "我們相信，每一束花都有其獨特的意義，能夠完美傳遞出我們的心意和關懷。在這充滿挑戰的時代，我們承諾與你攜手同行，無論逆境或疫情，我們將一路相伴，讓關愛傳遞到每一個角落。",
     "phone": "電話",

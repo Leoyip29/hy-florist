@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useTranslations, useLocale } from "next-intl"
 import ProductCard from "@/components/product/ProductCard"
-import type { UiProduct } from "@/app/products/page"
+import type { UiProduct } from "@/app/[locale]/products/page"
 
 interface ProductImage {
   id: number
@@ -30,6 +31,8 @@ interface FeaturedProductsProps {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export default function FeaturedProducts({ onProductClick }: FeaturedProductsProps) {
+  const t = useTranslations("FeaturedProducts")
+  const locale = useLocale()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -85,10 +88,10 @@ export default function FeaturedProducts({ onProductClick }: FeaturedProductsPro
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 md:gap-12 items-start">
             <div className="lg:col-span-1">
               <h2 className="text-5xl md:text-6xl font-light tracking-wide text-neutral-900 font-serif">
-                熱賣
+                {t("title")}
               </h2>
               <h2 className="text-5xl md:text-6xl font-light tracking-wide text-neutral-900 font-serif">
-                花藝
+                {t("subtitle")}
               </h2>
               <p className="mt-4 text-neutral-500 font-light text-sm tracking-widest">
                 BESTSELLERS
@@ -123,10 +126,10 @@ export default function FeaturedProducts({ onProductClick }: FeaturedProductsPro
           {/* Section Title - Left */}
           <div className="lg:col-span-1">
             <h2 className="text-5xl md:text-6xl font-light tracking-wide text-neutral-900 font-serif">
-              熱賣
+              {t("title")}
             </h2>
             <h2 className="text-5xl md:text-6xl font-light tracking-wide text-neutral-900 font-serif">
-              花藝
+              {t("subtitle")}
             </h2>
             <p className="mt-4 text-neutral-500 font-light text-sm tracking-widest">
               BESTSELLERS
@@ -151,10 +154,10 @@ export default function FeaturedProducts({ onProductClick }: FeaturedProductsPro
             {/* View All Link */}
             <div className="mt-16 text-center">
               <Link
-                href="/products"
+                href={`/${locale}/products`}
                 className="inline-block px-8 py-3 text-sm tracking-widest text-neutral-600 border border-neutral-300 hover:bg-neutral-900 hover:text-white hover:border-neutral-900 transition-all duration-300"
               >
-                查看全部
+                {t("viewAll")}
               </Link>
             </div>
           </div>

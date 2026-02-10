@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import ProductCard from "@/components/product/ProductCard"
-import type { UiProduct } from "@/app/products/page"
+import type { UiProduct } from "@/app/[locale]/products/page"
 
 interface ProductImage {
   id: number
@@ -33,6 +34,8 @@ const SHOWCASE_PRODUCT_IDS = [439, 12, 15]
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowcaseProps) {
+  const t = useTranslations("SplitScreenShowcase")
+  
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -69,7 +72,7 @@ export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowc
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % products.length)
-    }, 10000)
+    }, 5000)
 
     return () => clearInterval(interval)
   }, [products.length])
@@ -139,7 +142,7 @@ export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowc
               key={i}
               className="text-3xl md:text-4xl font-light tracking-[0.2em] text-stone-600/50 mx-8 md:mx-10 font-serif italic"
             >
-               HYACINTH FLORIST
+              HYACINTH FLORIST
             </span>
           ))}
         </div>
@@ -185,8 +188,8 @@ export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowc
             </div>
 
             {/* Main Title */}
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif text-center tracking-[0.15em] text-neutral-900 mb-6 animate-fade-in" style={{ animationDelay: '0.16s' }}>
-              永恆追思花束
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-center tracking-[0.3em] text-[#78716C] mb-8 animate-fade-in uppercase" style={{ animationDelay: '0.16s' }}>
+              {t("title")}
             </h2>
 
             {/* Product Image */}
@@ -217,7 +220,7 @@ export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowc
                 onClick={() => mainProduct && onProductClick?.(toUiProduct(mainProduct))}
                 className="inline-block px-12 py-4 bg-[#E8B4B8] hover:bg-[#d49fa3] transition-all duration-300 text-neutral-800 font-serif text-sm tracking-widest"
               >
-                立刻購買
+                {t("cta")}
               </button>
             </div>
 
