@@ -321,7 +321,8 @@ function ErrorAlert({message, onClose}: { message: string; onClose: () => void }
 function CheckoutForm({
                           clientSecret,
                           initialFormData,
-                          expectedAmount
+                          expectedAmount,
+                          requiresRedirect = false,
                       }: {
     clientSecret: string
     initialFormData: {
@@ -331,8 +332,10 @@ function CheckoutForm({
         delivery_address: string
         delivery_date: string
         delivery_notes: string
+        payment_method: string
     }
     expectedAmount: number
+    requiresRedirect?: boolean
 }) {
     const stripe = useStripe()
     const elements = useElements()
@@ -340,11 +343,7 @@ function CheckoutForm({
     const {items, clearCart} = useCart()
     const locale = useLocale()
 
-    const [formData] = useState({
-        ...initialFormData,
-        payment_method: "card_pay",
-    })
-
+    const [formData] = useState(initialFormData)
     const [isProcessing, setIsProcessing] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
     const [showSuccess, setShowSuccess] = useState(false)
@@ -374,13 +373,29 @@ function CheckoutForm({
         setErrorMessage("")
 
         try {
-            const {error, paymentIntent} = await stripe.confirmPayment({
+            // For redirect-based payments (AliPay), save order data to session storage
+            // so we can retrieve it after redirect
+            sessionStorage.setItem('pending_order_data', JSON.stringify({
+                ...formData,
+                items: items.map((item) => ({
+                    product_id: item.id,
+                    quantity: item.quantity,
+                })),
+            }))
+
+            // Build return URL for redirect payments
+            const returnUrl = `${window.location.origin}/${locale}/checkout/return`
+
+            // Configure confirmation parameters based on payment type
+            const confirmParams: any = {
                 elements,
                 confirmParams: {
-                    return_url: `${window.location.origin}/${locale}/order-confirmation`,
+                    return_url: returnUrl,  // needed for AliPay redirect, ignored for card
                 },
                 redirect: "if_required",
-            })
+            }
+
+            const {error, paymentIntent} = await stripe.confirmPayment(confirmParams)
 
             if (error) {
                 if (error.type === 'card_error') {
@@ -394,6 +409,8 @@ function CheckoutForm({
                 return
             }
 
+            // For redirect payments, the user will be redirected and won't reach this code
+            // This only runs for inline payments (card, Apple Pay, Google Pay)
             if (paymentIntent && paymentIntent.status === "succeeded") {
                 const paidAmount = paymentIntent.amount / 100
                 if (Math.abs(paidAmount - expectedAmount) > 0.01) {
@@ -518,6 +535,14 @@ function CheckoutForm({
                         付款方式
                     </h2>
                     <PaymentElement/>
+
+                    {requiresRedirect && formData.payment_method === 'alipay' && (
+                        <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <p className="text-sm text-blue-800">
+                                💡 點擊「確認付款」後，您將被導向到 AliPay 完成付款
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Security Notice */}
@@ -536,7 +561,7 @@ function CheckoutForm({
                     {isProcessing ? (
                         <>
                             <Loader2 className="w-5 h-5 animate-spin"/>
-                            處理中...
+                            {requiresRedirect ? '準備跳轉...' : '處理中...'}
                         </>
                     ) : (
                         `確認付款 HK$${expectedAmount.toFixed(2)}`
@@ -552,6 +577,54 @@ function CheckoutForm({
 }
 
 // ---------------------------------------------------------------------------
+// Payment Method Selector
+// ---------------------------------------------------------------------------
+function PaymentMethodSelector({
+                                   selected,
+                                   onChange,
+                               }: {
+    selected: string
+    onChange: (method: string) => void
+}) {
+    const paymentMethods = [
+        {value: 'card_pay', label: '信用卡 / 扣賬卡', icon: '💳'},
+        {value: 'apple_pay', label: 'Apple Pay', icon: ''},
+        {value: 'google_pay', label: 'Google Pay', icon: 'G'},
+        {value: 'alipay', label: 'AliPay', icon: '💵'},
+    ]
+
+    return (
+        <div className="space-y-3">
+            <label className="block text-sm font-medium mb-2">
+                選擇付款方式
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+                {paymentMethods.map((method) => (
+                    <button
+                        key={method.value}
+                        type="button"
+                        onClick={() => onChange(method.value)}
+                        className={`
+                            p-4 border-2 rounded-lg text-left transition-all
+                            ${
+                            selected === method.value
+                                ? 'border-neutral-900 bg-neutral-50'
+                                : 'border-neutral-200 hover:border-neutral-400'
+                        }
+                        `}
+                    >
+                        <div className="flex items-center gap-2">
+                            <span className="text-2xl">{method.icon}</span>
+                            <span className="text-sm font-medium">{method.label}</span>
+                        </div>
+                    </button>
+                ))}
+            </div>
+        </div>
+    )
+}
+
+// ---------------------------------------------------------------------------
 // Main Checkout Wrapper
 // ---------------------------------------------------------------------------
 function CheckoutWrapper() {
@@ -563,6 +636,7 @@ function CheckoutWrapper() {
     const [isCreatingIntent, setIsCreatingIntent] = useState(false)
     const [showForm, setShowForm] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
+    const [requiresRedirect, setRequiresRedirect] = useState(false)
 
     const [tempFormData, setTempFormData] = useState({
         customer_name: "",
@@ -571,6 +645,7 @@ function CheckoutWrapper() {
         delivery_address: "",
         delivery_date: "",
         delivery_notes: "",
+        payment_method: "card_pay",  // Default to card
     })
 
     useEffect(() => {
@@ -584,7 +659,7 @@ function CheckoutWrapper() {
         return (
             <main className="min-h-screen bg-neutral-50 py-12 flex items-center justify-center">
                 <div className="text-center">
-                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-neutral-900" />
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-neutral-900"/>
                     <p className="text-neutral-600">載入中...</p>
                 </div>
             </main>
@@ -608,6 +683,13 @@ function CheckoutWrapper() {
         setTempFormData({
             ...tempFormData,
             delivery_date: date,
+        })
+    }
+
+    const handlePaymentMethodChange = (method: string) => {
+        setTempFormData({
+            ...tempFormData,
+            payment_method: method,
         })
     }
 
@@ -646,7 +728,6 @@ function CheckoutWrapper() {
 
             const orderData = {
                 ...tempFormData,
-                payment_method: "card_pay",
                 items: items.map((item) => ({
                     product_id: item.id,
                     quantity: item.quantity,
@@ -657,7 +738,10 @@ function CheckoutWrapper() {
                 `${API_BASE_URL}/api/orders/create-payment-intent/`,
                 {
                     method: "POST",
-                    headers: {"Content-Type": "application/json"},
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Origin": window.location.origin,  // Send origin for return URL
+                    },
                     body: JSON.stringify(orderData),
                 }
             )
@@ -681,6 +765,7 @@ function CheckoutWrapper() {
 
             const data = await response.json()
             setClientSecret(data.clientSecret)
+            setRequiresRedirect(data.requiresRedirect || false)
             setShowForm(true)
         } catch (error) {
             console.error("Error creating payment intent:", error)
@@ -812,6 +897,7 @@ function CheckoutWrapper() {
                                     </div>
                                 </div>
 
+
                                 <button
                                     type="submit"
                                     disabled={isCreatingIntent}
@@ -839,12 +925,24 @@ function CheckoutWrapper() {
                                                 colorPrimary: "#1a1a1a",
                                             },
                                         },
+                                        defaultValues: {
+                                            billingDetails: {},
+                                        },
+                                        // Pre-select the payment method type chosen in step 1
+                                        paymentMethodOrder: tempFormData.payment_method === 'alipay'
+                                            ? ['alipay']
+                                            : tempFormData.payment_method === 'apple_pay'
+                                                ? ['apple_pay', 'card']
+                                                : tempFormData.payment_method === 'google_pay'
+                                                    ? ['google_pay', 'card']
+                                                    : ['card'],
                                     }}
                                 >
                                     <CheckoutForm
                                         clientSecret={clientSecret}
                                         initialFormData={tempFormData}
                                         expectedAmount={totalPrice}
+                                        requiresRedirect={requiresRedirect}
                                     />
                                 </Elements>
                             )
