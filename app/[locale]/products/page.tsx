@@ -4,7 +4,7 @@ import Image from "next/image"
 import { useState, useEffect, useRef, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Playfair_Display } from "next/font/google"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import ProductCategory from "@/components/product/ProductCategory"
 import ProductCard from "@/components/product/ProductCard"
 import ProductDetail from "@/components/product/ProductDetail"
@@ -45,6 +45,64 @@ export type UiProduct = {
   reviews?: number
 }
 
+// Category name translations - maps Chinese names to translated names
+// These are used for internationalization of category/location names
+const CATEGORY_NAME_TRANSLATIONS: Record<string, string> = {
+  全部: "All",
+  花束: "Bouquet",
+  "花束多買優惠": "Bouquet Bundle",
+  花籃: "Flower Basket",
+  花牌: "Flower Board",
+  花牌套餐: "Board Set",
+  十字架花牌: "Cross Board",
+  圓型花牌: "Round Board",
+  心型花牌: "Heart-shaped Board",
+  棺面花: "Casket Decoration",
+  場地裝飾: "Venue Decoration",
+  台花: "Stand Flower",
+  講台花: "Podium Flower",
+  櫈花: "Bench Flower",
+  場地系列: "Venue Series",
+}
+
+const LOCATION_NAME_TRANSLATIONS: Record<string, string> = {
+  全部: "All",
+  教堂: "Church",
+  殯儀館: "FuneralHome",
+  醫院: "Hospital",
+  不適用: "NotApplicable",
+}
+
+// Translate a location name using the translation map
+export function translateLocation(name: string): string {
+  return LOCATION_NAME_TRANSLATIONS[name] ?? name
+}
+
+// Translate product name - for products following the pattern "CategoryCode Number",
+// we translate just the category prefix
+export function translateProductName(name: string): string {
+  // Check if the product name starts with a known category
+  const categoryPrefixes = Object.keys(CATEGORY_NAME_TRANSLATIONS).filter(
+    (key) => key.length > 1 && name.startsWith(key)
+  )
+
+  if (categoryPrefixes.length > 0) {
+    // Use the longest matching prefix
+    const longestPrefix = categoryPrefixes.sort((a, b) => b.length - a.length)[0]
+    const translatedPrefix = CATEGORY_NAME_TRANSLATIONS[longestPrefix]
+    const remainder = name.slice(longestPrefix.length)
+    return `${translatedPrefix}${remainder}`
+  }
+
+  // If no match, return the original name
+  return name
+}
+
+// Translate category name
+export function translateCategory(name: string): string {
+  return CATEGORY_NAME_TRANSLATIONS[name] ?? name
+}
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000"
 
@@ -65,7 +123,7 @@ const CATEGORY_LOGOS: Record<string, string> = {
   花牌: "Funeral Flower Boards.png",
   心型花牌: "Heart-Shaped Funeral Wreaths.png",
   棺面花: "Coffin Flower Arrangements.png",
-  圓形花牌: "Round Funeral Wreaths.png",
+  圓型花牌: "Round Funeral Wreaths.png",
   十字架花牌: "Cross Funeral Wreaths.png",
   場地裝飾: "Venue Decorations.png",
   台花: "Table Flower Arrangements.png",
@@ -86,13 +144,18 @@ function pickPrimaryImage(images: ApiProductImage[]) {
   return anyWithImage?.image ?? ""
 }
 
-function toUiProduct(p: ApiProduct): UiProduct {
+// Function to convert API product to UI product with locale-aware translation
+function apiToUiProduct(p: ApiProduct, locale: string): UiProduct {
   return {
     id: p.id,
-    name: p.name,
+    name: locale === 'en' ? translateProductName(p.name) : p.name,
     description: p.description,
-    categories: p.categories?.map((c) => c.name) ?? ["未分類"],
-    locations: p.suitable_locations?.map((l) => l.name) ?? [],
+    categories: p.categories?.map((c) => 
+      locale === 'en' ? translateCategory(c.name) : c.name
+    ) ?? ["未分類"],
+    locations: p.suitable_locations?.map((l) => 
+      locale === 'en' ? translateLocation(l.name) : l.name
+    ) ?? [],
     price: Number(p.price),
     image: pickPrimaryImage(p.images),
   }
@@ -109,16 +172,20 @@ export default function ShopPage() {
 function ShopPageContent() {
   const searchParams = useSearchParams()
   const t = useTranslations("Products")
-  // Use Chinese "全部" for API comparison since backend returns Chinese category names
-  const initialCategory = searchParams.get("category") || "全部"
+  const tCategory = useTranslations("ProductCategory")
+  const locale = useLocale()
+
+  // Use locale-aware "All" for initial state
+  const allText = locale === 'en' ? "All" : "全部"
+  const initialCategory = searchParams.get("category") || allText
   const searchQuery = searchParams.get("search") || ""
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchKeyword, setSearchKeyword] = useState(searchQuery)
   const [categories, setCategories] = useState<CategoryItem[]>([
-    { name: "全部" },
+    { name: allText },
   ])
-  const [selectedLocation, setSelectedLocation] = useState("全部")
-  const [locations, setLocations] = useState<string[]>(["全部"])
+  const [selectedLocation, setSelectedLocation] = useState(allText)
+  const [locations, setLocations] = useState<string[]>([allText])
   const [products, setProducts] = useState<UiProduct[]>([])
   const [filteredProducts, setFilteredProducts] = useState<UiProduct[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -147,16 +214,20 @@ function ShopPageContent() {
         }
 
         const data = (await res.json()) as ApiProduct[]
-        const uiProducts = data.map(toUiProduct)
 
-        const uniqueCategories = Array.from(
+        // Process products with locale-aware translation
+        const uiProducts = data.map(p => apiToUiProduct(p, locale))
+
+        // Get unique category names (keep Chinese for filtering, translate for English display)
+        const uniqueOriginalCategories = Array.from(
           new Set(
             data
               .flatMap((p) => p.categories?.map((c) => c.name) ?? [])
               .filter(Boolean)
           )
         )
-        const uniqueLocations = Array.from(
+        // Get unique location names (keep Chinese for filtering, translate for English display)
+        const uniqueOriginalLocations = Array.from(
           new Set(
             data
               .flatMap((p) => p.suitable_locations?.map((l) => l.name) ?? [])
@@ -164,29 +235,48 @@ function ShopPageContent() {
           )
         )
 
+        // Display names based on locale (English only shows translated names)
+        const displayCategories = locale === 'en'
+          ? uniqueOriginalCategories.map(name => translateCategory(name))
+          : uniqueOriginalCategories
+        const displayLocations = locale === 'en'
+          ? uniqueOriginalLocations.map(name => translateLocation(name))
+          : uniqueOriginalLocations
+
         // Prefer static logos from /public/CategoriesLogo, fallback to the first product image found.
         const categoryToImage = new Map<string, string>()
-        for (const name of uniqueCategories) {
-          const logoFile = CATEGORY_LOGOS[name]
-          if (logoFile) categoryToImage.set(name, publicLogo(logoFile))
+        // Map using original Chinese category names for logo lookup
+        for (const originalName of uniqueOriginalCategories) {
+          const logoFile = CATEGORY_LOGOS[originalName]
+          if (logoFile) categoryToImage.set(originalName, publicLogo(logoFile))
         }
         for (const p of uiProducts) {
-          for (const cat of p.categories) {
-            if (!categoryToImage.has(cat) && p.image)
-              categoryToImage.set(cat, p.image)
+          // Find the original Chinese category name for this product
+          const originalProduct = data.find(ap => ap.id === p.id)
+          if (originalProduct) {
+            for (const cat of originalProduct.categories ?? []) {
+              if (!categoryToImage.has(cat.name) && p.image)
+                categoryToImage.set(cat.name, p.image)
+            }
           }
         }
 
         setProducts(uiProducts)
         setFilteredProducts(uiProducts)
         setCategories([
-          { name: "全部", image: publicLogo(CATEGORY_LOGOS["全部"] ?? "All.png") },
-          ...uniqueCategories.map((name) => ({
+          { name: locale === 'en' ? "All" : "全部", image: publicLogo(CATEGORY_LOGOS["全部"] ?? "All.png") },
+          ...displayCategories.map((name) => ({
             name,
-            image: categoryToImage.get(name),
+            image: categoryToImage.get(
+              locale === 'en'
+                ? Object.entries(CATEGORY_NAME_TRANSLATIONS).find(
+                    ([, trans]) => trans === name
+                  )?.[0] ?? name
+                : name
+            ),
           })),
         ])
-        setLocations(["全部", ...uniqueLocations])
+        setLocations([locale === 'en' ? "All" : "全部", ...displayLocations])
         setCurrentPage(1)
       } catch (e) {
         setError(e instanceof Error ? e.message : t("errorLoadProducts"))
@@ -203,13 +293,19 @@ function ShopPageContent() {
     setSearchKeyword(searchParams.get("search") || "")
   }, [searchParams])
 
+  // Reset category/location selection when locale changes
+  useEffect(() => {
+    setSelectedCategory(allText)
+    setSelectedLocation(allText)
+  }, [locale, allText])
+
   // Filter products by category, location, and search keyword
   useEffect(() => {
     const filtered = products.filter((p) => {
       const matchCategory =
-        selectedCategory === "全部" || p.categories.includes(selectedCategory)
+        selectedCategory === allText || p.categories.includes(selectedCategory)
       const matchLocation =
-        selectedLocation === "全部" || p.locations.includes(selectedLocation)
+        selectedLocation === allText || p.locations.includes(selectedLocation)
       const matchSearch = !searchKeyword ||
         p.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
         p.description.toLowerCase().includes(searchKeyword.toLowerCase())

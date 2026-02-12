@@ -2,8 +2,12 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useTranslations, useLocale } from "next-intl"
 
 export default function ServicesAndAbout() {
+  const t = useTranslations("ServicesAndAbout")
+  const locale = useLocale()
+  
   return (
     <section className="pb-20 md:pb-28">
       {/* About Section */}
@@ -23,22 +27,22 @@ export default function ServicesAndAbout() {
           {/* Text */}
           <div>
             <p className="text-xs tracking-[0.2em] text-neutral-500 uppercase mb-4">
-              ABOUT US
+              {t("about.tagline")}
             </p>
             <h2 className="text-3xl md:text-4xl font-light text-neutral-900 mb-6 font-serif">
-              風信子花店
+              {t("about.title")}
             </h2>
             <p className="text-neutral-600 font-light leading-relaxed mb-6">
-              風信子花店以向客人提供優質的花藝服務為使命。我們的花藝師認真對待每一朵花材，細緻地製作每一件作品，珍惜每一次花藝創作的機會。
+              {t("about.description1")}
             </p>
             <p className="text-neutral-600 font-light leading-relaxed mb-8">
-              花藝不僅是裝飾，更是傳遞心意的橋樑。我們用花的姿態，為您留下最後的告白，為摯愛送行。風信子傳遞的不只是哀悼，更是愛的延續，讓思念在時間中，也能被溫柔地接住。
+              {t("about.description2")}
             </p>
             <Link
-              href="/about"
+              href={`/${locale}/about`}
               className="inline-block px-8 py-3 text-sm tracking-widest text-neutral-600 border border-neutral-300 hover:bg-neutral-900 hover:text-white hover:border-neutral-900 transition-all duration-300"
             >
-              關於我們
+              {t("about.cta")}
             </Link>
           </div>
         </div>

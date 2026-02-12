@@ -58,6 +58,270 @@
     "nextPage": "Next",
     "pageOf": "Page {current} of {total}"
   },
+  "FeaturedProducts": {
+    "title": "Bestselling",
+    "subtitle": "Floral",
+    "viewAll": "View All"
+  },
+  "FlowerStandSection": {
+    "tagline": "SYMPATHY & TRIBUTE",
+    "title": "Eternal Tribute",
+    "subtitle": "Cross Flower Arrangements",
+    "description": "Express deepest sympathy and respect through elegant floral designs, offering eternal blessings for every precious memory.",
+    "viewAll": "Explore More"
+  },
+  "HeartFlowerSection": {
+    "tagline": "ETERNAL LOVE & REMEMBRANCE",
+    "title": "Heart Shaped",
+    "subtitle": "Floral Tributes",
+    "description": "Convey deepest love and longing through heart-shaped floral arrangements, offering eternal blessings for precious memories.",
+    "viewAll": "Explore More"
+  },
+  "SectionDivider": {
+    "tagline": "Honoring Life With Flowers"
+  },
+  "SeriesSection": {
+    "title": "Funeral Floral Collections",
+    "subtitle": "Elegant Tributes",
+    "items": {
+      "bench": {
+        "title": "Bench Flowers",
+        "desc": "Adorn each seat with delicate bench floral arrangements, adding warmth and respect to the farewell ceremony.",
+        "cta": "View Bench Flowers"
+      },
+      "casket": {
+        "title": "Casket Flowers",
+        "desc": "Express deepest respect with gentle casket floral designs, allowing memories to rest peacefully.",
+        "cta": "View Casket Flowers"
+      },
+      "pulpit": {
+        "title": "Pulpit Flowers",
+        "desc": "Elegant floral arrangements for the pulpit, creating a solemn atmosphere for remembrance.",
+        "cta": "View Pulpit Flowers"
+      },
+      "stand": {
+        "title": "Stand Flowers",
+        "desc": "Graceful stand flower designs bringing warmth and tribute to the farewell hall.",
+        "cta": "View Stand Flowers"
+      }
+    }
+  },
+  "ServicesAndAbout": {
+    "about": {
+      "tagline": "About Us",
+      "title": "Hyacinth Florist",
+      "description1": "Hyacinth Florist is dedicated to providing exceptional floral services. Our florists approach each bloom with care and precision, crafting every piece with meticulous attention.",
+      "description2": "Floral art is more than decoration—it's a bridge for conveying emotions. We use the beauty of flowers to create lasting tributes for your loved ones.",
+      "cta": "About Us"
+    }
+  },
+  "SplitScreenShowcase": {
+    "title": "Eternal Tribute Bouquet",
+    "cta": "Shop Now"
+  },
+  "Home": {
+    "hero": {
+      "ctaButton": "Explore Floristry",
+      "slides": [
+        {
+          "title": "Flowers Speak\nTribute to Life",
+          "description": "With care and professionalism, we send heartfelt blessings for every precious moment."
+        },
+        {
+          "title": "Sincere Condolences\nEternal Remembrance",
+          "description": "With elegant floristry, expressing deepest respect and care."
+        }
+      ]
+    }
+  },
+  "About": {
+    "title": "About Us",
+    "mainTitle": "Hyacinth Florist",
+    "subtitle": "Condolence Floral Specialists",
+    "hero": {
+      "paragraph1": "We believe that floristry is not just a decoration, but a language. Whether it's a final tribute to a loved one, or expressing condolences and care, our team creates the most suitable floral designs with meticulous care and professional expertise."
+    },
+    "main": {
+      "paragraph1": "Hyacinth Florist is a professional online florist specializing in funeral wreaths, flower baskets and bouquets, delivering the most sincere emotions for every heartfelt message.",
+      "paragraph2": "We believe that floristry is not just a decoration, but a language. Whether it's a final tribute to a loved one, or expressing condolences and care, our team creates the most suitable floral designs with meticulous care and professional expertise.",
+      "paragraph3": "Our services cover all of Hong Kong, ensuring timely delivery of floral arrangements so that your blessings and thoughts are conveyed without interruption. We insist on using the freshest flowers combined with exquisite floral design, ensuring every piece reflects your intentions.",
+      "paragraph4": "Whether you need a dignified and elegant funeral wreath, flower baskets to convey condolences, or a simple and elegant bouquet, we can provide you with the most thoughtful choices."
+    },
+    "services": {
+      "title": "Our Services",
+      "items": [
+        {
+          "title": "Funeral Venue Decoration",
+          "description": "With dignified and gentle floral designs, accompany your loved one through the final journey."
+        },
+        {
+          "title": "Condolence Wreaths",
+          "description": "Designing appropriate and heartfelt wreaths to express respect and remembrance."
+        },
+        {
+          "title": "Condolence Bouquets",
+          "description": "With simple and sincere floristry, conveying deep care and concern."
+        }
+      ]
+    }
+  },
+  "Checkout": {
+    "title": "Checkout",
+    "loading": "Loading...",
+    "close": "Close",
+    "processing": "Processing...",
+    "preparing": "Preparing...",
+    "confirmPayment": "Confirm Payment HK${amount}",
+    "proceedToPayment": "Proceed to Payment",
+    "termsNotice": "By clicking \"Confirm Payment\", you agree to our Terms of Service and Privacy Policy",
+    "securityNotice": "Your payment information is encrypted and protected by Stripe. We do not store your credit card details.",
+    "orderSummary": "Order Summary",
+    "quantity": "Quantity",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery Fee",
+    "free": "Free",
+    "total": "Total",
+    "optional": "Optional",
+    "orderNumber": "Order Number",
+    "customerInfo": "Customer Information",
+    "deliveryInfo": "Delivery Information",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "deliveryAddress": "Delivery Address",
+    "deliveryDate": "Delivery Date",
+    "notes": "Notes",
+    "paymentMethod": "Payment Method",
+    "placeholders": {
+      "name": "Enter your name",
+      "email": "your@email.com",
+      "phone": "9123 4567",
+      "address": "Enter your full delivery address",
+      "notes": "Special requests or notes"
+    },
+    "datePicker": {
+      "label": "Delivery Date",
+      "selectDate": "Select delivery date",
+      "minDaysNotice": "Order must be placed at least {days} days in advance",
+      "weekdays": "日一二三四五六",
+      "disabledNotice": "Gray dates cannot be selected (must be {days} days in advance)"
+    },
+    "success": {
+      "title": "Payment Successful!",
+      "message": "Your order has been confirmed",
+      "emailSent": "A confirmation email has been sent to your inbox",
+      "viewOrder": "View Order Details"
+    },
+    "errors": {
+      "cardRejected": "Card payment rejected, please check your card details",
+      "incompletePayment": "Please complete payment details",
+      "paymentFailed": "Payment failed, please try again",
+      "amountMismatch": "Payment amount mismatch, please contact customer service",
+      "invalidOrder": "Invalid order data, please try again",
+      "systemErrorPaid": "System error, but your payment has been completed. Please contact customer service with your order number.",
+      "orderConfirmationFailed": "Order confirmation failed, please contact customer service",
+      "paymentProcessFailed": "Payment processing failed, please try again",
+      "tooManyRequests": "Too many requests, please try again later",
+      "createPaymentFailed": "Unable to create payment, please check your details and try again",
+      "networkError": "Network error, please check your connection and try again"
+    },
+    "validation": {
+      "nameRequired": "Please enter a valid name",
+      "emailRequired": "Please enter a valid email address",
+      "phoneRequired": "Please enter a valid phone number",
+      "addressRequired": "Please enter a complete delivery address",
+      "dateRequired": "Please select a delivery date"
+    }
+  },
+  "OrderConfirmation": {
+    "orderConfirmed": "Order Confirmed",
+    "thankYou": "Thank you for your order!",
+    "orderNumber": "Order Number",
+    "emailSent": "Confirmation email sent",
+    "emailSentTo": "We've sent the order details to ${email}",
+    "customerInfo": "Customer Information",
+    "deliveryInfo": "Delivery Information",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "deliveryAddress": "Delivery Address",
+    "deliveryDate": "Delivery Date",
+    "notes": "Notes",
+    "orderDetails": "Order Details",
+    "quantity": "Quantity",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery Fee",
+    "discount": "Discount",
+    "total": "Total",
+    "paymentInfo": "Payment Information",
+    "paymentMethod": "Payment Method",
+    "paymentStatus": "Payment Status",
+    "paid": "Paid",
+    "continueShopping": "Continue Shopping",
+    "printOrder": "Print Order",
+    "backToShop": "Back to Shop",
+    "paymentMethods": {
+      "creditCard": "Credit / Debit Card"
+    },
+    "errors": {
+      "noOrderNumber": "Order number not provided",
+      "noEmail": "Email address not provided",
+      "loadOrderFailed": "Unable to load order",
+      "loadOrderDetailsFailed": "Unable to load order details",
+      "orderNotFound": "Order not found"
+    }
+  },
+  "CartButton": {
+    "openCart": "Open cart"
+  },
+  "CartDrawer": {
+    "title": "Shopping Cart",
+    "closeCart": "Close cart",
+    "emptyCart": "Your cart is empty",
+    "continueShopping": "Continue Shopping",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
+    "removeItem": "Remove item",
+    "total": "Total",
+    "checkout": "Proceed to Checkout"
+  },
+  "ProductCard": {
+    "noImage": "No Image",
+    "addToCart": "Add to Cart"
+  },
+  "ProductDetail": {
+    "noImage": "No Image",
+    "quantity": "Quantity",
+    "addToCart": "Add to Cart",
+    "localDelivery": "Local Flower Delivery in Hong Kong",
+    "freshDaily": "Freshly Made Daily"
+  },
+  "ProductCategory": {
+    "locations": {
+      "All": "All Locations",
+      "Church": "Church",
+      "FuneralHome": "Funeral Home",
+      "Hospital": "Hospital",
+      "NotApplicable": "Not Applicable"
+    },
+    "names": {
+      "全部": "All",
+      "花束": "Bouquet",
+      "花束多買優惠": "Bouquet Bundle",
+      "花籃": "Flower Basket",
+      "花牌": "Flower Board",
+      "花牌套餐": "Board Set",
+      "十字架花牌": "Cross Board",
+      "圓形花牌": "Round Board",
+      "心型花牌": "Heart-shaped Board",
+      "棺面花": "Casket Decoration",
+      "場地裝飾": "Venue Decoration",
+      "台花": "Stand Flower",
+      "講台花": "Podium Flower",
+      "櫈花": "Bench Flower",
+      "場地系列": "Venue Series"
+    }
+  },
   "Footer": {
     "description": "We believe every bouquet carries a unique meaning, perfectly conveying our feelings and care. In these challenging times, we promise to stand by your side, through adversity or pandemic, accompanying you all the way and spreading love to every corner.",
     "phone": "Phone",

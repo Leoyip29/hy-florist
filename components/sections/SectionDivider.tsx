@@ -1,8 +1,15 @@
 "use client"
 
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 
 export default function SectionDivider() {
+  const t = useTranslations("SectionDivider")
+  
+  const playfair = {
+    className: "font-serif",
+  }
+
   return (
     <section className="py-16 md:py-24 overflow-hidden">
       <div className="mx-auto px-4 max-w-6xl">
@@ -48,14 +55,10 @@ export default function SectionDivider() {
         {/* Optional Subtle Tagline */}
         <div className="mt-6 text-center">
           <p className="text-xs md:text-sm text-neutral-400 font-light tracking-[0.2em] uppercase">
-            以花傳意 · 致敬生命
+            {t("tagline")}
           </p>
         </div>
       </div>
     </section>
   )
-}
-
-const playfair = {
-  className: "font-serif",
 }
