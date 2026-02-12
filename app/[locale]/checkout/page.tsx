@@ -630,6 +630,7 @@ function PaymentMethodSelector({
 // Main Checkout Wrapper
 // ---------------------------------------------------------------------------
 function CheckoutWrapper() {
+    const t = useTranslations("Checkout")
     const {items, totalPrice, isLoading} = useCart()
     const router = useRouter()
     const locale = useLocale()
@@ -638,7 +639,7 @@ function CheckoutWrapper() {
     const [isCreatingIntent, setIsCreatingIntent] = useState(false)
     const [showForm, setShowForm] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
-    const [isInitialized, setIsInitialized] = useState(false)
+    const [requiresRedirect, setRequiresRedirect] = useState(false)
 
     const [tempFormData, setTempFormData] = useState({
         customer_name: "",
@@ -651,15 +652,14 @@ function CheckoutWrapper() {
     })
 
   // Check if cart is loaded and redirect if empty
-  useEffect(() => {
-    if (items.length === 0 && isInitialized) {
-      router.push(`/${locale}/products`)
-    }
-    setIsInitialized(true)
-  }, [items.length, router, locale, isInitialized])
+    useEffect(() => {
+        if (!isLoading && items.length === 0) {
+            router.push(`/${locale}/products`)
+        }
+    }, [items.length, router, isLoading, locale])
 
   // Show loading state (initial load)
-  if (!isInitialized) {
+  if (isLoading) {
     return (
       <main className="min-h-screen bg-neutral-50 py-12 flex items-center justify-center">
         <div className="text-center">
