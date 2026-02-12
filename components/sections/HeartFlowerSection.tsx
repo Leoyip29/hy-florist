@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useTranslations, useLocale } from "next-intl"
 import ProductCard from "@/components/product/ProductCard"
-import type { UiProduct } from "@/app/products/page"
+import type { UiProduct } from "@/app/[locale]/products/page"
+import { translateProductName, translateCategory } from "@/app/[locale]/products/page"
 
 interface ProductImage {
   id: number
@@ -34,6 +36,8 @@ const HEART_FLOWER_PRODUCT_IDS = [244, 265, 267, 283]
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export default function HeartFlowerSection({ onProductClick }: HeartFlowerSectionProps) {
+  const t = useTranslations("HeartFlowerSection")
+  const locale = useLocale()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -72,12 +76,14 @@ export default function HeartFlowerSection({ onProductClick }: HeartFlowerSectio
     return anyWithImage?.image ?? ""
   }
 
-  // Transform API product to UiProduct format
+  // Transform API product to UiProduct format with locale-aware translation
   const toUiProduct = (p: Product): UiProduct => ({
     id: p.id,
-    name: p.name,
+    name: locale === 'en' ? translateProductName(p.name) : p.name,
     description: p.description,
-    categories: p.categories?.map((c) => c.name) ?? [],
+    categories: p.categories?.map((c) => 
+      locale === 'en' ? translateCategory(c.name) : c.name
+    ) ?? [],
     locations: [],
     price: Number(p.price),
     image: getPrimaryImage(p.images),
@@ -90,10 +96,10 @@ export default function HeartFlowerSection({ onProductClick }: HeartFlowerSectio
         <div className="mx-auto px-4 md:px-8">
           <div className="text-center mb-16">
             <p className="text-xs md:text-sm tracking-[0.25em] text-rose-200 uppercase mb-4">
-              ETERNAL LOVE & REMEMBRANCE
+              {t("tagline")}
             </p>
             <h2 className="text-3xl md:text-4xl font-light tracking-wide text-rose-100 font-serif">
-              心型花牌
+              {t("title")} {t("subtitle")}
             </h2>
             <div className="flex items-center justify-center gap-2 mt-6">
               <div className="w-8 h-px bg-[#E8C8C8]" />
@@ -140,10 +146,10 @@ export default function HeartFlowerSection({ onProductClick }: HeartFlowerSectio
             </div>
           </div>
           <p className="text-xs md:text-sm tracking-[0.25em] text-rose-200 uppercase mb-4">
-            ETERNAL LOVE & REMEMBRANCE
+            {t("tagline")}
           </p>
           <h2 className="text-3xl md:text-4xl font-light tracking-wide text-rose-100 font-serif">
-            心型花牌
+            {t("title")} {t("subtitle")}
           </h2>
           {/* Heart Decorative Element */}
           <div className="flex items-center justify-center gap-2 mt-6">
@@ -156,7 +162,7 @@ export default function HeartFlowerSection({ onProductClick }: HeartFlowerSectio
             <div className="w-8 h-px bg-[#E8C8C8]" />
           </div>
           <p className="mt-4 text-rose-300/80 font-light text-sm tracking-wide max-w-lg mx-auto leading-relaxed">
-            以心形花藝傳遞最深切的愛與思念，為珍貴的回憶送上永恆的祝福。
+            {t("description")}
           </p>
         </div>
 
@@ -177,10 +183,10 @@ export default function HeartFlowerSection({ onProductClick }: HeartFlowerSectio
         {/* View All Link */}
         <div className="mt-16 text-center">
           <Link
-            href="/products?category=心型花牌"
+            href={`/${locale}/products?category=心型花牌`}
             className="inline-block text-sm tracking-widest text-rose-200 border border-rose-400/50 px-8 py-3 hover:bg-white hover:text-[#8B6B6B] hover:border-white transition-all duration-300"
           >
-            探索更多心型花牌
+            {t("viewAll")}
           </Link>
         </div>
       </div>

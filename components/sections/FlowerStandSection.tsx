@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useTranslations, useLocale } from "next-intl"
 import ProductCard from "@/components/product/ProductCard"
-import type { UiProduct } from "@/app/products/page"
+import type { UiProduct } from "@/app/[locale]/products/page"
+import { translateProductName, translateCategory } from "@/app/[locale]/products/page"
 
 interface ProductImage {
   id: number
@@ -34,6 +36,8 @@ const FLOWER_STAND_PRODUCT_IDS = [97, 98, 101, 	109]
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export default function FlowerStandSection({ onProductClick }: FlowerStandSectionProps) {
+  const t = useTranslations("FlowerStandSection")
+  const locale = useLocale()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -72,12 +76,14 @@ export default function FlowerStandSection({ onProductClick }: FlowerStandSectio
     return anyWithImage?.image ?? ""
   }
 
-  // Transform API product to UiProduct format
+  // Transform API product to UiProduct format with locale-aware translation
   const toUiProduct = (p: Product): UiProduct => ({
     id: p.id,
-    name: p.name,
+    name: locale === 'en' ? translateProductName(p.name) : p.name,
     description: p.description,
-    categories: p.categories?.map((c) => c.name) ?? [],
+    categories: p.categories?.map((c) => 
+      locale === 'en' ? translateCategory(c.name) : c.name
+    ) ?? [],
     locations: [],
     price: Number(p.price),
     image: getPrimaryImage(p.images),
@@ -90,10 +96,10 @@ export default function FlowerStandSection({ onProductClick }: FlowerStandSectio
         <div className="mx-auto px-4 md:px-8">
           <div className="text-center mb-16">
             <p className="text-xs md:text-sm tracking-[0.25em] text-stone-300 uppercase mb-4">
-              SYMPATHY & TRIBUTE
+              {t("tagline")}
             </p>
             <h2 className="text-3xl md:text-4xl font-light tracking-wide text-stone-100 font-serif">
-              永恆告別花牌
+              {t("title")} {t("subtitle")}
             </h2>
             <div className="flex items-center justify-center gap-2 mt-6">
               <div className="w-8 h-px bg-[#D4C8B8]" />
@@ -128,10 +134,10 @@ export default function FlowerStandSection({ onProductClick }: FlowerStandSectio
         {/* Section Header - Elegant & Minimal */}
         <div className="text-center mb-16">
           <p className="text-xs md:text-sm tracking-[0.25em] text-stone-300 uppercase mb-4">
-            SYMPATHY & TRIBUTE
+            {t("tagline")}
           </p>
           <h2 className="text-3xl md:text-4xl font-light tracking-wide text-stone-100 font-serif">
-          永恆告別十字架花牌
+            {t("title")} {t("subtitle")}
           </h2>
           {/* Decorative line */}
           <div className="flex items-center justify-center gap-2 mt-6">
@@ -140,7 +146,7 @@ export default function FlowerStandSection({ onProductClick }: FlowerStandSectio
             <div className="w-8 h-px bg-[#D4C8B8]" />
           </div>
           <p className="mt-4 text-stone-400 font-light text-sm tracking-wide max-w-lg mx-auto leading-relaxed">
-            以優雅花藝傳遞最深切的慰問與敬意，為每一段珍貴的記憶送上永恆的祝福。
+            {t("description")}
           </p>
         </div>
 
@@ -161,10 +167,10 @@ export default function FlowerStandSection({ onProductClick }: FlowerStandSectio
         {/* View All Link */}
         <div className="mt-16 text-center">
           <Link
-            href="/products?category=十字架花牌"
+            href={`/${locale}/products?category=十字架花牌`}
             className="inline-block text-sm tracking-widest text-stone-300 border border-stone-500 px-8 py-3 hover:bg-white hover:text-[#5c4d3c] hover:border-white transition-all duration-300"
           >
-            探索更多十字架花牌
+            {t("viewAll")}
           </Link>
         </div>
       </div>

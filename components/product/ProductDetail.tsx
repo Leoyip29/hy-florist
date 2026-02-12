@@ -4,7 +4,8 @@ import { useState } from "react"
 import Image from "next/image"
 import { X, Minus, Plus, ShoppingCart, Heart, Share2 } from "lucide-react"
 import { useCart } from "@/contexts/CartContext"
-import type { UiProduct } from "@/app/products/page"
+import { useTranslations } from "next-intl"
+import type { UiProduct } from "@/app/[locale]/products/page"
 
 interface ProductDetailProps {
   product: UiProduct
@@ -12,6 +13,7 @@ interface ProductDetailProps {
 }
 
 export default function ProductDetail({ product, onClose }: ProductDetailProps) {
+  const t = useTranslations("ProductDetail")
   const { addItem } = useCart()
   const [quantity, setQuantity] = useState(1)
 
@@ -53,7 +55,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-neutral-400">
-                  <span className="text-lg">No Image</span>
+                  <span className="text-lg">{t("noImage")}</span>
                 </div>
               )}
             </div>
@@ -107,7 +109,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
 
             {/* Quantity Selector */}
             <div className="flex items-center gap-4 mb-6">
-              <span className="text-sm text-neutral-600">數量</span>
+              <span className="text-sm text-neutral-600">{t("quantity")}</span>
               <div className="flex items-center border border-neutral-300 rounded-lg">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -133,7 +135,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
               className="w-full py-4 bg-[#E8B4B8] hover:bg-[#d49fa3] transition-all duration-300 text-neutral-800 font-serif text-sm tracking-widest rounded-lg flex items-center justify-center gap-2 mb-4"
             >
               <ShoppingCart className="w-5 h-5" />
-              加入購物車
+              {t("addToCart")}
             </button>
 
             {/* Additional Info */}
@@ -144,11 +146,11 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
               </div> */}
               <div className="flex items-center gap-2 text-sm text-neutral-500">
                 <span className="w-2 h-2 bg-[#9CAFA3] rounded-full" />
-                香港本地送花服務
+                {t("localDelivery")}
               </div>
               <div className="flex items-center gap-2 text-sm text-neutral-500">
                 <span className="w-2 h-2 bg-[#9CAFA3] rounded-full" />
-                當日新鮮製作
+                {t("freshDaily")}
               </div>
             </div>
           </div>
