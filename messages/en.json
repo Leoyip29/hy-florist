@@ -330,5 +330,26 @@
     "addressLine1": "Shop 3, G/F, Ka Lai Court",
     "addressLine2": "18 Pictorial Street, Hung Hom, Kowloon",
     "copyright": "Copyright © 2026 Hyacinth Florist. All rights reserved."
+  },
+  "CheckoutReturn": {
+    "processing": "Processing",
+    "verifyingPayment": "Verifying your payment...",
+    "paymentProcessing": "Payment processing, please wait...",
+    "paymentSuccess": "Payment Successful!",
+    "paymentFailed": "Payment Failed",
+    "successMessage": "Redirecting to order confirmation...",
+    "orderNumber": "Order Number",
+    "backToCheckout": "Back to Checkout",
+    "errors": {
+      "missingPaymentData": "Payment data missing",
+      "cannotRetrievePayment": "Unable to retrieve payment data",
+      "paymentFailed": "Payment failed, please return and try again",
+      "paymentFailedGeneric": "Payment failed",
+      "orderDataMissing": "Order data missing, please contact customer service with Payment ID: ",
+      "orderDataInvalid": "Invalid order data",
+      "systemError": "System error, but your payment has been completed. Please contact customer service with Payment ID: ",
+      "orderConfirmationFailed": "Order confirmation failed, please contact customer service",
+      "confirmationError": "Order confirmation failed: "
+    }
   }
 }

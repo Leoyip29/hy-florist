@@ -5,7 +5,7 @@ import {useSearchParams, useRouter} from "next/navigation"
 import {loadStripe} from "@stripe/stripe-js"
 import {Elements, useStripe} from "@stripe/react-stripe-js"
 import {Loader2, CheckCircle, XCircle} from "lucide-react"
-import {useLocale} from 'next-intl'
+import {useLocale, useTranslations} from 'next-intl'
 import {useCart} from "@/contexts/CartContext"
 
 const stripePromise = loadStripe(
@@ -25,6 +25,7 @@ function CheckoutReturnContent() {
     const stripe = useStripe()
     const locale = useLocale()
     const {clearCart} = useCart()
+    const t = useTranslations('CheckoutReturn')
 
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
     const [message, setMessage] = useState('')
@@ -39,7 +40,7 @@ function CheckoutReturnContent() {
 
         if (!clientSecret) {
             setStatus('error')
-            setMessage('付款資料缺失')
+            setMessage(t('errors.missingPaymentData'))
             return
         }
 
@@ -47,7 +48,7 @@ function CheckoutReturnContent() {
         stripe.retrievePaymentIntent(clientSecret).then(({paymentIntent}) => {
             if (!paymentIntent) {
                 setStatus('error')
-                setMessage('無法獲取付款資料')
+                setMessage(t('errors.cannotRetrievePayment'))
                 return
             }
 
@@ -58,7 +59,7 @@ function CheckoutReturnContent() {
 
                 case 'processing':
                     setStatus('loading')
-                    setMessage('付款處理中，請稍候...')
+                    setMessage(t('paymentProcessing'))
                     // Poll for status update
                     setTimeout(() => {
                         window.location.reload()
@@ -67,7 +68,7 @@ function CheckoutReturnContent() {
 
                 case 'requires_payment_method':
                     setStatus('error')
-                    setMessage('付款失敗，請返回重試')
+                    setMessage(t('errors.paymentFailed'))
                     setTimeout(() => {
                         router.push(`/${locale}/checkout`)
                     }, 3000)
@@ -75,15 +76,15 @@ function CheckoutReturnContent() {
 
                 default:
                     setStatus('error')
-                    setMessage('付款失敗')
+                    setMessage(t('errors.paymentFailedGeneric'))
                     break
             }
         }).catch((error) => {
             console.error('Error retrieving payment intent:', error)
             setStatus('error')
-            setMessage('無法確認付款狀態')
+            setMessage(t('errors.cannotRetrievePayment'))
         })
-    }, [stripe, searchParams, router, locale])
+    }, [stripe, searchParams, router, locale, t])
 
     const handleSuccessfulPayment = async (paymentIntent: any) => {
         try {
@@ -91,7 +92,7 @@ function CheckoutReturnContent() {
             const orderDataStr = sessionStorage.getItem('pending_order_data')
             if (!orderDataStr) {
                 setStatus('error')
-                setMessage('訂單資料遺失，請聯絡客服並提供付款 ID: ' + paymentIntent.id)
+                setMessage(t('errors.orderDataMissing') + paymentIntent.id)
                 return
             }
 
@@ -114,13 +115,13 @@ function CheckoutReturnContent() {
 
                 if (response.status === 400) {
                     setStatus('error')
-                    setMessage(errorData.error || '訂單資料無效')
+                    setMessage(errorData.error || t('errors.orderDataInvalid'))
                 } else if (response.status === 500) {
                     setStatus('error')
-                    setMessage('系統錯誤，但您的付款已完成。請聯絡客服並提供付款 ID: ' + paymentIntent.id)
+                    setMessage(t('errors.systemError') + paymentIntent.id)
                 } else {
                     setStatus('error')
-                    setMessage('訂單確認失敗，請聯絡客服')
+                    setMessage(t('errors.orderConfirmationFailed'))
                 }
                 return
             }
@@ -135,7 +136,7 @@ function CheckoutReturnContent() {
 
             setOrderNumber(order.order_number)
             setStatus('success')
-            setMessage('付款成功！正在跳轉到訂單確認頁面...')
+            setMessage(t('successMessage'))
 
             // Redirect to order confirmation
             setTimeout(() => {
@@ -147,7 +148,7 @@ function CheckoutReturnContent() {
         } catch (error) {
             console.error('Error confirming order:', error)
             setStatus('error')
-            setMessage('訂單確認失敗: ' + (error instanceof Error ? error.message : '未知錯誤'))
+            setMessage(t('errors.confirmationError') + (error instanceof Error ? error.message : '未知錯誤'))
         }
     }
 
@@ -157,8 +158,8 @@ function CheckoutReturnContent() {
                 {status === 'loading' && (
                     <>
                         <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-neutral-900"/>
-                        <h1 className="text-2xl font-semibold mb-2">處理中</h1>
-                        <p className="text-neutral-600">{message || '正在確認您的付款...'}</p>
+                        <h1 className="text-2xl font-semibold mb-2">{t('processing')}</h1>
+                        <p className="text-neutral-600">{message || t('verifyingPayment')}</p>
                     </>
                 )}
 
@@ -167,11 +168,11 @@ function CheckoutReturnContent() {
                         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <CheckCircle className="w-10 h-10 text-green-600"/>
                         </div>
-                        <h1 className="text-2xl font-semibold mb-2 text-green-600">付款成功！</h1>
+                        <h1 className="text-2xl font-semibold mb-2 text-green-600">{t('paymentSuccess')}</h1>
                         <p className="text-neutral-600 mb-4">{message}</p>
                         {orderNumber && (
                             <div className="bg-neutral-50 rounded-lg p-4">
-                                <p className="text-sm text-neutral-600 mb-1">訂單編號</p>
+                                <p className="text-sm text-neutral-600 mb-1">{t('orderNumber')}</p>
                                 <p className="text-lg font-semibold">#{orderNumber}</p>
                             </div>
                         )}
@@ -183,13 +184,13 @@ function CheckoutReturnContent() {
                         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <XCircle className="w-10 h-10 text-red-600"/>
                         </div>
-                        <h1 className="text-2xl font-semibold mb-2 text-red-600">付款失敗</h1>
+                        <h1 className="text-2xl font-semibold mb-2 text-red-600">{t('paymentFailed')}</h1>
                         <p className="text-neutral-600 mb-6">{message}</p>
                         <button
                             onClick={() => router.push(`/${locale}/checkout`)}
                             className="w-full bg-neutral-900 text-white py-3 rounded-lg font-medium hover:bg-neutral-800 transition-colors"
                         >
-                            返回結帳頁面
+                            {t('backToCheckout')}
                         </button>
                     </>
                 )}

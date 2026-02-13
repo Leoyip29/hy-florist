@@ -330,5 +330,26 @@
     "addressLine1": "九龍 紅磡 必嘉街18號",
     "addressLine2": "嘉麗閣 地下3號舖",
     "copyright": "Copyright © 2026 風信子花店. All rights reserved."
+  },
+  "CheckoutReturn": {
+    "processing": "處理中",
+    "verifyingPayment": "正在確認您的付款...",
+    "paymentProcessing": "付款處理中，請稍候...",
+    "paymentSuccess": "付款成功！",
+    "paymentFailed": "付款失敗",
+    "successMessage": "正在跳轉到訂單確認頁面...",
+    "orderNumber": "訂單編號",
+    "backToCheckout": "返回結帳頁面",
+    "errors": {
+      "missingPaymentData": "付款資料缺失",
+      "cannotRetrievePayment": "無法獲取付款資料",
+      "paymentFailed": "付款失敗，請返回重試",
+      "paymentFailedGeneric": "付款失敗",
+      "orderDataMissing": "訂單資料遺失，請聯絡客服並提供付款 ID: ",
+      "orderDataInvalid": "訂單資料無效",
+      "systemError": "系統錯誤，但您的付款已完成。請聯絡客服並提供付款 ID: ",
+      "orderConfirmationFailed": "訂單確認失敗，請聯絡客服",
+      "confirmationError": "訂單確認失敗: "
+    }
   }
 }
