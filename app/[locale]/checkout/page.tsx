@@ -12,7 +12,7 @@ import {
 import { useCart } from "@/contexts/CartContext"
 import Image from "next/image"
 import { Playfair_Display } from "next/font/google"
-import { Loader2, CheckCircle, X, AlertCircle, Calendar, CreditCard } from "lucide-react"
+import { Loader2, CheckCircle, X, AlertCircle, Calendar, CreditCard, ExternalLink } from "lucide-react"
 import { useLocale } from "next-intl"
 
 const playfair = Playfair_Display({
@@ -23,7 +23,6 @@ const playfair = Playfair_Display({
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "")
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000"
 
-// Date Picker Component (simplified for brevity - use your existing one)
 function DatePicker({ value, onChange }: { value: string; onChange: (date: string) => void }) {
     return (
         <div>
@@ -57,6 +56,60 @@ function ErrorAlert({ message, onClose }: { message: string; onClose: () => void
     )
 }
 
+/**
+ * Redirect Payment Notice
+ *
+ * Shown when the user selects AliPay or WeChat Pay.
+ * Both are redirect-based: Stripe will navigate the user to the external
+ * payment page, then redirect back to our /checkout/return page.
+ */
+function RedirectPaymentNotice({ paymentType }: { paymentType: 'alipay' | 'wechat_pay' | null }) {
+    if (!paymentType) return null
+
+    const config = {
+        alipay: {
+            icon: '🟡',
+            name: 'AliPay',
+            description: '您將被導向至 AliPay 頁面完成付款，付款後將自動返回本站確認訂單。',
+            color: 'from-amber-50 to-yellow-50',
+            border: 'border-amber-200',
+            text: 'text-amber-900',
+            subtext: 'text-amber-700',
+        },
+        wechat_pay: {
+            icon: '💚',
+            name: 'WeChat Pay',
+            description: '您將被導向至 WeChat Pay 頁面完成付款，付款後將自動返回本站確認訂單。請確保您的裝置已安裝微信 (WeChat)。',
+            color: 'from-green-50 to-emerald-50',
+            border: 'border-green-200',
+            text: 'text-green-900',
+            subtext: 'text-green-700',
+        },
+    }
+
+    const c = config[paymentType]
+
+    return (
+        <div className={`bg-gradient-to-r ${c.color} border ${c.border} rounded-lg p-4`}>
+            <div className="flex items-start gap-3">
+                <span className="text-2xl flex-shrink-0">{c.icon}</span>
+                <div>
+                    <p className={`text-sm font-semibold ${c.text} mb-1`}>
+                        使用 {c.name} 付款
+                    </p>
+                    <p className={`text-xs ${c.subtext} leading-relaxed`}>
+                        {c.description}
+                    </p>
+                    <div className={`flex items-center gap-1 mt-2 text-xs ${c.subtext}`}>
+                        <ExternalLink className="w-3 h-3" />
+                        <span>點擊「確認付款」後將跳轉至外部頁面</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 // Payment Form Component
 function CheckoutForm({
                           clientSecret,
@@ -81,6 +134,41 @@ function CheckoutForm({
     const [isProcessing, setIsProcessing] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
 
+    /**
+     * Detect redirect-based payment method from the PaymentElement.
+     *
+     * Stripe's PaymentElement doesn't expose the selected method directly,
+     * but we can read it from the elements instance after submit.
+     * We show the notice based on what Stripe reports in the error/result.
+     *
+     * For the notice shown BEFORE submit, we use a lightweight onChange listener.
+     */
+    const [selectedRedirectMethod, setSelectedRedirectMethod] = useState<'alipay' | 'wechat_pay' | null>(null)
+
+    // Listen for PaymentElement changes to detect redirect methods
+    useEffect(() => {
+        if (!elements) return
+
+        const paymentElement = elements.getElement('payment')
+        if (!paymentElement) return
+
+        const handleChange = (event: any) => {
+            const value = event?.value?.type as string | undefined
+            if (value === 'alipay') {
+                setSelectedRedirectMethod('alipay')
+            } else if (value === 'wechat_pay') {
+                setSelectedRedirectMethod('wechat_pay')
+            } else {
+                setSelectedRedirectMethod(null)
+            }
+        }
+
+        paymentElement.on('change', handleChange)
+        return () => {
+            paymentElement.off('change', handleChange)
+        }
+    }, [elements])
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!stripe || !elements) return
@@ -89,6 +177,19 @@ function CheckoutForm({
         setErrorMessage("")
 
         try {
+            /**
+             * Save order data to sessionStorage BEFORE redirecting.
+             *
+             * For redirect-based methods (AliPay, WeChat Pay), Stripe will
+             * navigate the user away from the site. When they return via the
+             * return_url, the checkout/return page reads this data from
+             * sessionStorage to confirm the order with our backend.
+             *
+             * Note: sessionStorage persists within the same browser tab session,
+             * so it survives same-tab redirects. For WeChat Pay on mobile, the
+             * user may switch apps, but the browser tab remains, so sessionStorage
+             * is preserved on return.
+             */
             sessionStorage.setItem('pending_order_data', JSON.stringify({
                 ...initialFormData,
                 items: items.map((item) => ({
@@ -99,6 +200,16 @@ function CheckoutForm({
 
             const returnUrl = `${window.location.origin}/${locale}/checkout/return`
 
+            /**
+             * confirmPayment with redirect: "if_required"
+             *
+             * - For cards / Apple Pay / Google Pay: completes inline, no redirect.
+             * - For AliPay: redirects to AliPay web page, returns via return_url.
+             * - For WeChat Pay: redirects to WeChat QR page (desktop) or WeChat
+             *   app (mobile), returns via return_url after completion.
+             *
+             * In all cases, Stripe handles the redirect logic automatically.
+             */
             const { error, paymentIntent } = await stripe.confirmPayment({
                 elements,
                 confirmParams: { return_url: returnUrl },
@@ -106,6 +217,7 @@ function CheckoutForm({
             })
 
             if (error) {
+                // Payment failed or was cancelled
                 sessionStorage.removeItem('pending_order_data')
                 setErrorMessage(error.message || "付款失敗")
                 setIsProcessing(false)
@@ -113,8 +225,11 @@ function CheckoutForm({
             }
 
             if (paymentIntent && (paymentIntent.status === "succeeded" || paymentIntent.status === "processing")) {
+                // Non-redirect payment succeeded inline — go to return page to confirm order
                 router.push(`${returnUrl}?payment_intent_client_secret=${clientSecret}`)
             }
+            // If redirect happened, browser navigates away automatically — no code runs here
+
         } catch (error) {
             console.error("Payment error:", error)
             sessionStorage.removeItem('pending_order_data')
@@ -160,7 +275,7 @@ function CheckoutForm({
                 </div>
                 <div className="mt-3 pt-3 border-t border-blue-200">
                     <p className="text-xs text-blue-700">
-                        ℹ️ 所有付款以美元 (USD) 處理。如您使用AliPay,將以美元支付。信用卡/扣賬卡將由您的銀行自動轉換為美元。
+                        ℹ️ 所有付款以美元 (USD) 處理。AliPay 及 WeChat Pay 將直接以美元支付；信用卡/扣賬卡將由您的銀行自動轉換。
                     </p>
                 </div>
             </div>
@@ -168,8 +283,15 @@ function CheckoutForm({
             {/* Payment Element */}
             <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
                 <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>選擇付款方式</h2>
-                <PaymentElement />
+                <PaymentElement
+                    options={{
+                        layout: 'tabs',
+                    }}
+                />
             </div>
+
+            {/* Redirect notice for AliPay / WeChat Pay */}
+            <RedirectPaymentNotice paymentType={selectedRedirectMethod} />
 
             {/* Security Notice */}
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -187,6 +309,8 @@ function CheckoutForm({
             >
                 {isProcessing ? (
                     <><Loader2 className="w-5 h-5 animate-spin" />處理中...</>
+                ) : selectedRedirectMethod ? (
+                    <><ExternalLink className="w-5 h-5" />確認付款 US${conversionDetails.amountUSD.toFixed(2)}</>
                 ) : (
                     <><CreditCard className="w-5 h-5" />確認付款 US${conversionDetails.amountUSD.toFixed(2)}</>
                 )}
@@ -250,7 +374,7 @@ export default function CheckoutWrapper() {
 
             const orderData = {
                 ...formData,
-                payment_method: 'card_pay', // Default, will be determined by user selection
+                payment_method: 'card_pay', // Default; actual method detected server-side after payment
                 items: items.map((item) => ({
                     product_id: item.id,
                     quantity: item.quantity,
