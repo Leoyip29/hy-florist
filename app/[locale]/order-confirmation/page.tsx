@@ -53,7 +53,7 @@ interface Order {
 function getPaymentMethodInfo(method: string): { label: string; icon: string } {
   switch (method) {
     case 'card_pay':
-      return { label: '信用卡 / 扣賬卡', icon: '💳' }
+      return { label: 'Credit/Debit Card', icon: '💳' }
     case 'apple_pay':
       return { label: 'Apple Pay', icon: '🍎' }
     case 'google_pay':
