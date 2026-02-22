@@ -123,6 +123,7 @@ function CheckoutReturnContent() {
 
             // Attach payment intent ID for backend verification
             orderData.payment_intent_id = paymentIntent.id
+            orderData.language=locale
 
             // Confirm order with our backend — this creates the Order record,
             // marks it as paid, and sends the confirmation email

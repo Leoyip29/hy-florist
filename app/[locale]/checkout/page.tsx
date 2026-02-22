@@ -343,6 +343,7 @@ export default function CheckoutWrapper() {
             const orderData = {
                 ...formData,
                 payment_method: paymentMethod === "payme" ? "payme" : "card_pay",
+                language: locale,
                 items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
             }
 
