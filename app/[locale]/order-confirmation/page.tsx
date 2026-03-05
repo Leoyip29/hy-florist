@@ -39,7 +39,7 @@ interface Order {
   payment_status: string
   payment_currency: string
   exchange_rate: string | null
-  total_usd: string | null
+  total_cny: string | null
   subtotal: string
   delivery_fee: string
   discount: string
@@ -155,7 +155,7 @@ function OrderConfirmationContent() {
   }
 
   const paymentInfo = getPaymentMethodInfo(order.payment_method)
-  const showUsdBreakdown = order.total_usd && order.exchange_rate && parseFloat(order.exchange_rate) > 0
+  const showCnyBreakdown = order.total_cny && order.exchange_rate && parseFloat(order.exchange_rate) > 0
 
   return (
       <main className="min-h-screen bg-neutral-50 py-12">
@@ -297,17 +297,17 @@ function OrderConfirmationContent() {
                 <span>{t("total")}</span>
                 <span>HK${order.total}</span>
               </div>
-              {/* USD breakdown for AliPay / WeChat Pay */}
-              {showUsdBreakdown && (
+              {/* CNY breakdown for AliPay / WeChat Pay */}
+              {showCnyBreakdown && (
                   <div className="pt-2 bg-neutral-50 rounded-lg p-3 space-y-1">
-                    <p className="text-xs text-neutral-500 font-medium">付款詳情 (美元)</p>
+                    <p className="text-xs text-neutral-500 font-medium">付款詳情 (人民幣)</p>
                     <div className="flex justify-between text-xs text-neutral-600">
                       <span>實際付款金額</span>
-                      <span className="font-medium">US${parseFloat(order.total_usd!).toFixed(2)}</span>
+                      <span className="font-medium">CN¥{parseFloat(order.total_cny!).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-xs text-neutral-500">
                       <span>匯率</span>
-                      <span>1 USD = {parseFloat(order.exchange_rate!).toFixed(4)} HKD</span>
+                      <span>1 CNY = {parseFloat(order.exchange_rate!).toFixed(4)} HKD</span>
                     </div>
                   </div>
               )}

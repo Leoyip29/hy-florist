@@ -156,12 +156,12 @@ function StripeMethodSelector({
 }) {
     const locale = useLocale()
 
-    const calculateUSD = () => {
+    const calculateCNY = () => {
         if (!exchangeRate) return null
         return (totalHKD / exchangeRate).toFixed(2)
     }
 
-    const totalUSD = calculateUSD()
+    const totalCNY = calculateCNY()
 
     const methods: Array<{
         id: StripePaymentMethod
@@ -170,7 +170,7 @@ function StripeMethodSelector({
         nameZh: string
         descEn: string
         descZh: string
-        currency: 'HKD' | 'USD'
+        currency: 'HKD' | 'CNY'
     }> = [
         {
             id: 'card',
@@ -186,9 +186,9 @@ function StripeMethodSelector({
             icon: '🟡💚',
             nameEn: 'AliPay & WeChat Pay',
             nameZh: '支付寶 & 微信支付',
-            descEn: 'Pay with AliPay and WeChat Pay (charged in USD)',
-            descZh: '使用支付寶或微信支付 (以美元結算)',
-            currency: 'USD',
+            descEn: 'Pay with AliPay and WeChat Pay (charged in CNY)',
+            descZh: '使用支付寶或微信支付 (以人民幣結算)',
+            currency: 'CNY',
         },
     ]
 
@@ -200,8 +200,8 @@ function StripeMethodSelector({
             </div>
 
             {methods.map((method) => {
-                const isUSD = method.currency === 'USD'
-                const displayAmount = isUSD && totalUSD ? `US$${totalUSD}` : `HK$${totalHKD.toFixed(2)}`
+                const isCNY = method.currency === 'CNY'
+                const displayAmount = isCNY && totalCNY ? `CN¥${totalCNY}` : `HK$${totalHKD.toFixed(2)}`
                 const isSelected = selectedMethod === method.id
 
                 return (
@@ -227,7 +227,7 @@ function StripeMethodSelector({
                                     {displayAmount}
                                 </p>
 
-                                {isUSD && (
+                                {isCNY && (
                                     <p className="text-sm text-neutral-600 mb-2">
                                         ≈ HK${totalHKD.toFixed(2)}
                                     </p>
@@ -255,13 +255,13 @@ function StripeMethodSelector({
                                         <p className="text-blue-800 mb-1">
                                             💱 {locale === 'en' ? 'Exchange Rate' : '匯率'}:
                                             <span className="font-mono ml-1">
-                                                1 USD = {exchangeRate?.toFixed(4)} HKD
+                                                1 CNY = {exchangeRate?.toFixed(4)} HKD
                                             </span>
                                         </p>
                                         <p className="text-blue-700">
                                             {locale === 'en'
-                                                ? 'Amount shown is in USD, converted at market rate'
-                                                : '顯示金額為美元，按市場匯率轉換'}
+                                                ? 'Amount shown is in CNY, converted at market rate'
+                                                : '顯示金額為人民幣，按市場匯率轉換'}
                                         </p>
                                     </div>
                                 )}
@@ -387,7 +387,7 @@ function CheckoutForm({
                             {locale === 'en' ? 'You will pay' : '您將支付'}
                         </p>
                         <p className="text-3xl font-bold">{displayAmount}</p>
-                        {currency === 'usd' && conversionDetails && (
+                        {currency === 'cny' && conversionDetails && (
                             <p className="text-sm opacity-80 mt-1">
                                 ≈ HK${conversionDetails.amountHKD?.toFixed(2)}
                             </p>
