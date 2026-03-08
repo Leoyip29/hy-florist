@@ -148,12 +148,10 @@ function CheckoutForm({
                           clientSecret,
                           initialFormData,
                           expectedAmount,
-                          conversionDetails,
                       }: {
     clientSecret: string
     initialFormData: any
     expectedAmount: number
-    conversionDetails: { amountHKD: number; amountUSD: number; exchangeRate: number }
 }) {
     const t = useTranslations("Checkout")
     const stripe = useStripe()
@@ -222,20 +220,7 @@ function CheckoutForm({
                     <div className="flex"><span className="text-neutral-600 w-20">{t("phone")}:</span><span className="font-medium">{initialFormData.customer_phone}</span></div>
                 </div>
             </div>
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-5">
-                <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2"><span className="text-xl">💱</span>{locale === "en" ? "Payment Information" : "付款資訊"}</h3>
-                <div className="space-y-2 text-sm">
-                    <div className="flex justify-between bg-white bg-opacity-50 p-2 rounded">
-                        <span className="text-blue-800">{locale === "en" ? "Amount in HKD:" : "港幣金額:"}</span>
-                        <span className="font-bold text-blue-900">HK${conversionDetails.amountHKD.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between bg-white bg-opacity-50 p-2 rounded">
-                        <span className="text-blue-800">{locale === "en" ? "Payment Amount (USD):" : "實際付款 (美元):"}</span>
-                        <span className="font-bold text-blue-900">US${conversionDetails.amountUSD.toFixed(2)}</span>
-                    </div>
-                </div>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
+<div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
                 <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>{locale === "en" ? "Card / Wallet Details" : "卡片 / 電子錢包資料"}</h2>
                 <PaymentElement options={{ layout: "tabs" }} />
             </div>
@@ -253,9 +238,9 @@ function CheckoutForm({
                 {isProcessing ? (
                     <><Loader2 className="w-5 h-5 animate-spin" />{t("processing")}</>
                 ) : selectedRedirectMethod ? (
-                    <><ExternalLink className="w-5 h-5" />{t("confirmPayment", { amount: conversionDetails.amountUSD.toFixed(2) }).replace("HK$", "US$")}</>
+                    <><ExternalLink className="w-5 h-5" />{t("confirmPayment", { amount: expectedAmount.toFixed(2) })}</>
                 ) : (
-                    <><CreditCard className="w-5 h-5" />{t("confirmPayment", { amount: conversionDetails.amountUSD.toFixed(2) }).replace("HK$", "US$")}</>
+                    <><CreditCard className="w-5 h-5" />{t("confirmPayment", { amount: expectedAmount.toFixed(2) })}</>
                 )}
             </button>
         </form>
@@ -276,7 +261,6 @@ export default function CheckoutWrapper() {
     // Stripe flow state
     const [showPaymentForm, setShowPaymentForm] = useState(false)
     const [clientSecret, setClientSecret] = useState("")
-    const [conversionDetails, setConversionDetails] = useState<any>(null)
 
     // PayMe flow state
     const [paymeData, setPaymeData] = useState<{
@@ -384,7 +368,6 @@ export default function CheckoutWrapper() {
                 }
                 const data = await res.json()
                 setClientSecret(data.clientSecret)
-                setConversionDetails(data.conversionDetails)
                 setShowPaymentForm(true)
                 window.scrollTo({ top: 0, behavior: "smooth" })
             }
@@ -495,7 +478,7 @@ export default function CheckoutWrapper() {
                                 </button>
                             </form>
                         ) : (
-                            clientSecret && conversionDetails && (
+                            clientSecret && (
                                 <Elements
                                     stripe={stripePromise}
                                     options={{
@@ -507,7 +490,6 @@ export default function CheckoutWrapper() {
                                         clientSecret={clientSecret}
                                         initialFormData={formData}
                                         expectedAmount={totalPrice}
-                                        conversionDetails={conversionDetails}
                                     />
                                 </Elements>
                             )
