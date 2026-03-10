@@ -5,7 +5,7 @@ import Image from "next/image"
 import { X, Minus, Plus, ShoppingCart, Heart, Share2 } from "lucide-react"
 import { useCart } from "@/contexts/CartContext"
 import { useTranslations } from "next-intl"
-import type { UiProduct } from "@/app/[locale]/products/page"
+import type { UiProduct } from "@/lib/product-utils"
 
 interface ProductDetailProps {
   product: UiProduct

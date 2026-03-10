@@ -5,14 +5,14 @@ import Link from "next/link"
 import { ShoppingCart } from "lucide-react"
 import { useCart } from "@/contexts/CartContext"
 import { useTranslations } from "next-intl"
-import type { UiProduct } from "@/app/[locale]/products/page"
+import { useProductDetail } from "@/contexts/ProductDetailContext"
+import type { UiProduct } from "@/lib/product-utils"
 
 interface ProductCardProps {
   product: UiProduct
   playfairClassName: string
   inView: boolean
   index: number
-  onClick?: (product: UiProduct) => void
 }
 
 export default function ProductCard({
@@ -20,10 +20,10 @@ export default function ProductCard({
   playfairClassName,
   inView,
   index,
-  onClick,
 }: ProductCardProps) {
   const t = useTranslations("ProductCard")
   const { addItem } = useCart()
+  const { openProduct } = useProductDetail()
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -38,7 +38,7 @@ export default function ProductCard({
 
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    onClick?.(product)
+    openProduct(product)
   }
 
   return (
@@ -46,12 +46,10 @@ export default function ProductCard({
       className={`product-card group transition-all duration-700 cursor-pointer ${
         inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
-      style={{
-        transitionDelay: `${index * 100}ms`,
-      }}
-      onClick={() => onClick?.(product)}
+      style={{ transitionDelay: `${index * 100}ms` }}
+      onClick={() => openProduct(product)}
     >
-      {/* Image Container - Click opens detail */}
+      {/* Image Container */}
       <div
         className="relative aspect-[3/4] overflow-hidden bg-neutral-100 mb-3 cursor-pointer"
         onClick={handleImageClick}
@@ -71,9 +69,7 @@ export default function ProductCard({
         )}
 
         {/* Add to Cart Button Overlay */}
-        <div
-          className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-end justify-center p-4"
-        >
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-end justify-center p-4">
           <button
             onClick={handleAddToCart}
             className="opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 bg-white text-neutral-900 px-6 py-2.5 rounded-full font-medium text-sm flex items-center gap-2 hover:bg-neutral-100 shadow-lg"
@@ -84,7 +80,7 @@ export default function ProductCard({
         </div>
       </div>
 
-      {/* Product Info - Click navigates to product page */}
+      {/* Product Info */}
       <Link href={`/products/${product.id}`} className="block">
         <div className="text-center space-y-1">
           <h3
@@ -92,7 +88,6 @@ export default function ProductCard({
           >
             {product.name}
           </h3>
-
           <p className="text-sm font-medium text-neutral-900">
             HK${product.price.toFixed(2)}
           </p>
