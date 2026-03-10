@@ -5,8 +5,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { useTranslations, useLocale } from "next-intl"
 import ProductCard from "@/components/product/ProductCard"
-import type { UiProduct } from "@/app/[locale]/products/page"
-import { translateProductName, translateCategory } from "@/app/[locale]/products/page"
+import { useProductDetail } from "@/contexts/ProductDetailContext"
+import type { UiProduct } from "@/lib/product-utils"
+import { translateProductName, translateCategory } from "@/lib/product-utils"
 
 interface ProductImage {
   id: number
@@ -37,7 +38,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowcaseProps) {
   const t = useTranslations("SplitScreenShowcase")
   const locale = useLocale()
-  
+  const { openProduct } = useProductDetail()
+
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -221,7 +223,7 @@ export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowc
             {/* CTA Button */}
             <div className="flex justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
               <button
-                onClick={() => mainProduct && onProductClick?.(toUiProduct(mainProduct))}
+                onClick={() => mainProduct && openProduct(toUiProduct(mainProduct))}
                 className="inline-block px-12 py-4 bg-[#E8B4B8] hover:bg-[#d49fa3] transition-all duration-300 text-neutral-800 font-serif text-sm tracking-widest"
               >
                 {t("cta")}
@@ -250,7 +252,6 @@ export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowc
                   playfairClassName="font-serif"
                   inView={true}
                   index={i}
-                  onClick={onProductClick}
                 />
               ))}
             </div>

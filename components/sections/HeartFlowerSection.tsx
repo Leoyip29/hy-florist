@@ -5,8 +5,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { useTranslations, useLocale } from "next-intl"
 import ProductCard from "@/components/product/ProductCard"
-import type { UiProduct } from "@/app/[locale]/products/page"
-import { translateProductName, translateCategory } from "@/app/[locale]/products/page"
+import type { UiProduct } from "@/lib/product-utils"
+import { translateProductName, translateCategory } from "@/lib/product-utils"
 
 interface ProductImage {
   id: number
@@ -175,7 +175,6 @@ export default function HeartFlowerSection({ onProductClick }: HeartFlowerSectio
               playfairClassName="font-serif"
               inView={true}
               index={index}
-              onClick={onProductClick}
             />
           ))}
         </div>

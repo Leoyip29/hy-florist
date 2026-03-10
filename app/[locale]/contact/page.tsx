@@ -1,5 +1,3 @@
-"use client"
-
 import { Playfair_Display } from "next/font/google"
 import { Mail, Phone, MapPin, Clock } from "lucide-react"
 
