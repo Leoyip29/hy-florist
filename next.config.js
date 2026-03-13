@@ -19,6 +19,11 @@ const nextConfig = {
         port: '8000',
         pathname: '/media/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'api.hy-florist.hk',
+        pathname: '/media/**',
+      },
     ],
   },
 }
