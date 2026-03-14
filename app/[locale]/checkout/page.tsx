@@ -237,7 +237,10 @@ function CheckoutForm({
             </div>
             <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
                 <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>{locale === "en" ? "Card / Wallet Details" : "卡片 / 電子錢包資料"}</h2>
-                <PaymentElement options={{ layout: "tabs" }} />
+                <PaymentElement options={{ 
+                    layout: "tabs",
+                    paymentMethodOrder: ['card', 'alipay', 'wechat_pay']
+                }} />
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-start gap-2 text-sm">

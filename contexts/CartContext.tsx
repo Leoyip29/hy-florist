@@ -23,6 +23,7 @@ interface CartContextType {
     openCart: () => void
     closeCart: () => void
     toggleCart: () => void
+    isLoading: boolean
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -30,6 +31,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 export function CartProvider({ children }: { children: ReactNode }) {
     const [items, setItems] = useState<CartItem[]>([])
     const [isOpen, setIsOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
 
     // Load cart from localStorage on mount
     useEffect(() => {
@@ -41,6 +43,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 console.error("Failed to parse cart from localStorage:", error)
             }
         }
+        setIsLoading(false)
     }, [])
 
     // Save cart to localStorage whenever it changes
@@ -105,22 +108,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return (
         <CartContext.Provider
             value={{
-        items,
-            addItem,
-            removeItem,
-            updateQuantity,
-            clearCart,
-            totalItems,
-            totalPrice,
-            isOpen,
-            openCart,
-            closeCart,
-            toggleCart,
-    }}
->
-    {children}
-    </CartContext.Provider>
-)
+                items,
+                addItem,
+                removeItem,
+                updateQuantity,
+                clearCart,
+                totalItems,
+                totalPrice,
+                isOpen,
+                openCart,
+                closeCart,
+                toggleCart,
+                isLoading,
+            }}
+        >
+            {children}
+        </CartContext.Provider>
+    )
 }
 
 export function useCart() {

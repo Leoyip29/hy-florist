@@ -1,11 +1,9 @@
-"use client"
-
 import Image from "next/image"
-import { useTranslations } from "next-intl"
+import { getTranslations } from "next-intl/server"
 
-export default function SectionDivider() {
-  const t = useTranslations("SectionDivider")
-  
+export default async function SectionDivider() {
+  const t = await getTranslations("SectionDivider")
+
   const playfair = {
     className: "font-serif",
   }
@@ -17,7 +15,7 @@ export default function SectionDivider() {
         <div className="relative flex items-center justify-center">
           {/* Left Line */}
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-neutral-200 to-neutral-300" />
-          
+
           {/* Center Botanical Element */}
           <div className="relative mx-6 md:mx-10">
             {/* Decorative leaves/branch - Left */}
@@ -29,14 +27,14 @@ export default function SectionDivider() {
                 <path d="M20 12C18 10 22 6 26 8" stroke="currentColor" strokeWidth="1" fill="none" />
               </svg>
             </div>
-            
+
             {/* Center Circle with Initial */}
             <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full border border-neutral-200 bg-white flex items-center justify-center">
               <span className={`text-lg md:text-xl font-light text-neutral-400 tracking-widest ${playfair.className}`}>
                 H
               </span>
             </div>
-            
+
             {/* Decorative leaves/branch - Right */}
             <div className="absolute -right-16 md:-right-20 top-1/2 -translate-y-1/2 opacity-40">
               <svg width="48" height="24" viewBox="0 0 48 24" fill="none" className="text-neutral-300">
@@ -47,7 +45,7 @@ export default function SectionDivider() {
               </svg>
             </div>
           </div>
-          
+
           {/* Right Line */}
           <div className="flex-1 h-px bg-gradient-to-l from-transparent via-neutral-200 to-neutral-300" />
         </div>

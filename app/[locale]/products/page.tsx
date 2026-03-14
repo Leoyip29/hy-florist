@@ -9,6 +9,7 @@ import ProductCategory from "@/components/product/ProductCategory"
 import ProductCard from "@/components/product/ProductCard"
 import ProductDetail from "@/components/product/ProductDetail"
 import type { CategoryItem } from "@/components/product/ProductCategory"
+import { CATEGORY_MAP, getApiCategory } from "@/lib/categories"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -177,7 +178,12 @@ function ShopPageContent() {
 
   // Use locale-aware "All" for initial state
   const allText = locale === 'en' ? "All" : "全部"
-  const initialCategory = searchParams.get("category") || allText
+  
+  // Convert URL-safe key to Chinese for filtering
+  const urlCategory = searchParams.get("category")
+  const initialCategory = urlCategory 
+    ? (locale === "zh-HK" || locale === "zh" ? getApiCategory(urlCategory) : urlCategory)
+    : allText
   const searchQuery = searchParams.get("search") || ""
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchKeyword, setSearchKeyword] = useState(searchQuery)

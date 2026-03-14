@@ -1,13 +1,12 @@
-"use client"
-
 import Image from "next/image"
 import Link from "next/link"
-import { useTranslations, useLocale } from "next-intl"
+import { getTranslations } from "next-intl/server"
+import { CATEGORY_MAP, getCategoryKey } from "@/lib/categories"
 
-export default function SeriesSection() {
-  const t = useTranslations("SeriesSection")
-  const locale = useLocale()
+export default async function SeriesSection({ locale }: { locale: string }) {
+  const t = await getTranslations("SeriesSection")
 
+  // Use URL-safe keys, convert to Chinese for API when locale is zh-HK
   const series = [
     {
       tag: "BENCH FLOWERS",
@@ -15,6 +14,7 @@ export default function SeriesSection() {
       desc: t("items.bench.desc"),
       image: "/series-chair.jpg",
       cta: t("items.bench.cta"),
+      category: "bench-flower",
     },
     {
       tag: "CASKET FLOWERS",
@@ -22,6 +22,7 @@ export default function SeriesSection() {
       desc: t("items.casket.desc"),
       image: "/series-casket1.jpg",
       cta: t("items.casket.cta"),
+      category: "casket-decoration",
     },
     {
       tag: "PULPIT FLOWERS",
@@ -29,6 +30,7 @@ export default function SeriesSection() {
       desc: t("items.pulpit.desc"),
       image: "/pulpit_flower.jpg",
       cta: t("items.pulpit.cta"),
+      category: "podium-flower",
     },
     {
       tag: "STAND FLOWERS",
@@ -36,8 +38,17 @@ export default function SeriesSection() {
       desc: t("items.stand.desc"),
       image: "/series_stand.jpg",
       cta: t("items.stand.cta"),
+      category: "stand-flower",
     },
   ]
+
+  // Get the API category based on locale
+  const getCategoryForApi = (cat: string) => {
+    if (locale === "zh-HK" || locale === "zh") {
+      return CATEGORY_MAP[cat] || cat
+    }
+    return cat
+  }
 
   return (
     <section className="py-20 md:py-28 bg-cream">
@@ -79,7 +90,7 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[0].desc}
             </p>
-            <Link href={`/${locale}/products?category=櫈花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=${getCategoryForApi(series[0].category)}`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[0].cta} →
             </Link>
           </div>
@@ -103,7 +114,7 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[1].desc}
             </p>
-            <Link href={`/${locale}/products?category=棺面花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=${getCategoryForApi(series[1].category)}`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[1].cta} →
             </Link>
           </div>
@@ -127,7 +138,7 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[2].desc}
             </p>
-            <Link href={`/${locale}/products?category=講台花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=${getCategoryForApi(series[2].category)}`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[2].cta} →
             </Link>
           </div>
@@ -151,18 +162,11 @@ export default function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[3].desc}
             </p>
-            <Link href={`/${locale}/products?category=台花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=${getCategoryForApi(series[3].category)}`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[3].cta} →
             </Link>
           </div>
         </div>
-
-        {/* Bottom decorative element */}
-        {/* <div className="flex items-center justify-center gap-2 mt-24">
-          <div className="w-8 h-px bg-[#D4C8B8]" />
-          <div className="w-1.5 h-1.5 rotate-45 bg-[#9CAFA3]" />
-          <div className="w-8 h-px bg-[#D4C8B8]" />
-        </div> */}
       </div>
     </section>
   )

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useTranslations, useLocale } from "next-intl"
+import { useRouter } from "next/navigation"
 import ProductCard from "@/components/product/ProductCard"
 import type { UiProduct } from "@/app/[locale]/products/page"
 import { translateProductName, translateCategory } from "@/app/[locale]/products/page"
@@ -25,7 +26,7 @@ interface Product {
 }
 
 interface SplitScreenShowcaseProps {
-  onProductClick?: (product: UiProduct) => void
+  locale?: string
 }
 
 // Configure which product IDs to display
@@ -34,9 +35,10 @@ const SHOWCASE_PRODUCT_IDS = [439, 12, 15]
 // Backend API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
-export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowcaseProps) {
+export default function SplitScreenShowcase({ locale: propLocale }: SplitScreenShowcaseProps) {
   const t = useTranslations("SplitScreenShowcase")
-  const locale = useLocale()
+  const locale = propLocale || useLocale()
+  const router = useRouter()
   
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -221,7 +223,7 @@ export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowc
             {/* CTA Button */}
             <div className="flex justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
               <button
-                onClick={() => mainProduct && onProductClick?.(toUiProduct(mainProduct))}
+                onClick={() => mainProduct && router.push(`/?product=${mainProduct.id}`, { scroll: false })}
                 className="inline-block px-12 py-4 bg-[#E8B4B8] hover:bg-[#d49fa3] transition-all duration-300 text-neutral-800 font-serif text-sm tracking-widest"
               >
                 {t("cta")}
@@ -250,7 +252,7 @@ export default function SplitScreenShowcase({ onProductClick }: SplitScreenShowc
                   playfairClassName="font-serif"
                   inView={true}
                   index={i}
-                  onClick={onProductClick}
+                  onClick={() => router.push(`/?product=${product.id}`, { scroll: false })}
                 />
               ))}
             </div>

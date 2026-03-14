@@ -241,7 +241,8 @@
     "quantity": "數量",
     "addToCart": "加入購物車",
     "localDelivery": "香港本地送花服務",
-    "freshDaily": "當日新鮮製作"
+    "freshDaily": "當日新鮮製作",
+    "backToProducts": "返回產品列表"
   },
   "Footer": {
     "description": "我們相信，每一束花都有其獨特的意義，能夠完美傳遞出我們的心意和關懷。",
@@ -413,5 +414,9 @@
       "櫈花": "櫈花",
       "場地系列": "場地系列"
     }
+  },
+  "SEO": {
+    "homeTitle": "HY 花店 - 香港鮮花速遞",
+    "homeDescription": "優質鮮花擺設及香港鮮花速遞服務。瀏覽我們精選的花束、花籃及訂製鮮花擺設。"
   }
 }

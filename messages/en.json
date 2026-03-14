@@ -241,7 +241,8 @@
     "quantity": "Quantity",
     "addToCart": "Add to Cart",
     "localDelivery": "Local Flower Delivery in Hong Kong",
-    "freshDaily": "Freshly Made Daily"
+    "freshDaily": "Freshly Made Daily",
+    "backToProducts": "Back to Products"
   },
   "Footer": {
     "description": "We believe every bouquet carries a unique meaning, perfectly conveying our feelings and care.",
@@ -413,5 +414,9 @@
       "櫈花": "Bench Flower",
       "場地系列": "Venue Series"
     }
+  },
+  "SEO": {
+    "homeTitle": "HY Florist - Fresh Flowers Delivery in Hong Kong",
+    "homeDescription": "Premium floral arrangements and fresh flower delivery in Hong Kong. Shop our curated collection of bouquets, flower baskets, and custom arrangements."
   }
 }

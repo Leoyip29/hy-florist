@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ShoppingCart } from "lucide-react"
 import { useCart } from "@/contexts/CartContext"
 import { useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 import type { UiProduct } from "@/app/[locale]/products/page"
 
 interface ProductCardProps {
@@ -24,6 +25,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   const t = useTranslations("ProductCard")
   const { addItem } = useCart()
+  const locale = useLocale()
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -85,7 +87,7 @@ export default function ProductCard({
       </div>
 
       {/* Product Info - Click navigates to product page */}
-      <Link href={`/products/${product.id}`} className="block">
+      <Link href={`/${locale}/products/${product.id}`} className="block">
         <div className="text-center space-y-1">
           <h3
             className={`${playfairClassName} text-base font-light text-neutral-900 group-hover:text-neutral-600 transition-colors line-clamp-2 min-h-[3rem]`}
