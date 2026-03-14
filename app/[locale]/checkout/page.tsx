@@ -1,17 +1,5 @@
 "use client"
 
-/**
- * PayMe Checkout Integration — checkout wrapper changes only.
- *
- * Changes from the original checkout.tsx:
- *  1. Added 'payme' as a selectable payment method card
- *  2. When PayMe is selected, handleProceedToPayment calls
- *     /api/orders/payme/create/ instead of the Stripe endpoint
- *  3. On success, renders <PayMePaymentPage> instead of Stripe <Elements>
- *
- * Everything else (Stripe card, AliPay, WeChat Pay) is unchanged.
- */
-
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { loadStripe } from "@stripe/stripe-js"
@@ -26,13 +14,10 @@ import Image from "next/image"
 import { Playfair_Display } from "next/font/google"
 import { Loader2, CheckCircle, X, AlertCircle, CreditCard, ExternalLink } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
-import PayMePaymentPage from "./PayMePaymentPage"   // ← new import
 
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["400", "600", "700"] })
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "")
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000"
-
-// ─── Helpers (unchanged from original) ───────────────────────────────────────
 
 function DatePicker({ value, onChange }: { value: string; onChange: (date: string) => void }) {
     const t = useTranslations("Checkout")
@@ -64,91 +49,11 @@ function ErrorAlert({ message, onClose }: { message: string; onClose: () => void
     )
 }
 
-// ─── Payment Method Selector ──────────────────────────────────────────────────
-
-type PaymentMethodId = "stripe" | "payme"
-
-interface MethodCard {
-    id: PaymentMethodId
-    icon: string
-    labelZh: string
-    labelEn: string
-    descZh: string
-    descEn: string
-    accent: string
-}
-
-const PAYMENT_METHODS: MethodCard[] = [
-    {
-        id: "stripe",
-        icon: "💳",
-        labelZh: "信用卡 / AliPay / WeChat Pay",
-        labelEn: "Card / AliPay / WeChat Pay",
-        descZh: "Visa、Mastercard、Apple Pay、Google Pay、AliPay、WeChat Pay",
-        descEn: "Visa, Mastercard, Apple Pay, Google Pay, AliPay, WeChat Pay",
-        accent: "border-neutral-300",
-    },
-    {
-        id: "payme",
-        icon: "📱",
-        labelZh: "PayMe by HSBC",
-        labelEn: "PayMe by HSBC",
-        descZh: "掃描 QR Code 或點擊連結，金額自動填入",
-        descEn: "Scan QR code or tap link — amount pre-filled",
-        accent: "border-[#E60028]",
-    },
-]
-
-function PaymentMethodSelector({
-                                   selected,
-                                   onChange,
-                               }: {
-    selected: PaymentMethodId
-    onChange: (id: PaymentMethodId) => void
-}) {
-    const locale = useLocale()
-    return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
-            <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>
-                {locale === "en" ? "Payment Method" : "選擇付款方式"}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {PAYMENT_METHODS.map((m) => (
-                    <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => onChange(m.id)}
-                        className={`text-left border-2 rounded-xl p-4 transition-all ${
-                            selected === m.id
-                                ? `${m.accent} bg-red-50/30 ring-2 ring-offset-1 ${
-                                    m.id === "payme" ? "ring-[#E60028]" : "ring-neutral-900"
-                                }`
-                                : "border-neutral-200 hover:border-neutral-300"
-                        }`}
-                    >
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xl">{m.icon}</span>
-                            <span className="font-semibold text-sm">
-                                {locale === "en" ? m.labelEn : m.labelZh}
-                            </span>
-                        </div>
-                        <p className="text-xs text-neutral-500">
-                            {locale === "en" ? m.descEn : m.descZh}
-                        </p>
-                    </button>
-                ))}
-            </div>
-        </div>
-    )
-}
-
-// ─── Stripe CheckoutForm (unchanged from original) ────────────────────────────
-
 function CheckoutForm({
-                          clientSecret,
-                          initialFormData,
-                          expectedAmount,
-                      }: {
+    clientSecret,
+    initialFormData,
+    expectedAmount,
+}: {
     clientSecret: string
     initialFormData: any
     expectedAmount: number
@@ -220,7 +125,7 @@ function CheckoutForm({
                     <div className="flex"><span className="text-neutral-600 w-20">{t("phone")}:</span><span className="font-medium">{initialFormData.customer_phone}</span></div>
                 </div>
             </div>
-<div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
                 <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>{locale === "en" ? "Card / Wallet Details" : "卡片 / 電子錢包資料"}</h2>
                 <PaymentElement options={{ layout: "tabs" }} />
             </div>
@@ -247,30 +152,14 @@ function CheckoutForm({
     )
 }
 
-// ─── Main Checkout Component ──────────────────────────────────────────────────
-
 export default function CheckoutWrapper() {
     const t = useTranslations("Checkout")
     const { items, totalPrice, isLoading } = useCart()
     const router = useRouter()
     const locale = useLocale()
 
-    // Which top-level payment method is selected
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>("stripe")
-
-    // Stripe flow state
     const [showPaymentForm, setShowPaymentForm] = useState(false)
     const [clientSecret, setClientSecret] = useState("")
-
-    // PayMe flow state
-    const [paymeData, setPaymeData] = useState<{
-        orderNumber: string
-        paymeLink: string
-        qrUrl: string
-        amountHkd: number
-        memo: string
-    } | null>(null)
-
     const [errorMessage, setErrorMessage] = useState("")
     const [isPreparingPayment, setIsPreparingPayment] = useState(false)
 
@@ -284,14 +173,10 @@ export default function CheckoutWrapper() {
     })
 
     useEffect(() => {
-        // Only redirect to products if cart is empty AND we're not already showing
-        // the PayMe payment page or the Stripe payment form.
-        // Without this guard, clearing the cart (or having an empty cart) would
-        // incorrectly redirect away from an active payment screen.
-        if (!isLoading && items.length === 0 && !paymeData && !showPaymentForm) {
+        if (!isLoading && items.length === 0 && !showPaymentForm) {
             router.push(`/${locale}/products`)
         }
-    }, [items.length, router, isLoading, locale, paymeData, showPaymentForm])
+    }, [items.length, router, isLoading, locale, showPaymentForm])
 
     if (isLoading) {
         return (
@@ -306,7 +191,6 @@ export default function CheckoutWrapper() {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
-    // ── Shared validation ──────────────────────────────────────────────────────
     const validateForm = () => {
         if (formData.customer_name.length < 2) throw new Error(t("validation.nameRequired"))
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customer_email)) throw new Error(t("validation.emailRequired"))
@@ -315,7 +199,6 @@ export default function CheckoutWrapper() {
         if (!formData.delivery_date) throw new Error(t("validation.dateRequired"))
     }
 
-    // ── Proceed handler ────────────────────────────────────────────────────────
     const handleProceedToPayment = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsPreparingPayment(true)
@@ -326,71 +209,30 @@ export default function CheckoutWrapper() {
 
             const orderData = {
                 ...formData,
-                payment_method: paymentMethod === "payme" ? "payme" : "card_pay",
+                payment_method: "card_pay",
                 language: locale,
                 items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
             }
 
-            if (paymentMethod === "payme") {
-                // ── PayMe flow: create pending order, get smart link ─────────
-                const res = await fetch(`${API_BASE_URL}/api/orders/payme/create/`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(orderData),
-                })
-                if (!res.ok) {
-                    const err = await res.json()
-                    throw new Error(err.error || t("errors.createPaymentFailed"))
-                }
-                const data = await res.json()
-                setPaymeData({
-                    orderNumber: data.order_number,
-                    paymeLink: data.payme_link,
-                    qrUrl: data.qr_url,
-                    amountHkd: data.amount_hkd,
-                    memo: data.memo,
-                })
-                // NOTE: cart is cleared in PayMePaymentPage AFTER admin confirms payment,
-                // NOT here — clearing here causes items.length=0 which triggers the
-                // redirect-to-products useEffect before the PayMe page can render.
-                window.scrollTo({ top: 0, behavior: "smooth" })
-
-            } else {
-                // ── Stripe flow: create payment intent (original behaviour) ──
-                const res = await fetch(`${API_BASE_URL}/api/orders/create-payment-intent/`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(orderData),
-                })
-                if (!res.ok) {
-                    const err = await res.json()
-                    throw new Error(err.error || t("errors.createPaymentFailed"))
-                }
-                const data = await res.json()
-                setClientSecret(data.clientSecret)
-                setShowPaymentForm(true)
-                window.scrollTo({ top: 0, behavior: "smooth" })
+            const res = await fetch(`${API_BASE_URL}/api/orders/create-payment-intent/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(orderData),
+            })
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error || t("errors.createPaymentFailed"))
             }
+            const data = await res.json()
+            setClientSecret(data.clientSecret)
+            setShowPaymentForm(true)
+            window.scrollTo({ top: 0, behavior: "smooth" })
 
         } catch (error: any) {
             setErrorMessage(error.message || t("errors.networkError"))
         } finally {
             setIsPreparingPayment(false)
         }
-    }
-
-    // ── PayMe page ─────────────────────────────────────────────────────────────
-    if (paymeData) {
-        return (
-            <PayMePaymentPage
-                orderNumber={paymeData.orderNumber}
-                paymeLink={paymeData.paymeLink}
-                qrUrl={paymeData.qrUrl}
-                amountHkd={paymeData.amountHkd}
-                memo={paymeData.memo}
-                customerEmail={formData.customer_email}
-            />
-        )
     }
 
     return (
@@ -410,20 +252,20 @@ export default function CheckoutWrapper() {
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("name")} <span className="text-red-600">*</span></label>
                                             <input type="text" name="customer_name" value={formData.customer_name} onChange={handleChange} required minLength={2}
-                                                   className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900"
-                                                   placeholder={t("placeholders.name")} />
+                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900"
+                                                placeholder={t("placeholders.name")} />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("email")} <span className="text-red-600">*</span></label>
                                             <input type="email" name="customer_email" value={formData.customer_email} onChange={handleChange} required
-                                                   className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900"
-                                                   placeholder={t("placeholders.email")} />
+                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900"
+                                                placeholder={t("placeholders.email")} />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("phone")} <span className="text-red-600">*</span></label>
                                             <input type="tel" name="customer_phone" value={formData.customer_phone} onChange={handleChange} required minLength={8}
-                                                   className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900"
-                                                   placeholder={t("placeholders.phone")} />
+                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900"
+                                                placeholder={t("placeholders.phone")} />
                                         </div>
                                     </div>
                                 </div>
@@ -435,41 +277,21 @@ export default function CheckoutWrapper() {
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("deliveryAddress")} <span className="text-red-600">*</span></label>
                                             <textarea name="delivery_address" value={formData.delivery_address} onChange={handleChange} required minLength={10} rows={3}
-                                                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 resize-none"
-                                                      placeholder={t("placeholders.address")} />
+                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 resize-none"
+                                                placeholder={t("placeholders.address")} />
                                         </div>
                                         <DatePicker value={formData.delivery_date} onChange={(date) => setFormData({ ...formData, delivery_date: date })} />
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("notes")} ({t("optional")})</label>
                                             <textarea name="delivery_notes" value={formData.delivery_notes} onChange={handleChange} maxLength={500} rows={2}
-                                                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 resize-none"
-                                                      placeholder={t("placeholders.notes")} />
+                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 resize-none"
+                                                placeholder={t("placeholders.notes")} />
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* ── NEW: Payment Method Selector ── */}
-                                <PaymentMethodSelector selected={paymentMethod} onChange={setPaymentMethod} />
-
-                                {/* PayMe notice */}
-                                {paymentMethod === "payme" && (
-                                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-                                        <span className="text-2xl">📱</span>
-                                        <div>
-                                            <p className="text-sm font-semibold text-red-900">PayMe — 確認後顯示 QR Code</p>
-                                            <p className="text-xs text-red-700 mt-1">
-                                                點擊「前往付款」後，系統將顯示專屬 PayMe 連結及 QR Code。
-                                                金額及訂單編號將自動填入，您只需在 PayMe 按「Send」即可。
-                                            </p>
-                                            <p className="text-xs text-red-600 mt-1">
-                                                After clicking "Proceed", you'll see a personalised QR code with the exact amount pre-filled.
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
-
                                 <button type="submit" disabled={isPreparingPayment}
-                                        className="w-full bg-neutral-900 text-white py-4 rounded-lg font-medium hover:bg-neutral-800 disabled:bg-neutral-400 transition-colors flex items-center justify-center gap-2">
+                                    className="w-full bg-neutral-900 text-white py-4 rounded-lg font-medium hover:bg-neutral-800 disabled:bg-neutral-400 transition-colors flex items-center justify-center gap-2">
                                     {isPreparingPayment ? (
                                         <><Loader2 className="w-5 h-5 animate-spin" />{t("preparing")}</>
                                     ) : (
@@ -496,7 +318,7 @@ export default function CheckoutWrapper() {
                         )}
                     </div>
 
-                    {/* Order Summary (unchanged) */}
+                    {/* Order Summary */}
                     <div className="lg:col-span-1">
                         <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200 sticky top-8">
                             <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>{t("orderSummary")}</h2>
