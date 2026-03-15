@@ -1,10 +1,12 @@
 import Image from "next/image"
 import Link from "next/link"
-import { useTranslations, useLocale } from "next-intl"
+import { getTranslations, getLocale } from "next-intl/server"
 
-export default function SeriesSection() {
-  const t = useTranslations("SeriesSection")
-  const locale = useLocale()
+export default async function SeriesSection() {
+  const [t, locale] = await Promise.all([
+    getTranslations("SeriesSection"),
+    getLocale(),
+  ])
 
   const series = [
     {

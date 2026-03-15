@@ -1,15 +1,13 @@
 "use client"
 
 import Image from "next/image"
-import { useState, useEffect, useRef, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
+import { useState, useEffect, useRef } from "react"
 import { Playfair_Display } from "next/font/google"
 import { useTranslations } from "next-intl"
 import ProductCategory from "@/components/product/ProductCategory"
 import ProductCard from "@/components/product/ProductCard"
 import type { CategoryItem } from "@/components/product/ProductCategory"
 import type { UiProduct } from "@/lib/product-utils"
-import { CATEGORY_NAME_TRANSLATIONS } from "@/lib/product-utils"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -21,24 +19,24 @@ interface ProductsClientProps {
   initialCategories: CategoryItem[]
   initialLocations: string[]
   locale: string
+  initialCategory?: string
+  initialSearch?: string
 }
 
-function ProductsClientContent({
+export default function ProductsClient({
   initialProducts,
   initialCategories,
   initialLocations,
   locale,
+  initialCategory,
+  initialSearch,
 }: ProductsClientProps) {
-  const searchParams = useSearchParams()
   const t = useTranslations("Products")
-  const tCategory = useTranslations("ProductCategory")
 
   const allText = locale === "en" ? "All" : "全部"
-  const initialCategory = searchParams.get("category") || allText
-  const searchQuery = searchParams.get("search") || ""
 
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory)
-  const [searchKeyword, setSearchKeyword] = useState(searchQuery)
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory || allText)
+  const [searchKeyword, setSearchKeyword] = useState(initialSearch || "")
   const [selectedLocation, setSelectedLocation] = useState(allText)
   const [filteredProducts, setFilteredProducts] = useState<UiProduct[]>(initialProducts)
   const [currentPage, setCurrentPage] = useState(1)
@@ -50,10 +48,14 @@ function ProductsClientContent({
     "recommended"
   )
 
-  // Sync searchKeyword with URL when navigating
+  // Sync state when server re-renders with new URL searchParams (e.g. header search)
   useEffect(() => {
-    setSearchKeyword(searchParams.get("search") || "")
-  }, [searchParams])
+    setSearchKeyword(initialSearch || "")
+  }, [initialSearch])
+
+  useEffect(() => {
+    setSelectedCategory(initialCategory || allText)
+  }, [initialCategory, allText])
 
   // Reset category/location selection when locale changes
   useEffect(() => {
@@ -178,7 +180,7 @@ function ProductsClientContent({
                 <button
                   onClick={() => {
                     setSearchKeyword("")
-                    const params = new URLSearchParams(searchParams.toString())
+                    const params = new URLSearchParams(window.location.search)
                     params.delete("search")
                     window.history.replaceState(null, "", `?${params.toString()}`)
                   }}
@@ -255,19 +257,5 @@ function ProductsClientContent({
         </section>
       )}
     </main>
-  )
-}
-
-export default function ProductsClient(props: ProductsClientProps) {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <p className="text-neutral-500 text-lg">Loading...</p>
-        </div>
-      }
-    >
-      <ProductsClientContent {...props} />
-    </Suspense>
   )
 }

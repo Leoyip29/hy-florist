@@ -1,10 +1,12 @@
 import Image from "next/image"
 import Link from "next/link"
-import { useTranslations, useLocale } from "next-intl"
+import { getTranslations, getLocale } from "next-intl/server"
 
-export default function ServicesAndAbout() {
-  const t = useTranslations("ServicesAndAbout")
-  const locale = useLocale()
+export default async function ServicesAndAbout() {
+  const [t, locale] = await Promise.all([
+    getTranslations("ServicesAndAbout"),
+    getLocale(),
+  ])
   
   return (
     <section className="pb-20 md:pb-28">

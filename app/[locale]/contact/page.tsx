@@ -1,12 +1,48 @@
+import type { Metadata } from "next"
 import { Playfair_Display } from "next/font/google"
 import { Mail, Phone, MapPin, Clock } from "lucide-react"
+
+export const revalidate = 86400
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
 })
 
-export default function ContactPage() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const isEn = locale === "en"
+  return {
+    title: isEn ? "Contact Us" : "聯絡我們",
+    description: isEn
+      ? "Contact Hyacinth Florist in Hong Kong. Visit us at Lai Chi Kok, call or email for enquiries and orders."
+      : "聯絡韓雅花店。歡迎蒞臨荔枝角門市，或致電及電郵查詢及落單。",
+    alternates: {
+      canonical: `https://hy-florist.hk/${locale}/contact`,
+      languages: {
+        "en": "https://hy-florist.hk/en/contact",
+        "zh-HK": "https://hy-florist.hk/zh-HK/contact",
+      },
+    },
+    openGraph: {
+      title: isEn ? "Contact Us | Hyacinth Florist" : "聯絡我們 | HY Florist",
+      description: isEn
+        ? "Get in touch with Hyacinth Florist Hong Kong."
+        : "聯絡韓雅花店香港。",
+    },
+  }
+}
+
+export default async function ContactPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  await params
   return (
     <main className="min-h-screen bg-white">
       {/* Hero Section */}

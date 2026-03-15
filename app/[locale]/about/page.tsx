@@ -1,14 +1,51 @@
+import type { Metadata } from "next"
 import Image from "next/image"
 import { Playfair_Display } from "next/font/google"
-import { useTranslations } from "next-intl"
+import { getTranslations } from "next-intl/server"
+
+export const revalidate = 86400
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
 })
 
-export default function AboutPage() {
-  const t = useTranslations("About")
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const isEn = locale === "en"
+  return {
+    title: isEn ? "About Us" : "關於我們",
+    description: isEn
+      ? "Learn about Hyacinth Florist – a Hong Kong premium florist offering bespoke floral arrangements for all occasions including weddings, funerals, and corporate events."
+      : "了解韓雅花店的故事——香港優質花藝師，為婚禮、喪禮、企業活動提供度身訂造的花藝佈置。",
+    alternates: {
+      canonical: `https://hy-florist.hk/${locale}/about`,
+      languages: {
+        "en": "https://hy-florist.hk/en/about",
+        "zh-HK": "https://hy-florist.hk/zh-HK/about",
+      },
+    },
+    openGraph: {
+      title: isEn ? "About Us | Hyacinth Florist" : "關於我們 | HY Florist",
+      description: isEn
+        ? "Learn about Hyacinth Florist – Hong Kong's premium florist."
+        : "了解韓雅花店——香港優質花藝師。",
+      images: [{ url: "https://hy-florist.hk/hy_about_04.png" }],
+    },
+  }
+}
+
+export default async function AboutPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  await params
+  const t = await getTranslations("About")
 
   return (
     <main>

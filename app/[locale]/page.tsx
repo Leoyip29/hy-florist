@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { getLocale } from "next-intl/server"
 import HeroSection from "@/components/sections/HeroSection"
 import FeaturedProducts from "@/components/sections/FeaturedProducts"
@@ -23,11 +24,19 @@ export default async function Home() {
   return (
     <main className="min-h-screen">
       <HeroSection />
-      <FeaturedProducts />
-      <FlowerStandSection />
+      <Suspense fallback={<div className="py-24 md:py-36" />}>
+        <FeaturedProducts />
+      </Suspense>
+      <Suspense fallback={<div className="py-24" />}>
+        <FlowerStandSection />
+      </Suspense>
       <SplitScreenShowcase initialProducts={showcaseProducts} />
-      <HeartFlowerSection />
-      <SeriesSection />
+      <Suspense fallback={<div className="py-24" />}>
+        <HeartFlowerSection />
+      </Suspense>
+      <Suspense fallback={<div className="py-16" />}>
+        <SeriesSection />
+      </Suspense>
       <SectionDivider />
       <ServicesAndAbout />
     </main>
