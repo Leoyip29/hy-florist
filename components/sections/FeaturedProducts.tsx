@@ -32,7 +32,8 @@ async function getFeaturedProducts(): Promise<Product[]> {
     }
 
     const data = await response.json()
-    return data
+    // API returns paginated response: { count, results, ... }
+    return data.results ?? data ?? []
   } catch (err) {
     console.error("Error fetching featured products:", err)
     return []

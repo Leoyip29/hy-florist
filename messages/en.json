@@ -248,11 +248,23 @@
   "Footer": {
     "description": "We believe every bouquet carries a unique meaning, perfectly conveying our feelings and care.",
     "phone": "Phone",
+    "phoneNumber": "+852 9684 6901",
     "email": "Email",
+    "emailAddress": "info@hy-florist.hk",
     "address": "Address",
     "addressLine1": "Shop 3, G/F, Ka Lai Court",
     "addressLine2": "18 Pictorial Street, Hung Hom, Kowloon",
     "copyright": "Copyright © 2026 Hyacinth Florist. All rights reserved."
+  },
+  "Contact": {
+    "title": "Contact Us",
+    "subtitle": "If you have any questions or need assistance, feel free to contact us. Our team will be happy to help.",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "openingHours": "Opening Hours",
+    "weekdays": "Daily",
+    "ourLocation": "Our Location"
   },
   "Home": {
     "title": "HY Florist - Hong Kong Floristry Specialist",

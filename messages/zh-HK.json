@@ -248,14 +248,26 @@
   "Footer": {
     "description": "我們相信，每一束花都有其獨特的意義，能夠完美傳遞出我們的心意和關懷。",
     "phone": "電話",
+    "phoneNumber": "+852 9684 6901",
     "email": "電郵",
+    "emailAddress": "info@hy-florist.hk",
     "address": "地址",
     "addressLine1": "九龍 紅磡 必嘉街18號",
     "addressLine2": "嘉麗閣 地下3號舖",
     "copyright": "Copyright © 2026 風信子花店. All rights reserved."
   },
+  "Contact": {
+    "title": "聯絡我們",
+    "subtitle": "如有任何查詢或需要協助，歡迎與我們聯絡。我們的團隊將竭誠為您服務。",
+    "phone": "電話",
+    "email": "電郵",
+    "address": "地址",
+    "openingHours": "營業時間",
+    "weekdays": "每日",
+    "ourLocation": "我們的位置"
+  },
   "Home": {
-    "title": "HY Florist - 香港花藝專門店",
+    "title": "風信子花店 - 帛事花牌專門店",
     "subtitle": "專業花藝設計，為生活的每一刻增添美麗與溫度",
     "hero": {
       "ctaButton": "探索花藝",
@@ -418,7 +430,7 @@
     }
   },
   "SEO": {
-    "homeTitle": "HY 花店 - 香港鮮花速遞",
+    "homeTitle": "風信子花店 - 帛事花牌專門店",
     "homeDescription": "優質鮮花擺設及香港鮮花速遞服務。瀏覽我們精選的花束、花籃及訂製鮮花擺設。"
   }
 }

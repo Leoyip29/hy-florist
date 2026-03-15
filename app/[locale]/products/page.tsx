@@ -94,6 +94,30 @@ const LOCATION_NAME_TRANSLATIONS: Record<string, string> = {
   不適用: "NotApplicable",
 }
 
+// Reverse translation map: English -> Chinese
+const REVERSE_CATEGORY_TRANSLATIONS: Record<string, string> = Object.fromEntries(
+  Object.entries(CATEGORY_NAME_TRANSLATIONS).map(([chinese, english]) => [english, chinese])
+)
+const REVERSE_LOCATION_TRANSLATIONS: Record<string, string> = Object.fromEntries(
+  Object.entries(LOCATION_NAME_TRANSLATIONS).map(([chinese, english]) => [english, chinese])
+)
+
+// Convert category name to API format (Chinese for backend)
+function toApiCategory(name: string, locale: string): string {
+  if (locale === 'en' && REVERSE_CATEGORY_TRANSLATIONS[name]) {
+    return REVERSE_CATEGORY_TRANSLATIONS[name]
+  }
+  return name
+}
+
+// Convert location name to API format (Chinese for backend)
+function toApiLocation(name: string, locale: string): string {
+  if (locale === 'en' && REVERSE_LOCATION_TRANSLATIONS[name]) {
+    return REVERSE_LOCATION_TRANSLATIONS[name]
+  }
+  return name
+}
+
 // Translate a location name using the translation map
 export function translateLocation(name: string): string {
   return LOCATION_NAME_TRANSLATIONS[name] ?? name
@@ -143,6 +167,42 @@ export function translateCategory(name: string): string {
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000"
+
+// Build filter URL params for server-side filtering and pagination
+function buildFilterUrl(
+  baseUrl: string,
+  category: string,
+  location: string,
+  search: string,
+  sort: string,
+  page: number,
+  locale: string
+) {
+  const params = new URLSearchParams()
+  
+  // Convert English category/location to Chinese for API
+  const apiCategory = toApiCategory(category, locale)
+  const apiLocation = toApiLocation(location, locale)
+  
+  if (apiCategory && apiCategory !== "All" && apiCategory !== "全部") {
+    params.set('category', apiCategory)
+  }
+  if (apiLocation && apiLocation !== "All" && apiLocation !== "全部") {
+    params.set('location', apiLocation)
+  }
+  if (search) {
+    params.set('search', search)
+  }
+  if (sort && sort !== "recommended") {
+    params.set('sort', sort)
+  }
+  if (page > 1) {
+    params.set('page', page.toString())
+  }
+  
+  const queryString = params.toString()
+  return queryString ? `${baseUrl}?${queryString}` : baseUrl
+}
 
 function publicLogo(fileName: string) {
   // Handles spaces in filenames like "Funeral Home.png"
@@ -246,8 +306,8 @@ function ShopPageContent() {
   const [selectedLocation, setSelectedLocation] = useState(allText)
   const [locations, setLocations] = useState<string[]>([allText])
   const [products, setProducts] = useState<UiProduct[]>([])
-  const [filteredProducts, setFilteredProducts] = useState<UiProduct[]>([])
   const [currentPage, setCurrentPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
   const pageSize = 12
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -259,69 +319,36 @@ function ShopPageContent() {
   )
   const [selectedProduct, setSelectedProduct] = useState<UiProduct | null>(null)
 
+  // Fetch categories and locations only once on mount
   useEffect(() => {
-    const run = async () => {
+    const fetchCategories = async () => {
       try {
-        setIsLoading(true)
-        setError(null)
-
-        const res = await fetch(`${API_BASE_URL}/api/products/`, {
+        const categoriesRes = await fetch(`${API_BASE_URL}/api/categories/`, {
           cache: "no-store",
         })
-        if (!res.ok) {
-          throw new Error(`${t("errorLoadProducts")} (${res.status})`)
+        
+        if (!categoriesRes.ok) return
+        
+        const { categories: apiCategories, locations: apiLocations } = await categoriesRes.json() as {
+          categories: string[]
+          locations: string[]
         }
-
-        const data = (await res.json()) as ApiProduct[]
-
-        // Process products with locale-aware translation
-        const uiProducts = data.map(p => apiToUiProduct(p, locale))
-
-        // Get unique category names (keep Chinese for filtering, translate for English display)
-        const uniqueOriginalCategories = Array.from(
-          new Set(
-            data
-              .flatMap((p) => p.categories?.map((c) => c.name) ?? [])
-              .filter(Boolean)
-          )
-        )
-        // Get unique location names (keep Chinese for filtering, translate for English display)
-        const uniqueOriginalLocations = Array.from(
-          new Set(
-            data
-              .flatMap((p) => p.suitable_locations?.map((l) => l.name) ?? [])
-              .filter((name) => Boolean(name) && name !== "不適用")
-          )
-        )
-
+        
         // Display names based on locale (English only shows translated names)
         const displayCategories = locale === 'en'
-          ? uniqueOriginalCategories.map(name => translateCategory(name))
-          : uniqueOriginalCategories
+          ? apiCategories.map(name => translateCategory(name))
+          : apiCategories
         const displayLocations = locale === 'en'
-          ? uniqueOriginalLocations.map(name => translateLocation(name))
-          : uniqueOriginalLocations
+          ? apiLocations.map(name => translateLocation(name))
+          : apiLocations
 
-        // Prefer static logos from /public/CategoriesLogo, fallback to the first product image found.
+        // Map categories to images
         const categoryToImage = new Map<string, string>()
-        // Map using original Chinese category names for logo lookup
-        for (const originalName of uniqueOriginalCategories) {
+        for (const originalName of apiCategories) {
           const logoFile = CATEGORY_LOGOS[originalName]
           if (logoFile) categoryToImage.set(originalName, publicLogo(logoFile))
         }
-        for (const p of uiProducts) {
-          // Find the original Chinese category name for this product
-          const originalProduct = data.find(ap => ap.id === p.id)
-          if (originalProduct) {
-            for (const cat of originalProduct.categories ?? []) {
-              if (!categoryToImage.has(cat.name) && p.image)
-                categoryToImage.set(cat.name, p.image)
-            }
-          }
-        }
 
-        setProducts(uiProducts)
-        setFilteredProducts(uiProducts)
         setCategories([
           { name: locale === 'en' ? "All" : "全部", image: publicLogo(CATEGORY_LOGOS["全部"] ?? "All.png") },
           ...displayCategories.map((name) => ({
@@ -336,7 +363,49 @@ function ShopPageContent() {
           })),
         ])
         setLocations([locale === 'en' ? "All" : "全部", ...displayLocations])
-        setCurrentPage(1)
+      } catch (err) {
+        console.error("Failed to fetch categories:", err)
+      }
+    }
+
+    fetchCategories()
+  }, [locale])
+
+  // Fetch products with server-side pagination and filtering
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const productsUrl = buildFilterUrl(
+          `${API_BASE_URL}/api/products/`,
+          selectedCategory,
+          selectedLocation,
+          searchKeyword,
+          sortOption,
+          currentPage,
+          locale
+        )
+        
+        const res = await fetch(productsUrl, {
+          cache: "no-store",
+        })
+        if (!res.ok) {
+          throw new Error(`${t("errorLoadProducts")} (${res.status})`)
+        }
+
+        // API returns paginated response: { count: 100, results: [...] }
+        const response = await res.json() as {
+          count: number
+          results: ApiProduct[]
+        }
+
+        // Process products with locale-aware translation
+        const uiProducts = response.results.map(p => apiToUiProduct(p, locale))
+
+        setProducts(uiProducts)
+        setTotalCount(response.count)
       } catch (e) {
         setError(e instanceof Error ? e.message : t("errorLoadProducts"))
       } finally {
@@ -344,8 +413,13 @@ function ShopPageContent() {
       }
     }
 
-    run()
-  }, [])
+    fetchProducts()
+  }, [selectedCategory, selectedLocation, searchKeyword, sortOption, currentPage, locale])
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedCategory, selectedLocation, searchKeyword, sortOption])
 
   // Sync selectedCategory with URL when searchParams changes
   useEffect(() => {
@@ -367,34 +441,10 @@ function ShopPageContent() {
     }
   }, [locale, allText, urlCategory])
 
-  // Filter products by category, location, and search keyword
-  useEffect(() => {
-    const filtered = products.filter((p) => {
-      const matchCategory =
-        selectedCategory === allText || p.categories.includes(selectedCategory)
-      const matchLocation =
-        selectedLocation === allText || p.locations.includes(selectedLocation)
-      const matchSearch = !searchKeyword ||
-        p.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchKeyword.toLowerCase())
-      return matchCategory && matchLocation && matchSearch
-    })
+  // Server-side filtering and pagination - products fetched from API with filters
+  // API returns paginated data, so no client-side slicing needed
 
-    const sorted = [...filtered].sort((a, b) => {
-      if (sortOption === "price_asc") return a.price - b.price
-      if (sortOption === "price_desc") return b.price - a.price
-      return 0
-    })
-
-    setFilteredProducts(sorted)
-    setCurrentPage(1)
-  }, [selectedCategory, selectedLocation, products, sortOption, searchKeyword])
-
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  )
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
   // Parallax scroll effect
   useEffect(() => {
@@ -425,12 +475,12 @@ function ShopPageContent() {
       )
       observer.observe(item)
     })
-  }, [paginatedProducts])
+  }, [products])
 
   return (
     <main className="bg-white">
       {/* ===== HERO SECTION ===== */}
-      <section
+      {/* <section
         className="relative py-24 md:py-50 overflow-hidden"
         ref={sectionRef}
         style={{
@@ -457,7 +507,7 @@ function ShopPageContent() {
             </p>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <ProductCategory
         categories={categories}
@@ -476,7 +526,7 @@ function ShopPageContent() {
             {searchKeyword ? (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-neutral-500">
-                  {t("searchResults", { searchKeyword, count: filteredProducts.length })}
+                  {t("searchResults", { searchKeyword, count: products.length })}
                 </span>
                 <button
                   onClick={() => {
@@ -493,7 +543,7 @@ function ShopPageContent() {
               </div>
             ) : (
               <p className="text-xs sm:text-sm text-neutral-500">
-                {t("totalProducts", { count: filteredProducts.length })}
+                {t("totalProducts", { count: products.length })}
               </p>
             )}
             <div className="flex items-center gap-2">
@@ -524,13 +574,13 @@ function ShopPageContent() {
                 {t("errorBackendCheck")} {API_BASE_URL}/api/products/
               </p>
             </div>
-          ) : filteredProducts.length === 0 ? (
+          ) : products.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-neutral-500 text-lg">{t("noProductsInCategory")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {paginatedProducts.map((product, index) => (
+              {products.map((product, index) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -546,7 +596,7 @@ function ShopPageContent() {
       </section>
 
       {/* ===== PAGINATION ===== */}
-      {!isLoading && !error && filteredProducts.length > 0 && (
+      {!isLoading && !error && products.length > 0 && (
         <section className="pb-16">
           <div className="mx-auto max-w-7xl px-4 md:px-8 flex items-center justify-center gap-3">
             <button

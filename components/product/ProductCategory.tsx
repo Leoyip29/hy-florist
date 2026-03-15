@@ -52,7 +52,7 @@ export default function ProductCategory({
   const visibleCategories = categories
 
   return (
-    <section className="bg-white border-b border-neutral-100">
+    <section className="bg-white border-b border-neutral-100 pt-30">
       <div className="mx-auto max-w-7xl px-4 md:px-8 py-8">
         {/* Category Icons - Elegant Minimal */}
         <div className="flex flex-wrap justify-center gap-4 md:gap-5">

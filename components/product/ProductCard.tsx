@@ -53,11 +53,11 @@ export default function ProductCard({
 
   return (
     <div
-      className={`product-card group transition-all duration-700 cursor-pointer ${
-        inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      className={`product-card group transition-all duration-300 cursor-pointer ${
+        inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
       style={{
-        transitionDelay: `${index * 100}ms`,
+        transitionDelay: `${index * 50}ms`,
       }}
       onClick={() => onClick?.(product)}
     >
@@ -84,10 +84,10 @@ export default function ProductCard({
         <div
           className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-end justify-center p-4"
         >
-          <button
-            onClick={handleAddToCart}
-            className="opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 bg-white text-neutral-900 px-6 py-2.5 rounded-full font-medium text-sm flex items-center gap-2 hover:bg-neutral-100 shadow-lg"
-          >
+            <button
+              onClick={handleAddToCart}
+              className="opacity-0 max-[1140px]:opacity-100 max-[1140px]:translate-y-0 max-[1140px]:py-2 max-[1140px]:px-4 max-[1140px]:text-xs group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 bg-white text-neutral-900 px-6 py-2.5 rounded-full font-medium text-sm flex items-center gap-2 hover:bg-neutral-100 shadow-lg active:scale-95"
+            >
             <ShoppingCart className="w-4 h-4" />
             {product.options && product.options.length > 0 
               ? t("selectOptions") || "Select Options" 

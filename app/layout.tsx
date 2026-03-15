@@ -12,10 +12,8 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 })
 
-export const metadata: Metadata = {
-    title: "HY Florist - 香港花藝專門店",
-    description: "專業花藝設計,為生活的每一刻增添美麗與溫度",
-}
+// Remove static metadata to allow child pages to set their own titles
+// The locale layout will handle the dynamic metadata
 
 export default function RootLayout({
                                        children,

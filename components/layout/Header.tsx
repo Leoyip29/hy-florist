@@ -38,6 +38,12 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  // Check if current page is homepage
+  const isHomepage = pathname === `/${locale}` || pathname === `/${locale}/`
+
+  // Determine if header should have transparent background (only on homepage when not scrolled)
+  const isTransparent = isHomepage && !isScrolled
+
   // Focus input when search opens
   useEffect(() => {
     if (searchOpen && searchInputRef.current) {
@@ -68,9 +74,9 @@ export default function Header() {
   return (
     <header
       className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-white shadow-md"
-          : "bg-transparent"
+        isTransparent
+          ? "bg-transparent"
+          : "bg-white shadow-md"
       }`}
     >
       <div className={`mx-auto flex max-w-[1400px] items-center justify-between px-6 py-4 transition-all duration-300 ${
@@ -84,28 +90,28 @@ export default function Header() {
             width={120}
             height={120}
             priority
-            className={isScrolled ? "" : "brightness-0 invert"}
+            className={isTransparent ? "brightness-0 invert" : ""}
           />
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-1 text-sm">
+        <nav className="hidden md:flex items-center gap-1 text-sm">
           <Link
             href={`/${locale}`}
             className={`group relative px-4 py-2 hover:opacity-100 transition-all duration-300 ${
-              isScrolled ? "text-neutral-700" : "text-white"
+              isTransparent ? "text-white" : "text-neutral-700"
             }`}
           >
             {t('home')}
             <span className={`absolute left-4 right-4 bottom-1 h-0.5 w-auto transition-all duration-300 scale-x-0 group-hover:scale-x-100 ${
-              isScrolled ? "bg-neutral-700" : "bg-white"
+              isTransparent ? "bg-white" : "bg-neutral-700"
             }`} />
           </Link>
 
           {/* Products Dropdown */}
           <div className="relative group px-4 py-2 z-30">
             <div className={`flex items-center gap-1 cursor-pointer hover:opacity-100 transition-all duration-300 ${
-              isScrolled ? "text-neutral-700" : "text-white"
+              isTransparent ? "text-white" : "text-neutral-700"
             }`}>
               {t('products')}
               <svg
@@ -119,7 +125,7 @@ export default function Header() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 className={`transition-transform duration-300 group-hover:rotate-180 ${
-                  isScrolled ? "text-neutral-700" : "text-white"
+                  isTransparent ? "text-white" : "text-neutral-700"
                 }`}
               >
                 <path d="m6 9 6 6 6-6" />
@@ -162,23 +168,23 @@ export default function Header() {
           <Link
             href={`/${locale}/about`}
             className={`group relative px-4 py-2 hover:opacity-100 transition-all duration-300 ${
-              isScrolled ? "text-neutral-700" : "text-white"
+              isTransparent ? "text-white" : "text-neutral-700"
             }`}
           >
             {t('about')}
             <span className={`absolute left-4 right-4 bottom-1 h-0.5 w-auto transition-all duration-300 scale-x-0 group-hover:scale-x-100 ${
-              isScrolled ? "bg-neutral-700" : "bg-white"
+              isTransparent ? "bg-white" : "bg-neutral-700"
             }`} />
           </Link>
           <Link
             href={`/${locale}/contact`}
             className={`group relative px-4 py-2 hover:opacity-100 transition-all duration-300 ${
-              isScrolled ? "text-neutral-700" : "text-white"
+              isTransparent ? "text-white" : "text-neutral-700"
             }`}
           >
             {t('contact')}
             <span className={`absolute left-4 right-4 bottom-1 h-0.5 w-auto transition-all duration-300 scale-x-0 group-hover:scale-x-100 ${
-              isScrolled ? "bg-neutral-700" : "bg-white"
+              isTransparent ? "bg-white" : "bg-neutral-700"
             }`} />
           </Link>
         </nav>
@@ -190,7 +196,7 @@ export default function Header() {
             <button
               onClick={() => setLanguageMenuOpen(!languageMenuOpen)}
               className={`text-sm hover:opacity-70 transition-opacity flex items-center gap-1 ${
-                isScrolled ? "text-neutral-700" : "text-white"
+                isTransparent ? "text-white" : "text-neutral-700"
               }`}
             >
               <svg
@@ -266,8 +272,8 @@ export default function Header() {
             ) : (
               <button
                 onClick={() => setSearchOpen(true)}
-                className={`p-2 hover:bg-white/10 rounded-full transition-colors ${
-                  isScrolled ? "" : "hover:bg-black/10"
+                className={`p-2 rounded-full transition-colors ${
+                  isTransparent ? "hover:bg-white/20" : "hover:bg-black/10"
                 }`}
               >
                 <svg
@@ -280,7 +286,7 @@ export default function Header() {
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className={isScrolled ? "text-neutral-700" : "text-white"}
+                  className={isTransparent ? "text-white" : "text-neutral-700"}
                 >
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.35-4.35" />
@@ -288,11 +294,11 @@ export default function Header() {
               </button>
             )}
           </div>
-          <CartButton isScrolled={isScrolled}/>
+          <CartButton isScrolled={!isTransparent}/>
 
           {/* Mobile Navigation */}
           <div className="md:hidden">
-            <Navbar isScrolled={isScrolled} />
+            <Navbar isScrolled={!isTransparent} />
           </div>
         </div>
       </div>

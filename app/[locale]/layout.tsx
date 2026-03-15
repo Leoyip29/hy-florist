@@ -1,5 +1,5 @@
 import {NextIntlClientProvider} from 'next-intl'
-import {getMessages} from 'next-intl/server'
+import {getMessages, getTranslations} from 'next-intl/server'
 import {notFound} from 'next/navigation'
 import {routing} from '@/i18n/routing'
 import {Geist, Geist_Mono} from "next/font/google"
@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer"
 import {CartProvider} from "@/contexts/CartContext"
 import CartDrawer from "@/components/cart/CartDrawer"
 import Header from "@/components/layout/Header"
+import type { Metadata } from "next"
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -17,6 +18,16 @@ const geistMono = Geist_Mono({
     variable: "--font-geist-mono",
     subsets: ["latin"],
 })
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'Home' })
+  
+  return {
+    title: t('title'),
+    description: t('subtitle'),
+  }
+}
 
 export default async function LocaleLayout({
                                                children,

@@ -1,11 +1,26 @@
 import Image from "next/image"
 import { Playfair_Display } from "next/font/google"
 import { useTranslations } from "next-intl"
+import { getTranslations } from "next-intl/server"
+import type { Metadata } from "next"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
 })
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "About" })
+
+  return {
+    title: t("title"),
+  }
+}
 
 export default function AboutPage() {
   const t = useTranslations("About")
@@ -17,7 +32,8 @@ export default function AboutPage() {
       <section
         className="
         relative
-        py-32
+        h-[600px]
+        flex items-center
         bg-[url('/hy_about_04.png')]
         bg-no-repeat
         bg-cover
@@ -27,14 +43,14 @@ export default function AboutPage() {
         {/* Gradient overlay to soften the background image */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/40 to-transparent" />
 
-        <div className="relative mx-auto max-w-[1140px] px-8">
+        <div className="relative mx-auto w-full max-w-[1140px] px-8">
           <div className="max-w-xl">
 
-            <h1 className={`${playfair.className} text-5xl md:text-6xl font-light mb-8 text-neutral-900 leading-tight`}>
+            <h1 className={`${playfair.className} text-5xl md:text-6xl font-light mb-8 text-white leading-tight`}>
               {t("title")}
             </h1>
 
-            <p className="text-base md:text-lg leading-8 text-neutral-700 font-light">
+            <p className="text-base md:text-lg leading-8 text-white/80 font-light">
               {t("hero.paragraph1")}
             </p>
 
