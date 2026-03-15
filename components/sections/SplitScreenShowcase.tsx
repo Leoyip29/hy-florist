@@ -213,7 +213,7 @@ export default function SplitScreenShowcase({ locale: propLocale }: SplitScreenS
             {/* Product Name & Price */}
             <div className="text-center mb-8 animate-fade-in" style={{ animationDelay: '0.32s' }}>
               <h3 className="text-2xl font-light text-neutral-900 tracking-wide mb-2">
-                {mainProduct?.name}
+                {mainProduct ? toUiProduct(mainProduct).name : ""}
               </h3>
               <p className="text-xl text-neutral-700 font-light">
                 HK$ {mainProduct ? Number(mainProduct.price).toLocaleString() : "0"}

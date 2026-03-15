@@ -42,6 +42,7 @@ const CATEGORY_NAME_TRANSLATIONS: Record<string, string> = {
   全部: "All",
   花束: "Bouquet",
   "花束多買優惠": "Bouquet Bundle",
+  "多買優惠組合": "Bundle Offer",
   花籃: "Flower Basket",
   花牌: "Flower Board",
   花牌套餐: "Board Set",
@@ -57,6 +58,8 @@ const CATEGORY_NAME_TRANSLATIONS: Record<string, string> = {
 }
 
 function translateProductName(name: string): string {
+  let translatedName = name
+
   const categoryPrefixes = Object.keys(CATEGORY_NAME_TRANSLATIONS).filter(
     (key) => key.length > 1 && name.startsWith(key)
   )
@@ -65,9 +68,17 @@ function translateProductName(name: string): string {
     const longestPrefix = categoryPrefixes.sort((a, b) => b.length - a.length)[0]
     const translatedPrefix = CATEGORY_NAME_TRANSLATIONS[longestPrefix]
     const remainder = name.slice(longestPrefix.length)
-    return `${translatedPrefix}${remainder}`
+    translatedName = `${translatedPrefix}${remainder}`
   }
-  return name
+
+  // After initial translation, check for any remaining untranslated category terms
+  for (const [chinese, english] of Object.entries(CATEGORY_NAME_TRANSLATIONS)) {
+    if (chinese.length > 1 && translatedName.includes(chinese)) {
+      translatedName = translatedName.replace(chinese, english)
+    }
+  }
+
+  return translatedName
 }
 
 function translateCategory(name: string): string {

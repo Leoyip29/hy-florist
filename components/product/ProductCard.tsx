@@ -29,6 +29,14 @@ export default function ProductCard({
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
+    
+    // If product has options, open detail modal instead of adding to cart
+    if (product.options && product.options.length > 0) {
+      onClick?.(product)
+      return
+    }
+    
+    // Otherwise, add directly to cart
     addItem({
       id: product.id,
       name: product.name,
@@ -81,7 +89,9 @@ export default function ProductCard({
             className="opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 bg-white text-neutral-900 px-6 py-2.5 rounded-full font-medium text-sm flex items-center gap-2 hover:bg-neutral-100 shadow-lg"
           >
             <ShoppingCart className="w-4 h-4" />
-            {t("addToCart")}
+            {product.options && product.options.length > 0 
+              ? t("selectOptions") || "Select Options" 
+              : t("addToCart")}
           </button>
         </div>
       </div>

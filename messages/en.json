@@ -234,7 +234,8 @@
   },
   "ProductCard": {
     "noImage": "No Image",
-    "addToCart": "Add to Cart"
+    "addToCart": "Add to Cart",
+    "selectOptions": "Select Options"
   },
   "ProductDetail": {
     "noImage": "No Image",
@@ -401,6 +402,7 @@
       "全部": "All",
       "花束": "Bouquet",
       "花束多買優惠": "Bouquet Bundle",
+      "多買優惠組合": "Bundle Offer",
       "花籃": "Flower Basket",
       "花牌": "Flower Board",
       "花牌套餐": "Board Set",

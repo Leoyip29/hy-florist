@@ -8,6 +8,7 @@ import CartButton from "@/components/cart/CartButton"
 import { useRouter, usePathname } from "next/navigation"
 import { useTranslations, useLocale } from 'next-intl'
 import { routing } from '@/i18n/routing'
+import { CATEGORY_MAP } from "@/lib/categories"
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -19,6 +20,14 @@ export default function Header() {
   const pathname = usePathname()
   const locale = useLocale()
   const t = useTranslations('Navigation')
+
+  // Get the API category based on locale
+  const getCategoryForApi = (cat: string) => {
+    if (locale === "zh-HK" || locale === "zh") {
+      return CATEGORY_MAP[cat] || cat
+    }
+    return cat
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -121,26 +130,26 @@ export default function Header() {
             <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 z-50">
               <div className="bg-white rounded-lg shadow-xl py-2 min-w-[180px]">
                 {[
-                  { name: t('allProducts'), category: "全部" },
-                  { name: t('flowerBasket'), category: "花籃" },
-                  { name: t('bouquet'), category: "花束" },
-                  { name: t('flowerBoard'), category: "花牌" },
-                  { name: t('heartShapedBoard'), category: "心型花牌" },
-                  { name: t('roundBoard'), category: "圓形花牌" },
-                  { name: t('crossBoard'), category: "十字架花牌" },
-                  { name: t('casketDecoration'), category: "棺面花" },
-                  { name: t('venueDecoration'), category: "場地裝飾" },
-                  { name: t('standFlower'), category: "台花" },
-                  { name: t('venueSeries'), category: "場地系列" },
-                  { name: t('benchFlower'), category: "櫈花" },
-                  { name: t('podiumFlower'), category: "講台花" },
-                  { name: t('boardSet'), category: "花牌套餐" },
-                  { name: t('bouquetDeal'), category: "花束多買優惠" },
+                  { name: t('allProducts'), category: "all" },
+                  { name: t('flowerBasket'), category: "flower-basket" },
+                  { name: t('bouquet'), category: "bouquet" },
+                  { name: t('flowerBoard'), category: "flower-board" },
+                  { name: t('heartShapedBoard'), category: "heart-shaped-board" },
+                  { name: t('roundBoard'), category: "round-board" },
+                  { name: t('crossBoard'), category: "cross-board" },
+                  { name: t('casketDecoration'), category: "casket-decoration" },
+                  { name: t('venueDecoration'), category: "venue-decoration" },
+                  { name: t('standFlower'), category: "stand-flower" },
+                  { name: t('venueSeries'), category: "venue-series" },
+                  { name: t('benchFlower'), category: "bench-flower" },
+                  { name: t('podiumFlower'), category: "podium-flower" },
+                  { name: t('boardSet'), category: "board-set" },
+                  { name: t('bouquetDeal'), category: "bouquet-bundle" },
 
                 ].map((item, i) => (
                   <Link
                     key={i}
-                    href={`/${locale}/products${item.category !== "全部" ? `?category=${encodeURIComponent(item.category)}` : ""}`}
+                    href={`/${locale}/products${item.category !== "all" ? `?category=${encodeURIComponent(getCategoryForApi(item.category))}` : ""}`}
                     className="block px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 transition-colors duration-150 text-sm"
                   >
                     {item.name}

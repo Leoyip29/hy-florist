@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useTranslations, useLocale } from 'next-intl'
+import { CATEGORY_MAP } from "@/lib/categories"
 
 export default function Navbar({ isScrolled }: { isScrolled?: boolean }) {
   const [open, setOpen] = useState(false)
@@ -12,22 +13,30 @@ export default function Navbar({ isScrolled }: { isScrolled?: boolean }) {
   const locale = pathname.split('/')[1] || 'zh-HK'
   const t = useTranslations('Navigation')
 
+  // Get the API category based on locale
+  const getCategoryForApi = (cat: string) => {
+    if (locale === "zh-HK" || locale === "zh") {
+      return CATEGORY_MAP[cat] || cat
+    }
+    return cat
+  }
+
   const productCategories = [
     { name: t('allProducts'), href: `/${locale}/products` },
-    { name: t('flowerBasket'), href: `/${locale}/products?category=花籃` },
-    { name: t('bouquet'), href: `/${locale}/products?category=花束` },
-    { name: t('flowerBoard'), href: `/${locale}/products?category=花牌` },
-    { name: t('heartShapedBoard'), href: `/${locale}/products?category=心型花牌` },
-    { name: t('roundBoard'), href: `/${locale}/products?category=圓形花牌` },
-    { name: t('crossBoard'), href: `/${locale}/products?category=十字架花牌` },
-    { name: t('casketDecoration'), href: `/${locale}/products?category=棺面花` },
-    { name: t('venueDecoration'), href: `/${locale}/products?category=場地裝飾` },
-    { name: t('standFlower'), href: `/${locale}/products?category=台花` },
-    { name: t('venueSeries'), href: `/${locale}/products?category=場地系列` },
-    { name: t('benchFlower'), href: `/${locale}/products?category=櫈花` },
-    { name: t('podiumFlower'), href: `/${locale}/products?category=講台花` },
-    { name: t('boardSet'), href: `/${locale}/products?category=花牌套餐` },
-    { name: t('bouquetDeal'), href: `/${locale}/products?category=花束多買優惠` },
+    { name: t('flowerBasket'), href: `/${locale}/products?category=${getCategoryForApi("flower-basket")}` },
+    { name: t('bouquet'), href: `/${locale}/products?category=${getCategoryForApi("bouquet")}` },
+    { name: t('flowerBoard'), href: `/${locale}/products?category=${getCategoryForApi("flower-board")}` },
+    { name: t('heartShapedBoard'), href: `/${locale}/products?category=${getCategoryForApi("heart-shaped-board")}` },
+    { name: t('roundBoard'), href: `/${locale}/products?category=${getCategoryForApi("round-board")}` },
+    { name: t('crossBoard'), href: `/${locale}/products?category=${getCategoryForApi("cross-board")}` },
+    { name: t('casketDecoration'), href: `/${locale}/products?category=${getCategoryForApi("casket-decoration")}` },
+    { name: t('venueDecoration'), href: `/${locale}/products?category=${getCategoryForApi("venue-decoration")}` },
+    { name: t('standFlower'), href: `/${locale}/products?category=${getCategoryForApi("stand-flower")}` },
+    { name: t('venueSeries'), href: `/${locale}/products?category=${getCategoryForApi("venue-series")}` },
+    { name: t('benchFlower'), href: `/${locale}/products?category=${getCategoryForApi("bench-flower")}` },
+    { name: t('podiumFlower'), href: `/${locale}/products?category=${getCategoryForApi("podium-flower")}` },
+    { name: t('boardSet'), href: `/${locale}/products?category=${getCategoryForApi("board-set")}` },
+    { name: t('bouquetDeal'), href: `/${locale}/products?category=${getCategoryForApi("bouquet-bundle")}` },
   ]
 
   return (

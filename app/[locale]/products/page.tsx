@@ -21,8 +21,17 @@ type ApiLocation = { id: number; name: string }
 type ApiProductImage = {
   id: number
   image: string | null  // Local file path (e.g., /media/products/xxx.jpg)
+  url: string | null    // External URL
   alt_text: string
   is_primary: boolean
+}
+type ApiProductOption = {
+  id: number
+  name: string
+  name_en: string
+  price_adjustment: string
+  image: string | null
+  image_url: string | null
 }
 type ApiProduct = {
   id: number
@@ -32,6 +41,15 @@ type ApiProduct = {
   categories: ApiCategory[]
   suitable_locations: ApiLocation[]
   images: ApiProductImage[]
+  options: ApiProductOption[]
+}
+
+export type ProductOption = {
+  id: number
+  name: string
+  nameEn: string
+  priceAdjustment: number
+  image: string | null
 }
 
 export type UiProduct = {
@@ -44,6 +62,7 @@ export type UiProduct = {
   image: string
   rating?: number
   reviews?: number
+  options?: ProductOption[]
 }
 
 // Category name translations - maps Chinese names to translated names
@@ -52,6 +71,7 @@ const CATEGORY_NAME_TRANSLATIONS: Record<string, string> = {
   全部: "All",
   花束: "Bouquet",
   "花束多買優惠": "Bouquet Bundle",
+  "多買優惠組合": "Bundle Offer",
   花籃: "Flower Basket",
   花牌: "Flower Board",
   花牌套餐: "Board Set",
@@ -80,9 +100,11 @@ export function translateLocation(name: string): string {
 }
 
 // Translate product name - for products following the pattern "CategoryCode Number",
-// we translate just the category prefix
+// we translate just the category prefix. Also handles names that contain category terms.
 export function translateProductName(name: string): string {
-  // Check if the product name starts with a known category
+  let translatedName = name
+
+  // First, check if the product name starts with a known category
   const categoryPrefixes = Object.keys(CATEGORY_NAME_TRANSLATIONS).filter(
     (key) => key.length > 1 && name.startsWith(key)
   )
@@ -92,11 +114,26 @@ export function translateProductName(name: string): string {
     const longestPrefix = categoryPrefixes.sort((a, b) => b.length - a.length)[0]
     const translatedPrefix = CATEGORY_NAME_TRANSLATIONS[longestPrefix]
     const remainder = name.slice(longestPrefix.length)
-    return `${translatedPrefix}${remainder}`
+    translatedName = `${translatedPrefix}${remainder}`
+  } else {
+    // If no prefix match, check if the name contains any known category and translate it
+    for (const [chinese, english] of Object.entries(CATEGORY_NAME_TRANSLATIONS)) {
+      if (chinese.length > 1 && name.includes(chinese)) {
+        translatedName = name.replace(chinese, english)
+        break
+      }
+    }
   }
 
-  // If no match, return the original name
-  return name
+  // After initial translation, check for any remaining untranslated category terms
+  // This handles cases like "花束BA08 多買優惠組合" -> "BouquetBA08 多買優惠組合" -> "BouquetBA08 Bundle Offer"
+  for (const [chinese, english] of Object.entries(CATEGORY_NAME_TRANSLATIONS)) {
+    if (chinese.length > 1 && translatedName.includes(chinese)) {
+      translatedName = translatedName.replace(chinese, english)
+    }
+  }
+
+  return translatedName
 }
 
 // Translate category name
@@ -147,6 +184,15 @@ function pickPrimaryImage(images: ApiProductImage[]) {
 
 // Function to convert API product to UI product with locale-aware translation
 function apiToUiProduct(p: ApiProduct, locale: string): UiProduct {
+  // Map options if present
+  const options: ProductOption[] | undefined = p.options?.map((opt) => ({
+    id: opt.id,
+    name: locale === 'en' ? opt.name_en : opt.name,
+    nameEn: opt.name_en,
+    priceAdjustment: Number(opt.price_adjustment),
+    image: opt.image_url || opt.image || null,
+  }))
+
   return {
     id: p.id,
     name: locale === 'en' ? translateProductName(p.name) : p.name,
@@ -159,6 +205,7 @@ function apiToUiProduct(p: ApiProduct, locale: string): UiProduct {
     ) ?? [],
     price: Number(p.price),
     image: pickPrimaryImage(p.images),
+    options,
   }
 }
 
@@ -180,9 +227,15 @@ function ShopPageContent() {
   const allText = locale === 'en' ? "All" : "全部"
   
   // Convert URL-safe key to Chinese for filtering
+  // Check if URL param contains Chinese characters (already in API format) or is URL-safe key
   const urlCategory = searchParams.get("category")
+  const isChineseCategory = urlCategory && /[\u4e00-\u9fa5]/.test(urlCategory)
   const initialCategory = urlCategory 
-    ? (locale === "zh-HK" || locale === "zh" ? getApiCategory(urlCategory) : urlCategory)
+    ? (locale === "zh-HK" || locale === "zh"
+        ? (isChineseCategory ? urlCategory : getApiCategory(urlCategory))
+        : (isChineseCategory 
+            ? translateCategory(urlCategory)  // Convert Chinese to English for en locale
+            : translateCategory(getApiCategory(urlCategory))))  // Convert URL key to English
     : allText
   const searchQuery = searchParams.get("search") || ""
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
@@ -294,16 +347,25 @@ function ShopPageContent() {
     run()
   }, [])
 
+  // Sync selectedCategory with URL when searchParams changes
+  useEffect(() => {
+    if (urlCategory) {
+      setSelectedCategory(initialCategory)
+    }
+  }, [urlCategory, initialCategory])
+
   // Sync searchKeyword with URL when navigating
   useEffect(() => {
     setSearchKeyword(searchParams.get("search") || "")
   }, [searchParams])
 
-  // Reset category/location selection when locale changes
+  // Reset category/location selection when locale changes (only if no URL category)
   useEffect(() => {
-    setSelectedCategory(allText)
-    setSelectedLocation(allText)
-  }, [locale, allText])
+    if (!urlCategory) {
+      setSelectedCategory(allText)
+      setSelectedLocation(allText)
+    }
+  }, [locale, allText, urlCategory])
 
   // Filter products by category, location, and search keyword
   useEffect(() => {

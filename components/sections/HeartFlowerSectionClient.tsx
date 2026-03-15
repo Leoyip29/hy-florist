@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl"
 import { useRouter } from "next/navigation"
 import ProductCard from "@/components/product/ProductCard"
 import type { UiProduct } from "@/app/[locale]/products/page"
+import { CATEGORY_MAP } from "@/lib/categories"
 
 interface ProductImage {
   id: number
@@ -42,6 +43,7 @@ const CATEGORY_NAME_TRANSLATIONS: Record<string, string> = {
   全部: "All",
   花束: "Bouquet",
   "花束多買優惠": "Bouquet Bundle",
+  "多買優惠組合": "Bundle Offer",
   花籃: "Flower Basket",
   花牌: "Flower Board",
   花牌套餐: "Board Set",
@@ -57,6 +59,8 @@ const CATEGORY_NAME_TRANSLATIONS: Record<string, string> = {
 }
 
 function translateProductName(name: string): string {
+  let translatedName = name
+
   const categoryPrefixes = Object.keys(CATEGORY_NAME_TRANSLATIONS).filter(
     (key) => key.length > 1 && name.startsWith(key)
   )
@@ -65,9 +69,17 @@ function translateProductName(name: string): string {
     const longestPrefix = categoryPrefixes.sort((a, b) => b.length - a.length)[0]
     const translatedPrefix = CATEGORY_NAME_TRANSLATIONS[longestPrefix]
     const remainder = name.slice(longestPrefix.length)
-    return `${translatedPrefix}${remainder}`
+    translatedName = `${translatedPrefix}${remainder}`
   }
-  return name
+
+  // After initial translation, check for any remaining untranslated category terms
+  for (const [chinese, english] of Object.entries(CATEGORY_NAME_TRANSLATIONS)) {
+    if (chinese.length > 1 && translatedName.includes(chinese)) {
+      translatedName = translatedName.replace(chinese, english)
+    }
+  }
+
+  return translatedName
 }
 
 function translateCategory(name: string): string {
@@ -80,6 +92,14 @@ export function HeartFlowerSectionClient({
 }: HeartFlowerSectionProps) {
   const t = useTranslations("HeartFlowerSection")
   const router = useRouter()
+
+  // Get the API category based on locale
+  const getCategoryForApi = (cat: string) => {
+    if (locale === "zh-HK" || locale === "zh") {
+      return CATEGORY_MAP[cat] || cat
+    }
+    return cat
+  }
 
   // Transform API product to UiProduct format with locale-aware translation
   const toUiProduct = (p: Product): UiProduct => ({
@@ -153,7 +173,7 @@ export function HeartFlowerSectionClient({
         {/* View All Link */}
         <div className="mt-16 text-center">
           <Link
-            href={`/${locale}/products?category=心型花牌`}
+            href={`/${locale}/products?category=${getCategoryForApi("heart-shaped-board")}`}
             className="inline-block text-sm tracking-widest text-rose-200 border border-rose-400/50 px-8 py-3 hover:bg-white hover:text-[#8B6B6B] hover:border-white transition-all duration-300"
           >
             {t("viewAll")}

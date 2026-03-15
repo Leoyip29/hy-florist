@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useState, Suspense } from "react"
 import ProductDetail from "@/components/product/ProductDetail"
 import type { UiProduct } from "@/app/[locale]/products/page"
+import { translateProductName, translateCategory } from "@/app/[locale]/products/page"
 
 interface ProductModalProps {
   locale: string
@@ -42,11 +43,16 @@ function ProductModalContent({ locale }: ProductModalProps) {
           const p = data[0]
           const primaryImage = p.images?.find((img: any) => img.is_primary && img.image) || p.images?.[0]
           
+          // Apply translation for English locale
+          const isEnglish = locale === 'en'
+          
           setProduct({
             id: p.id,
-            name: p.name,
+            name: isEnglish ? translateProductName(p.name) : p.name,
             description: p.description,
-            categories: p.categories?.map((c: any) => c.name) || [],
+            categories: p.categories?.map((c: any) => 
+              isEnglish ? translateCategory(c.name) : c.name
+            ) || [],
             locations: [],
             price: Number(p.price),
             image: primaryImage?.image || "",
@@ -63,7 +69,7 @@ function ProductModalContent({ locale }: ProductModalProps) {
     }
 
     fetchProduct()
-  }, [productId])
+  }, [productId, locale])
 
   const handleClose = () => {
     router.push("/", { scroll: false })

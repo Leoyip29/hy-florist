@@ -9,6 +9,7 @@ export interface CartItem {
     quantity: number
     image: string
     categories: string[]
+    selectedOptionId?: number  // For products with selectable options (e.g., board set types)
 }
 
 interface CartContextType {
