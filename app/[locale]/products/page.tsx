@@ -378,20 +378,30 @@ function ShopPageContent() {
         setIsLoading(true)
         setError(null)
 
+        // Validate page before fetching - reset to page 1 if filters changed
+        const pageToFetch = currentPage > 1 ? currentPage : 1
+
         const productsUrl = buildFilterUrl(
           `${API_BASE_URL}/api/products/`,
           selectedCategory,
           selectedLocation,
           searchKeyword,
           sortOption,
-          currentPage,
+          pageToFetch,
           locale
         )
         
         const res = await fetch(productsUrl, {
           cache: "no-store",
         })
+        
+        // Handle invalid page error - reset to page 1 and retry
         if (!res.ok) {
+          if (res.status === 404 && currentPage > 1) {
+            // Page out of bounds, reset to page 1 and fetch again
+            setCurrentPage(1)
+            return
+          }
           throw new Error(`${t("errorLoadProducts")} (${res.status})`)
         }
 
@@ -406,6 +416,11 @@ function ShopPageContent() {
 
         setProducts(uiProducts)
         setTotalCount(response.count)
+        
+        // If we got fewer results than expected on current page, reset to page 1
+        if (response.results.length === 0 && currentPage > 1) {
+          setCurrentPage(1)
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : t("errorLoadProducts"))
       } finally {
