@@ -21,7 +21,7 @@ interface Product {
 const HEART_FLOWER_PRODUCT_IDS = [244, 265, 267, 283]
 
 // Backend API URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
+const API_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000") + "/api"
 
 async function getHeartFlowerProducts(): Promise<Product[]> {
   try {

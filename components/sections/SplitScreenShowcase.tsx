@@ -33,7 +33,7 @@ interface SplitScreenShowcaseProps {
 const SHOWCASE_PRODUCT_IDS = [439, 12, 15]
 
 // Backend API URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
+const API_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000") + "/api"
 
 export default function SplitScreenShowcase({ locale: propLocale }: SplitScreenShowcaseProps) {
   const t = useTranslations("SplitScreenShowcase")
