@@ -338,9 +338,16 @@ function ShopPageContent() {
         const displayCategories = locale === 'en'
           ? apiCategories.map(name => translateCategory(name))
           : apiCategories
+        
         const displayLocations = locale === 'en'
           ? apiLocations.map(name => translateLocation(name))
           : apiLocations
+        
+        // Filter out "不適用" (Not Applicable) from locations
+        const filteredLocations = displayLocations.filter(name => {
+          const englishName = locale === 'en' ? name : translateLocation(name)
+          return englishName !== "NotApplicable"
+        })
 
         // Map categories to images
         const categoryToImage = new Map<string, string>()
@@ -362,7 +369,7 @@ function ShopPageContent() {
             ),
           })),
         ])
-        setLocations([locale === 'en' ? "All" : "全部", ...displayLocations])
+        setLocations([locale === 'en' ? "All" : "全部", ...filteredLocations])
       } catch (err) {
         console.error("Failed to fetch categories:", err)
       }
@@ -558,7 +565,7 @@ function ShopPageContent() {
               </div>
             ) : (
               <p className="text-xs sm:text-sm text-neutral-500">
-                {t("totalProducts", { count: products.length })}
+                {t("totalProducts", { count: totalCount })}
               </p>
             )}
             <div className="flex items-center gap-2">

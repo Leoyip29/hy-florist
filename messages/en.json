@@ -267,8 +267,8 @@
     "ourLocation": "Our Location"
   },
   "Home": {
-    "title": "HY Florist - Hong Kong Floristry Specialist",
-    "subtitle": "Professional floral designs to add beauty and warmth to every moment of your life",
+    "title": "HY Florist - Funeral Flower Specialist",
+    "subtitle": "Professional memorial flower arrangements for dignified farewells and lasting tributes",
     "hero": {
       "ctaButton": "Explore Floristry",
       "slides": [
@@ -291,8 +291,8 @@
     "exploreButton": "Explore Floristry"
   },
   "Products": {
-    "pageTitle": "Floral Shop",
-    "pageSubtitle": "Explore our carefully selected floral works, adding beauty and warmth to every moment of your life.",
+    "pageTitle": "Memorial Flowers",
+    "pageSubtitle": "Explore our carefully selected memorial floral arrangements for dignified farewells and lasting tributes.",
     "loading": "Loading...",
     "errorLoadProducts": "Unable to load products",
     "errorBackendCheck": "Please confirm the backend is running at:",
@@ -303,7 +303,7 @@
     "totalProducts": "{count} products",
     "clear": "Clear",
     "sort": "Sort",
-    "sortDefault": "Default",
+    "sortDefault": "Recommended",
     "sortPriceAsc": "Price: Low to High",
     "sortPriceDesc": "Price: High to Low",
     "previousPage": "Previous",
@@ -430,7 +430,7 @@
     }
   },
   "SEO": {
-    "homeTitle": "HY Florist - Fresh Flowers Delivery in Hong Kong",
-    "homeDescription": "Premium floral arrangements and fresh flower delivery in Hong Kong. Shop our curated collection of bouquets, flower baskets, and custom arrangements."
+    "homeTitle": "HY Florist - Funeral Flower Specialist in Hong Kong",
+    "homeDescription": "Professional memorial flower arrangements and funeral floral delivery in Hong Kong. Shop our collection of condolence flower stands, wreaths, and custom memorial arrangements."
   }
 }

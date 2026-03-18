@@ -303,7 +303,7 @@
     "totalProducts": "共 {count} 件商品",
     "clear": "清除",
     "sort": "排序",
-    "sortDefault": "預設排序",
+    "sortDefault": "推薦",
     "sortPriceAsc": "價格：由低至高",
     "sortPriceDesc": "價格：由高至低",
     "previousPage": "上一頁",
@@ -431,6 +431,6 @@
   },
   "SEO": {
     "homeTitle": "風信子花店 - 帛事花牌專門店",
-    "homeDescription": "優質鮮花擺設及香港鮮花速遞服務。瀏覽我們精選的花束、花籃及訂製鮮花擺設。"
+    "homeDescription": "專業帛事花牌及香港殯葬鮮花速遞服務。瀏覽我們精選的花牌、花籃及訂製帛事鮮花擺設。"
   }
 }
