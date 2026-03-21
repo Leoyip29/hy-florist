@@ -12,8 +12,10 @@ import {
 import { useCart } from "@/contexts/CartContext"
 import Image from "next/image"
 import { Playfair_Display } from "next/font/google"
-import { Loader2, CheckCircle, X, AlertCircle, CreditCard, ExternalLink } from "lucide-react"
+import { Loader2, CheckCircle, X, AlertCircle, CreditCard, ExternalLink, MessageCircle } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
+import PayMePaymentPage from "./PayMePaymentPage"
+import WhatsAppPaymentPage from "./WhatsAppPaymentPage"
 
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["400", "600", "700"] })
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY || "")
@@ -49,14 +51,105 @@ function ErrorAlert({ message, onClose }: { message: string; onClose: () => void
     )
 }
 
+// ─── Payment Method Selector ──────────────────────────────────────────────────
+
+type PaymentMethodId = "stripe" | "payme" | "whatsapp"
+
+interface MethodCard {
+    id: PaymentMethodId
+    icon: React.ReactNode
+    labelZh: string
+    labelEn: string
+    descZh: string
+    descEn: string
+    accent: string
+}
+
+const PAYMENT_METHODS: MethodCard[] = [
+    {
+        id: "stripe",
+        icon: "💳",
+        labelZh: "信用卡 / AliPay / WeChat Pay",
+        labelEn: "Card / AliPay / WeChat Pay",
+        descZh: "Visa、Mastercard、Apple Pay、Google Pay、AliPay、WeChat Pay",
+        descEn: "Visa, Mastercard, Apple Pay, Google Pay, AliPay, WeChat Pay",
+        accent: "border-neutral-300",
+    },
+    // {
+    //     id: "payme",
+    //     icon: "📱",
+    //     labelZh: "PayMe by HSBC",
+    //     labelEn: "PayMe by HSBC",
+    //     descZh: "掃描 QR Code 或點擊連結，金額自動填入",
+    //     descEn: "Scan QR code or tap link — amount pre-filled",
+    //     accent: "border-[#E60028]",
+    // },
+    {
+        id: "whatsapp",
+        icon: <MessageCircle className="w-5 h-5" />,
+        labelZh: "WhatsApp 訂購",
+        labelEn: "Order via WhatsApp",
+        descZh: "透過 WhatsApp 發送訂單資料給我們",
+        descEn: "Send order details via WhatsApp",
+        accent: "border-[#25D366]",
+    },
+]
+
+function PaymentMethodSelector({
+    selected,
+    onChange,
+}: {
+    selected: PaymentMethodId
+    onChange: (id: PaymentMethodId) => void
+}) {
+    const locale = useLocale()
+    return (
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
+            <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>
+                {locale === "en" ? "Payment Method" : "選擇付款方式"}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {PAYMENT_METHODS.map((m) => (
+                    <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => onChange(m.id)}
+                        className={`text-left border-2 rounded-xl p-4 transition-all ${
+                            selected === m.id
+                                ? `${m.accent} ${m.id === "whatsapp" ? "bg-green-50/30" : "bg-red-50/30"} ring-2 ring-offset-1 ${
+                                    m.id === "payme" ? "ring-[#E60028]" : m.id === "whatsapp" ? "ring-[#25D366]" : "ring-neutral-900"
+                                }`
+                                : "border-neutral-200 hover:border-neutral-300"
+                        }`}
+                    >
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xl">{m.icon}</span>
+                            <span className="font-semibold text-sm">
+                                {locale === "en" ? m.labelEn : m.labelZh}
+                            </span>
+                        </div>
+                        <p className="text-xs text-neutral-500">
+                            {locale === "en" ? m.descEn : m.descZh}
+                        </p>
+                    </button>
+                ))}
+            </div>
+        </div>
+    )
+}
+
+// ─── Stripe CheckoutForm ──────────────────────────────────────────────────────
+
 function CheckoutForm({
     clientSecret,
     initialFormData,
     expectedAmount,
+    conversionDetails,
 }: {
     clientSecret: string
     initialFormData: any
     expectedAmount: number
+    conversionDetails: { amountHKD: number; amountUSD: number; exchangeRate: number } | null
 }) {
     const t = useTranslations("Checkout")
     const stripe = useStripe()
@@ -90,7 +183,11 @@ function CheckoutForm({
         try {
             sessionStorage.setItem("pending_order_data", JSON.stringify({
                 ...initialFormData,
-                items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
+                items: items.map((item) => ({
+                    product_id: item.id,
+                    quantity: item.quantity,
+                    selected_option_id: item.selectedOptionId || null,
+                })),
             }))
             const returnUrl = `${window.location.origin}/${locale}/checkout/return`
             const { error, paymentIntent } = await stripe.confirmPayment({
@@ -125,9 +222,29 @@ function CheckoutForm({
                     <div className="flex"><span className="text-neutral-600 w-20">{t("phone")}:</span><span className="font-medium">{initialFormData.customer_phone}</span></div>
                 </div>
             </div>
+            {conversionDetails && (
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-5">
+                    <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                        <span className="text-xl">💱</span>
+                        {locale === "en" ? "Payment Information" : "付款資訊"}
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                        <div className="flex justify-between bg-white bg-opacity-50 p-2 rounded">
+                            <span className="text-blue-800">{locale === "en" ? "Amount in HKD:" : "港幣金額:"}</span>
+                            <span className="font-bold text-blue-900">HK${conversionDetails.amountHKD.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between bg-white bg-opacity-50 p-2 rounded">
+                            <span className="text-blue-800">{locale === "en" ? "Payment Amount (USD):" : "實際付款 (美元):"}</span>
+                            <span className="font-bold text-blue-900">US${conversionDetails.amountUSD.toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
-                <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>{locale === "en" ? "Card / Wallet Details" : "卡片 / 電子錢包資料"}</h2>
-                <PaymentElement options={{ layout: "tabs" }} />
+                <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>
+                    {locale === "en" ? "Card / Wallet Details" : "卡片 / 電子錢包資料"}
+                </h2>
+                <PaymentElement options={{ layout: "tabs", paymentMethodOrder: ["card", "alipay", "wechat_pay"] }} />
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-start gap-2 text-sm">
@@ -143,13 +260,50 @@ function CheckoutForm({
                 {isProcessing ? (
                     <><Loader2 className="w-5 h-5 animate-spin" />{t("processing")}</>
                 ) : selectedRedirectMethod ? (
-                    <><ExternalLink className="w-5 h-5" />{t("confirmPayment", { amount: expectedAmount.toFixed(2) })}</>
+                    <><ExternalLink className="w-5 h-5" />{conversionDetails ? t("confirmPayment", { amount: conversionDetails.amountUSD.toFixed(2) }).replace("HK$", "US$") : t("proceedToPayment")}</>
                 ) : (
-                    <><CreditCard className="w-5 h-5" />{t("confirmPayment", { amount: expectedAmount.toFixed(2) })}</>
+                    <><CreditCard className="w-5 h-5" />{conversionDetails ? t("confirmPayment", { amount: conversionDetails.amountUSD.toFixed(2) }).replace("HK$", "US$") : t("proceedToPayment")}</>
                 )}
             </button>
         </form>
     )
+}
+
+// ─── Main Checkout Component ──────────────────────────────────────────────────
+
+// Hong Kong regions and districts
+const HONG_KONG_REGIONS = [
+    { id: "hong-kong-island", nameZh: "香港島", nameEn: "Hong Kong Island" },
+    { id: "kowloon", nameZh: "九龍", nameEn: "Kowloon" },
+    { id: "new-territories", nameZh: "新界", nameEn: "New Territories" },
+]
+
+const HONG_KONG_DISTRICTS: Record<string, Array<{ id: string; nameZh: string; nameEn: string }>> = {
+    "hong-kong-island": [
+        { id: "central-and-western", nameZh: "中西區", nameEn: "Central & Western" },
+        { id: "eastern", nameZh: "東區", nameEn: "Eastern" },
+        { id: "southern", nameZh: "南區", nameEn: "Southern" },
+        { id: "wan-chai", nameZh: "灣仔區", nameEn: "Wan Chai" },
+    ],
+    "kowloon": [
+        { id: "sham-shui-po", nameZh: "深水埗區", nameEn: "Sham Shui Po" },
+        { id: "yau-tsim-mong", nameZh: "油尖旺區", nameEn: "Yau Tsim Mong" },
+        { id: "shatin", nameZh: "沙田區", nameEn: "Sha Tin" },
+        { id: "kowloon-city", nameZh: "九龍城區", nameEn: "Kowloon City" },
+        { id: "wong-tai-sin", nameZh: "黃大仙區", nameEn: "Wong Tai Sin" },
+        { id: "kwun-tong", nameZh: "觀塘區", nameEn: "Kwun Tong" },
+    ],
+    "new-territories": [
+        { id: "kwai-tsing", nameZh: "葵青區", nameEn: "Kwai Tsing" },
+        { id: "tsuen-wan", nameZh: "荃灣區", nameEn: "Tsuen Wan" },
+        { id: "tuen-mun", nameZh: "屯門區", nameEn: "Tuen Mun" },
+        { id: "yuen-long", nameZh: "元朗區", nameEn: "Yuen Long" },
+        { id: "north", nameZh: "北區", nameEn: "North" },
+        { id: "tai-po", nameZh: "大埔區", nameEn: "Tai Po" },
+        { id: "sha-tin", nameZh: "沙田區", nameEn: "Sha Tin" },
+        { id: "sai-kung", nameZh: "西貢區", nameEn: "Sai Kung" },
+        { id: "islands", nameZh: "離島區", nameEn: "Islands" },
+    ],
 }
 
 export default function CheckoutWrapper() {
@@ -158,8 +312,34 @@ export default function CheckoutWrapper() {
     const router = useRouter()
     const locale = useLocale()
 
+    // Which top-level payment method is selected
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>("stripe")
+
+    // Stripe flow state
     const [showPaymentForm, setShowPaymentForm] = useState(false)
     const [clientSecret, setClientSecret] = useState("")
+    const [conversionDetails, setConversionDetails] = useState<{
+        amountHKD: number
+        amountUSD: number
+        exchangeRate: number
+    } | null>(null)
+
+    // PayMe flow state
+    const [paymeData, setPaymeData] = useState<{
+        orderNumber: string
+        paymeLink: string
+        qrUrl: string
+        amountHkd: number
+        memo: string
+    } | null>(null)
+
+    // WhatsApp flow state
+    const [whatsappData, setWhatsappData] = useState<{
+        orderNumber: string
+        whatsappLink: string
+        amountHkd: number
+    } | null>(null)
+
     const [errorMessage, setErrorMessage] = useState("")
     const [isPreparingPayment, setIsPreparingPayment] = useState(false)
 
@@ -167,16 +347,19 @@ export default function CheckoutWrapper() {
         customer_name: "",
         customer_email: "",
         customer_phone: "",
+        delivery_region: "",
+        delivery_district: "",
         delivery_address: "",
         delivery_date: "",
         delivery_notes: "",
     })
 
     useEffect(() => {
-        if (!isLoading && items.length === 0 && !showPaymentForm) {
+        // Only redirect to products if cart is empty AND no active payment page is shown
+        if (!isLoading && items.length === 0 && !paymeData && !whatsappData && !showPaymentForm) {
             router.push(`/${locale}/products`)
         }
-    }, [items.length, router, isLoading, locale, showPaymentForm])
+    }, [items.length, router, isLoading, locale, paymeData, whatsappData, showPaymentForm])
 
     if (isLoading) {
         return (
@@ -185,17 +368,24 @@ export default function CheckoutWrapper() {
             </main>
         )
     }
-    if (items.length === 0) return null
+    if (items.length === 0 && !paymeData && !whatsappData) return null
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value })
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target
+        if (name === "delivery_region") {
+            setFormData(prev => ({ ...prev, delivery_region: value, delivery_district: "" }))
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }))
+        }
     }
 
     const validateForm = () => {
         if (formData.customer_name.length < 2) throw new Error(t("validation.nameRequired"))
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customer_email)) throw new Error(t("validation.emailRequired"))
         if (formData.customer_phone.length < 8) throw new Error(t("validation.phoneRequired"))
-        if (formData.delivery_address.length < 10) throw new Error(t("validation.addressRequired"))
+        if (!formData.delivery_region) throw new Error(locale === "en" ? "Please select a region" : "請選擇地區")
+        if (!formData.delivery_district) throw new Error(locale === "en" ? "Please select a district" : "請選擇區域")
+        if (formData.delivery_address.length < 5) throw new Error(t("validation.addressRequired"))
         if (!formData.delivery_date) throw new Error(t("validation.dateRequired"))
     }
 
@@ -209,30 +399,101 @@ export default function CheckoutWrapper() {
 
             const orderData = {
                 ...formData,
-                payment_method: "card_pay",
+                payment_method: paymentMethod === "payme" ? "payme" : paymentMethod === "whatsapp" ? "whatsapp" : "card_pay",
                 language: locale,
-                items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
+                items: items.map((item) => ({
+                    product_id: item.id,
+                    quantity: item.quantity,
+                    selected_option_id: item.selectedOptionId || null,
+                })),
             }
 
-            const res = await fetch(`${API_BASE_URL}/api/orders/create-payment-intent/`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(orderData),
-            })
-            if (!res.ok) {
-                const err = await res.json()
-                throw new Error(err.error || t("errors.createPaymentFailed"))
+            if (paymentMethod === "payme") {
+                const res = await fetch(`${API_BASE_URL}/api/orders/payme/create/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(orderData),
+                })
+                if (!res.ok) {
+                    const err = await res.json()
+                    throw new Error(err.error || t("errors.createPaymentFailed"))
+                }
+                const data = await res.json()
+                setPaymeData({
+                    orderNumber: data.order_number,
+                    paymeLink: data.payme_link,
+                    qrUrl: data.qr_url,
+                    amountHkd: data.amount_hkd,
+                    memo: data.memo,
+                })
+                window.scrollTo({ top: 0, behavior: "smooth" })
+
+            } else if (paymentMethod === "whatsapp") {
+                const res = await fetch(`${API_BASE_URL}/api/orders/whatsapp/create/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(orderData),
+                })
+                if (!res.ok) {
+                    const err = await res.json()
+                    throw new Error(err.error || t("errors.createPaymentFailed"))
+                }
+                const data = await res.json()
+                setWhatsappData({
+                    orderNumber: data.order_number,
+                    whatsappLink: data.whatsapp_link,
+                    amountHkd: data.amount_hkd,
+                })
+                window.scrollTo({ top: 0, behavior: "smooth" })
+
+            } else {
+                // Stripe flow
+                const res = await fetch(`${API_BASE_URL}/api/orders/create-payment-intent/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(orderData),
+                })
+                if (!res.ok) {
+                    const err = await res.json()
+                    throw new Error(err.error || t("errors.createPaymentFailed"))
+                }
+                const data = await res.json()
+                setClientSecret(data.clientSecret)
+                setConversionDetails(data.conversionDetails)
+                setShowPaymentForm(true)
+                window.scrollTo({ top: 0, behavior: "smooth" })
             }
-            const data = await res.json()
-            setClientSecret(data.clientSecret)
-            setShowPaymentForm(true)
-            window.scrollTo({ top: 0, behavior: "smooth" })
 
         } catch (error: any) {
             setErrorMessage(error.message || t("errors.networkError"))
         } finally {
             setIsPreparingPayment(false)
         }
+    }
+
+    // ── PayMe page ─────────────────────────────────────────────────────────────
+    if (paymeData) {
+        return (
+            <PayMePaymentPage
+                orderNumber={paymeData.orderNumber}
+                paymeLink={paymeData.paymeLink}
+                qrUrl={paymeData.qrUrl}
+                amountHkd={paymeData.amountHkd}
+                memo={paymeData.memo}
+                customerEmail={formData.customer_email}
+            />
+        )
+    }
+
+    // ── WhatsApp page ─────────────────────────────────────────────────────────
+    if (whatsappData) {
+        return (
+            <WhatsAppPaymentPage
+                orderNumber={whatsappData.orderNumber}
+                whatsappLink={whatsappData.whatsappLink}
+                amountHkd={whatsappData.amountHkd}
+            />
+        )
     }
 
     return (
@@ -274,11 +535,68 @@ export default function CheckoutWrapper() {
                                 <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
                                     <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>{t("deliveryInfo")}</h2>
                                     <div className="space-y-4">
+                                        {/* Region Dropdown */}
                                         <div>
-                                            <label className="block text-sm font-medium mb-2">{t("deliveryAddress")} <span className="text-red-600">*</span></label>
-                                            <textarea name="delivery_address" value={formData.delivery_address} onChange={handleChange} required minLength={10} rows={3}
+                                            <label className="block text-sm font-medium mb-2">
+                                                {locale === "en" ? "Region" : "地區"} <span className="text-red-600">*</span>
+                                            </label>
+                                            <select
+                                                name="delivery_region"
+                                                value={formData.delivery_region}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 bg-white"
+                                            >
+                                                <option value="">
+                                                    {locale === "en" ? "Select Region" : "選擇地區"}
+                                                </option>
+                                                {HONG_KONG_REGIONS.map((region) => (
+                                                    <option key={region.id} value={region.id}>
+                                                        {locale === "en" ? region.nameEn : region.nameZh}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        {/* District Dropdown */}
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">
+                                                {locale === "en" ? "District" : "區域"} <span className="text-red-600">*</span>
+                                            </label>
+                                            <select
+                                                name="delivery_district"
+                                                value={formData.delivery_district}
+                                                onChange={handleChange}
+                                                required
+                                                disabled={!formData.delivery_region}
+                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 bg-white disabled:bg-neutral-100 disabled:cursor-not-allowed"
+                                            >
+                                                <option value="">
+                                                    {locale === "en" ? "Select District" : "選擇區域"}
+                                                </option>
+                                                {formData.delivery_region && HONG_KONG_DISTRICTS[formData.delivery_region]?.map((district) => (
+                                                    <option key={district.id} value={district.id}>
+                                                        {locale === "en" ? district.nameEn : district.nameZh}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        {/* Detailed Address */}
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">
+                                                {locale === "en" ? "Detailed Address" : "詳細地址"} <span className="text-red-600">*</span>
+                                            </label>
+                                            <textarea
+                                                name="delivery_address"
+                                                value={formData.delivery_address}
+                                                onChange={handleChange}
+                                                required
+                                                minLength={5}
+                                                rows={3}
                                                 className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 resize-none"
-                                                placeholder={t("placeholders.address")} />
+                                                placeholder={locale === "en" ? "Flat, Floor, Building name, Street address" : "樓層、室號、大廈名稱、街道地址"}
+                                            />
                                         </div>
                                         <DatePicker value={formData.delivery_date} onChange={(date) => setFormData({ ...formData, delivery_date: date })} />
                                         <div>
@@ -289,6 +607,43 @@ export default function CheckoutWrapper() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Payment Method Selector */}
+                                <PaymentMethodSelector selected={paymentMethod} onChange={setPaymentMethod} />
+
+                                {/* PayMe notice */}
+                                {paymentMethod === "payme" && (
+                                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+                                        <span className="text-2xl">📱</span>
+                                        <div>
+                                            <p className="text-sm font-semibold text-red-900">PayMe — 確認後顯示 QR Code</p>
+                                            <p className="text-xs text-red-700 mt-1">
+                                                點擊「前往付款」後，系統將顯示專屬 PayMe 連結及 QR Code。
+                                                金額及訂單編號將自動填入，您只需在 PayMe 按「Send」即可。
+                                            </p>
+                                            <p className="text-xs text-red-600 mt-1">
+                                                After clicking &quot;Proceed&quot;, you&apos;ll see a personalised QR code with the exact amount pre-filled.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* WhatsApp notice */}
+                                {paymentMethod === "whatsapp" && (
+                                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
+                                        <MessageCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-1" />
+                                        <div>
+                                            <p className="text-sm font-semibold text-green-900">WhatsApp 訂購</p>
+                                            <p className="text-xs text-green-700 mt-1">
+                                                點擊「前往付款」後，系統將引導您透過 WhatsApp 聯繫我們完成訂單。
+                                                我們會確認訂單詳情並提供付款指示。
+                                            </p>
+                                            <p className="text-xs text-green-600 mt-1">
+                                                After clicking &quot;Proceed&quot;, you&apos;ll be redirected to WhatsApp to confirm your order and receive payment instructions.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <button type="submit" disabled={isPreparingPayment}
                                     className="w-full bg-neutral-900 text-white py-4 rounded-lg font-medium hover:bg-neutral-800 disabled:bg-neutral-400 transition-colors flex items-center justify-center gap-2">
@@ -312,6 +667,7 @@ export default function CheckoutWrapper() {
                                         clientSecret={clientSecret}
                                         initialFormData={formData}
                                         expectedAmount={totalPrice}
+                                        conversionDetails={conversionDetails}
                                     />
                                 </Elements>
                             )

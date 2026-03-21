@@ -3,6 +3,7 @@ export type ApiLocation = { id: number; name: string }
 export type ApiProductImage = {
   id: number
   image: string | null
+  url: string | null
   alt_text: string
   is_primary: boolean
 }
@@ -76,10 +77,11 @@ export function translateCategory(name: string): string {
 }
 
 export function pickPrimaryImage(images: ApiProductImage[]): string {
-  const primary = images.find((img) => img.is_primary && img.image)
-  if (primary?.image) return primary.image
-  const anyWithImage = images.find((img) => img.image)
-  return anyWithImage?.image ?? ""
+  const pick = (img: ApiProductImage) => img.url || img.image || ""
+  const primary = images.find((img) => img.is_primary && (img.url || img.image))
+  if (primary) return pick(primary)
+  const any = images.find((img) => img.url || img.image)
+  return any ? pick(any) : ""
 }
 
 export function apiToUiProduct(p: ApiProduct, locale: string): UiProduct {

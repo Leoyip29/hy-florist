@@ -24,6 +24,11 @@ const nextConfig = {
         hostname: 'api.hy-florist.hk',
         pathname: '/media/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'hy-florist.hk',
+        pathname: '/**',
+      },
     ],
   },
 }

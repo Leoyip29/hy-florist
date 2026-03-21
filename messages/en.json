@@ -41,7 +41,7 @@
     "quantity": "Quantity",
     "subtotal": "Subtotal",
     "deliveryFee": "Delivery Fee",
-    "free": "Free",
+    "free": "Provided later",
     "total": "Total",
     "optional": "Optional",
     "orderNumber": "Order Number",
@@ -387,6 +387,20 @@
         }
       ]
     }
+  },
+  "Contact": {
+    "title": "Contact Us",
+    "subtitle": "If you have any questions or need assistance, feel free to contact us. Our team will be happy to help.",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "openingHours": "Opening Hours",
+    "weekdays": "Daily",
+    "ourLocation": "Our Location"
+  },
+  "SEO": {
+    "homeTitle": "HY Florist - Funeral Flower Specialist in Hong Kong",
+    "homeDescription": "Professional memorial flower arrangements and funeral floral delivery in Hong Kong. Shop our collection of condolence flower stands, wreaths, and custom memorial arrangements."
   },
   "ProductCategory": {
     "locations": {
