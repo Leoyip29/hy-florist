@@ -7,6 +7,14 @@ export type ApiProductImage = {
   alt_text: string
   is_primary: boolean
 }
+export type ApiProductOption = {
+  id: number
+  name: string
+  name_en: string
+  price_adjustment: string
+  image: string | null
+  image_url: string | null
+}
 export type ApiProduct = {
   id: number
   name: string
@@ -15,6 +23,15 @@ export type ApiProduct = {
   categories: ApiCategory[]
   suitable_locations: ApiLocation[]
   images: ApiProductImage[]
+  options: ApiProductOption[]
+}
+
+export type ProductOption = {
+  id: number
+  name: string
+  nameEn: string
+  priceAdjustment: number
+  image: string | null
 }
 
 export type UiProduct = {
@@ -27,6 +44,7 @@ export type UiProduct = {
   image: string
   rating?: number
   reviews?: number
+  options?: ProductOption[]
 }
 
 export const CATEGORY_NAME_TRANSLATIONS: Record<string, string> = {
@@ -48,7 +66,7 @@ export const CATEGORY_NAME_TRANSLATIONS: Record<string, string> = {
   場地系列: "Venue Series",
 }
 
-const LOCATION_NAME_TRANSLATIONS: Record<string, string> = {
+export const LOCATION_NAME_TRANSLATIONS: Record<string, string> = {
   全部: "All",
   教堂: "Church",
   殯儀館: "FuneralHome",
@@ -56,25 +74,99 @@ const LOCATION_NAME_TRANSLATIONS: Record<string, string> = {
   不適用: "NotApplicable",
 }
 
+export const REVERSE_CATEGORY_TRANSLATIONS: Record<string, string> = Object.fromEntries(
+  Object.entries(CATEGORY_NAME_TRANSLATIONS).map(([chinese, english]) => [english, chinese])
+)
+
+export const REVERSE_LOCATION_TRANSLATIONS: Record<string, string> = Object.fromEntries(
+  Object.entries(LOCATION_NAME_TRANSLATIONS).map(([chinese, english]) => [english, chinese])
+)
+
 export function translateLocation(name: string): string {
   return LOCATION_NAME_TRANSLATIONS[name] ?? name
 }
 
 export function translateProductName(name: string): string {
+  let translatedName = name
+
   const categoryPrefixes = Object.keys(CATEGORY_NAME_TRANSLATIONS).filter(
     (key) => key.length > 1 && name.startsWith(key)
   )
+
   if (categoryPrefixes.length > 0) {
     const longestPrefix = categoryPrefixes.sort((a, b) => b.length - a.length)[0]
     const translatedPrefix = CATEGORY_NAME_TRANSLATIONS[longestPrefix]
     const remainder = name.slice(longestPrefix.length)
-    return `${translatedPrefix}${remainder}`
+    translatedName = `${translatedPrefix}${remainder}`
+  } else {
+    for (const [chinese, english] of Object.entries(CATEGORY_NAME_TRANSLATIONS)) {
+      if (chinese.length > 1 && name.includes(chinese)) {
+        translatedName = name.replace(chinese, english)
+        break
+      }
+    }
   }
-  return name
+
+  // Second pass: translate any remaining Chinese category terms
+  for (const [chinese, english] of Object.entries(CATEGORY_NAME_TRANSLATIONS)) {
+    if (chinese.length > 1 && translatedName.includes(chinese)) {
+      translatedName = translatedName.replace(chinese, english)
+    }
+  }
+
+  return translatedName
 }
 
 export function translateCategory(name: string): string {
   return CATEGORY_NAME_TRANSLATIONS[name] ?? name
+}
+
+export function toApiCategory(name: string, locale: string): string {
+  if (locale === "en" && REVERSE_CATEGORY_TRANSLATIONS[name]) {
+    return REVERSE_CATEGORY_TRANSLATIONS[name]
+  }
+  return name
+}
+
+export function toApiLocation(name: string, locale: string): string {
+  if (locale === "en" && REVERSE_LOCATION_TRANSLATIONS[name]) {
+    return REVERSE_LOCATION_TRANSLATIONS[name]
+  }
+  return name
+}
+
+export function buildFilterUrl(
+  baseUrl: string,
+  category: string,
+  location: string,
+  search: string,
+  sort: string,
+  page: number,
+  locale: string
+): string {
+  const params = new URLSearchParams()
+
+  const apiCategory = toApiCategory(category, locale)
+  const apiLocation = toApiLocation(location, locale)
+
+  if (apiCategory && apiCategory !== "All" && apiCategory !== "全部") {
+    params.set("category", apiCategory)
+  }
+  if (apiLocation && apiLocation !== "All" && apiLocation !== "全部") {
+    params.set("location", apiLocation)
+  }
+  if (search) {
+    params.set("search", search)
+  }
+  if (sort && sort !== "recommended") {
+    params.set("sort", sort)
+  }
+  if (page > 1) {
+    params.set("page", page.toString())
+  }
+
+  const queryString = params.toString()
+  return queryString ? `${baseUrl}?${queryString}` : baseUrl
 }
 
 export function pickPrimaryImage(images: ApiProductImage[]): string {
@@ -86,6 +178,14 @@ export function pickPrimaryImage(images: ApiProductImage[]): string {
 }
 
 export function apiToUiProduct(p: ApiProduct, locale: string): UiProduct {
+  const options: ProductOption[] | undefined = p.options?.map((opt) => ({
+    id: opt.id,
+    name: locale === "en" ? opt.name_en : opt.name,
+    nameEn: opt.name_en,
+    priceAdjustment: Number(opt.price_adjustment),
+    image: opt.image_url || opt.image || null,
+  }))
+
   return {
     id: p.id,
     name: locale === "en" ? translateProductName(p.name) : p.name,
@@ -98,6 +198,7 @@ export function apiToUiProduct(p: ApiProduct, locale: string): UiProduct {
     ) ?? [],
     price: Number(p.price),
     image: pickPrimaryImage(p.images),
+    options: options?.length ? options : undefined,
   }
 }
 
@@ -107,8 +208,6 @@ export function publicLogo(fileName: string) {
 
 export const CATEGORY_LOGOS: Record<string, string> = {
   全部: "All.png",
-
-  // Chinese -> English filenames (examples)
   花束: "Bouquets.png",
   花籃: "Flower Baskets.png",
   花束多買優惠: "Bouquet Bundle Offers.png",
@@ -123,6 +222,4 @@ export const CATEGORY_LOGOS: Record<string, string> = {
   櫈花: "Chair Flower Arrangements.png",
   講台花: "Podium Flower Arrangements.png",
   花牌套餐: "Funeral Flower Set.png",
-
-
 }
