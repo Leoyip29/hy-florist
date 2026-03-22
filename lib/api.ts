@@ -5,7 +5,6 @@ const API_BASE_URL =
 
 async function parseProductsResponse(res: Response): Promise<ApiProduct[]> {
   const data = await res.json()
-  // Handle both paginated { results: [] } and plain array responses
   if (Array.isArray(data)) return data
   if (Array.isArray(data?.results)) return data.results
   return []

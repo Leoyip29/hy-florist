@@ -8,6 +8,7 @@ import CartButton from "@/components/cart/CartButton"
 import { useRouter, usePathname } from "next/navigation"
 import { useTranslations, useLocale } from 'next-intl'
 import { routing } from '@/i18n/routing'
+import { CATEGORY_MAP } from "@/lib/categories"
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -20,6 +21,14 @@ export default function Header() {
   const locale = useLocale()
   const t = useTranslations('Navigation')
 
+  // Get the API category based on locale
+  const getCategoryForApi = (cat: string) => {
+    if (locale === "zh-HK" || locale === "zh") {
+      return CATEGORY_MAP[cat] || cat
+    }
+    return cat
+  }
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
@@ -28,6 +37,12 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  // Check if current page is homepage
+  const isHomepage = pathname === `/${locale}` || pathname === `/${locale}/`
+
+  // Determine if header should have transparent background (only on homepage when not scrolled)
+  const isTransparent = isHomepage && !isScrolled
 
   // Focus input when search opens
   useEffect(() => {
@@ -59,9 +74,9 @@ export default function Header() {
   return (
     <header
       className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-white shadow-md"
-          : "bg-transparent"
+        isTransparent
+          ? "bg-transparent"
+          : "bg-white shadow-md"
       }`}
     >
       <div className={`mx-auto flex max-w-[1400px] items-center justify-between px-6 py-4 transition-all duration-300 ${
@@ -75,28 +90,28 @@ export default function Header() {
             width={120}
             height={120}
             priority
-            className={isScrolled ? "" : "brightness-0 invert"}
+            className={isTransparent ? "brightness-0 invert" : ""}
           />
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-1 text-sm">
+        <nav className="hidden md:flex items-center gap-1 text-sm">
           <Link
             href={`/${locale}`}
             className={`group relative px-4 py-2 hover:opacity-100 transition-all duration-300 ${
-              isScrolled ? "text-neutral-700" : "text-white"
+              isTransparent ? "text-white" : "text-neutral-700"
             }`}
           >
             {t('home')}
             <span className={`absolute left-4 right-4 bottom-1 h-0.5 w-auto transition-all duration-300 scale-x-0 group-hover:scale-x-100 ${
-              isScrolled ? "bg-neutral-700" : "bg-white"
+              isTransparent ? "bg-white" : "bg-neutral-700"
             }`} />
           </Link>
 
           {/* Products Dropdown */}
           <div className="relative group px-4 py-2 z-30">
             <div className={`flex items-center gap-1 cursor-pointer hover:opacity-100 transition-all duration-300 ${
-              isScrolled ? "text-neutral-700" : "text-white"
+              isTransparent ? "text-white" : "text-neutral-700"
             }`}>
               {t('products')}
               <svg
@@ -110,7 +125,7 @@ export default function Header() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 className={`transition-transform duration-300 group-hover:rotate-180 ${
-                  isScrolled ? "text-neutral-700" : "text-white"
+                  isTransparent ? "text-white" : "text-neutral-700"
                 }`}
               >
                 <path d="m6 9 6 6 6-6" />
@@ -121,26 +136,26 @@ export default function Header() {
             <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 z-50">
               <div className="bg-white rounded-lg shadow-xl py-2 min-w-[180px]">
                 {[
-                  { name: t('allProducts'), category: "全部" },
-                  { name: t('flowerBasket'), category: "花籃" },
-                  { name: t('bouquet'), category: "花束" },
-                  { name: t('flowerBoard'), category: "花牌" },
-                  { name: t('heartShapedBoard'), category: "心型花牌" },
-                  { name: t('roundBoard'), category: "圓形花牌" },
-                  { name: t('crossBoard'), category: "十字架花牌" },
-                  { name: t('casketDecoration'), category: "棺面花" },
-                  { name: t('venueDecoration'), category: "場地裝飾" },
-                  { name: t('standFlower'), category: "台花" },
-                  { name: t('venueSeries'), category: "場地系列" },
-                  { name: t('benchFlower'), category: "櫈花" },
-                  { name: t('podiumFlower'), category: "講台花" },
-                  { name: t('boardSet'), category: "花牌套餐" },
-                  { name: t('bouquetDeal'), category: "花束多買優惠" },
+                  { name: t('allProducts'), category: "all" },
+                  { name: t('flowerBasket'), category: "flower-basket" },
+                  { name: t('bouquet'), category: "bouquet" },
+                  { name: t('flowerBoard'), category: "flower-board" },
+                  { name: t('heartShapedBoard'), category: "heart-shaped-board" },
+                  { name: t('roundBoard'), category: "round-board" },
+                  { name: t('crossBoard'), category: "cross-board" },
+                  { name: t('casketDecoration'), category: "casket-decoration" },
+                  { name: t('venueDecoration'), category: "venue-decoration" },
+                  { name: t('standFlower'), category: "stand-flower" },
+                  { name: t('venueSeries'), category: "venue-series" },
+                  { name: t('benchFlower'), category: "bench-flower" },
+                  { name: t('podiumFlower'), category: "podium-flower" },
+                  { name: t('boardSet'), category: "board-set" },
+                  { name: t('bouquetDeal'), category: "bouquet-bundle" },
 
                 ].map((item, i) => (
                   <Link
                     key={i}
-                    href={`/${locale}/products${item.category !== "全部" ? `?category=${encodeURIComponent(item.category)}` : ""}`}
+                    href={`/${locale}/products${item.category !== "all" ? `?category=${encodeURIComponent(getCategoryForApi(item.category))}` : ""}`}
                     className="block px-4 py-2.5 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 transition-colors duration-150 text-sm"
                   >
                     {item.name}
@@ -153,23 +168,23 @@ export default function Header() {
           <Link
             href={`/${locale}/about`}
             className={`group relative px-4 py-2 hover:opacity-100 transition-all duration-300 ${
-              isScrolled ? "text-neutral-700" : "text-white"
+              isTransparent ? "text-white" : "text-neutral-700"
             }`}
           >
             {t('about')}
             <span className={`absolute left-4 right-4 bottom-1 h-0.5 w-auto transition-all duration-300 scale-x-0 group-hover:scale-x-100 ${
-              isScrolled ? "bg-neutral-700" : "bg-white"
+              isTransparent ? "bg-white" : "bg-neutral-700"
             }`} />
           </Link>
           <Link
             href={`/${locale}/contact`}
             className={`group relative px-4 py-2 hover:opacity-100 transition-all duration-300 ${
-              isScrolled ? "text-neutral-700" : "text-white"
+              isTransparent ? "text-white" : "text-neutral-700"
             }`}
           >
             {t('contact')}
             <span className={`absolute left-4 right-4 bottom-1 h-0.5 w-auto transition-all duration-300 scale-x-0 group-hover:scale-x-100 ${
-              isScrolled ? "bg-neutral-700" : "bg-white"
+              isTransparent ? "bg-white" : "bg-neutral-700"
             }`} />
           </Link>
         </nav>
@@ -181,7 +196,7 @@ export default function Header() {
             <button
               onClick={() => setLanguageMenuOpen(!languageMenuOpen)}
               className={`text-sm hover:opacity-70 transition-opacity flex items-center gap-1 ${
-                isScrolled ? "text-neutral-700" : "text-white"
+                isTransparent ? "text-white" : "text-neutral-700"
               }`}
             >
               <svg
@@ -257,8 +272,8 @@ export default function Header() {
             ) : (
               <button
                 onClick={() => setSearchOpen(true)}
-                className={`p-2 hover:bg-white/10 rounded-full transition-colors ${
-                  isScrolled ? "" : "hover:bg-black/10"
+                className={`p-2 rounded-full transition-colors ${
+                  isTransparent ? "hover:bg-white/20" : "hover:bg-black/10"
                 }`}
               >
                 <svg
@@ -271,7 +286,7 @@ export default function Header() {
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className={isScrolled ? "text-neutral-700" : "text-white"}
+                  className={isTransparent ? "text-white" : "text-neutral-700"}
                 >
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.35-4.35" />
@@ -279,11 +294,11 @@ export default function Header() {
               </button>
             )}
           </div>
-          <CartButton isScrolled={isScrolled}/>
+          <CartButton isScrolled={!isTransparent}/>
 
           {/* Mobile Navigation */}
           <div className="md:hidden">
-            <Navbar isScrolled={isScrolled} />
+            <Navbar isScrolled={!isTransparent} />
           </div>
         </div>
       </div>
