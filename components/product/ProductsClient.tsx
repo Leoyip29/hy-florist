@@ -1,7 +1,6 @@
 "use client"
 
-import Image from "next/image"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Playfair_Display } from "next/font/google"
 import { useTranslations } from "next-intl"
 import ProductCategory from "@/components/product/ProductCategory"
@@ -41,9 +40,7 @@ export default function ProductsClient({
   const [filteredProducts, setFilteredProducts] = useState<UiProduct[]>(initialProducts)
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 12
-  const [scrollOffset, setScrollOffset] = useState(0)
   const [itemsInView, setItemsInView] = useState<boolean[]>([])
-  const sectionRef = useRef<HTMLDivElement>(null)
   const [sortOption, setSortOption] = useState<"recommended" | "price_asc" | "price_desc">(
     "recommended"
   )
@@ -93,19 +90,6 @@ export default function ProductsClient({
     currentPage * pageSize
   )
 
-  // Parallax scroll effect
-  useEffect(() => {
-    const handleScroll = () => {
-      if (sectionRef.current) {
-        const rect = sectionRef.current.getBoundingClientRect()
-        const offset = Math.max(0, (window.innerHeight - rect.top) * 0.3)
-        setScrollOffset(Math.min(offset, 100))
-      }
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
   // Intersection Observer for product animations
   useEffect(() => {
     const items = document.querySelectorAll(".product-card")
@@ -124,37 +108,7 @@ export default function ProductsClient({
   }, [paginatedProducts])
 
   return (
-    <main className="bg-white">
-      {/* ===== HERO SECTION ===== */}
-      <section
-        className="relative py-24 md:py-50 overflow-hidden"
-        ref={sectionRef}
-        style={{ transform: `translateY(-${scrollOffset * 0.2}px)` }}
-      >
-        <Image
-          src="/store.png"
-          alt="Store background"
-          fill
-          priority
-          className="object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/60 to-transparent" />
-        <div className="absolute inset-0 bg-black/10" />
-
-        <div className="relative mx-auto max-w-7xl px-4 md:px-8">
-          <div className="max-w-2xl">
-            <h1
-              className={`${playfair.className} text-5xl md:text-7xl font-light mb-6 text-neutral-900 leading-tight`}
-            >
-              {t("pageTitle")}
-            </h1>
-            <p className="text-lg md:text-xl text-neutral-700 font-light leading-8">
-              {t("pageSubtitle")}
-            </p>
-          </div>
-        </div>
-      </section>
-
+    <main className="bg-white pt-[125px]">
       <ProductCategory
         categories={initialCategories}
         selectedCategory={selectedCategory}
