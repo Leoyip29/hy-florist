@@ -3,21 +3,27 @@ import type { ApiProduct } from "./product-utils"
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000"
 
-async function parseProductsResponse(res: Response): Promise<ApiProduct[]> {
+async function parseProductsResponse(res: Response): Promise<{ results: ApiProduct[]; next: string | null }> {
   const data = await res.json()
-  // Handle both paginated { results: [] } and plain array responses
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data?.results)) return data.results
-  return []
+  if (Array.isArray(data)) return { results: data, next: null }
+  if (Array.isArray(data?.results)) return { results: data.results, next: data.next ?? null }
+  return { results: [], next: null }
 }
 
 export async function fetchProducts(): Promise<ApiProduct[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/products/`, {
-      next: { revalidate: 60 },
-    })
-    if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`)
-    return parseProductsResponse(res)
+    const all: ApiProduct[] = []
+    let url: string | null = `${API_BASE_URL}/api/products/`
+
+    while (url) {
+      const res = await fetch(url, { next: { revalidate: 60 } })
+      if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`)
+      const { results, next } = await parseProductsResponse(res)
+      all.push(...results)
+      url = next
+    }
+
+    return all
   } catch {
     return []
   }
@@ -29,13 +35,13 @@ export async function fetchFeaturedProducts(): Promise<ApiProduct[]> {
       cache: "no-store",
     })
     if (!res.ok) throw new Error(`Failed to fetch featured products: ${res.status}`)
-    const products = await parseProductsResponse(res)
+    const { results } = await parseProductsResponse(res)
     // Fallback: if hot-seller filter returns nothing, return first page of all products
-    if (products.length === 0) {
+    if (results.length === 0) {
       const fallback = await fetch(`${API_BASE_URL}/api/products/`, { cache: "no-store" })
-      if (fallback.ok) return parseProductsResponse(fallback)
+      if (fallback.ok) return (await parseProductsResponse(fallback)).results
     }
-    return products
+    return results
   } catch {
     return []
   }
@@ -50,7 +56,7 @@ export async function fetchProductsByIds(ids: number[]): Promise<ApiProduct[]> {
       { next: { revalidate: 60 } }
     )
     if (!res.ok) throw new Error(`Failed to fetch products by ids: ${res.status}`)
-    return parseProductsResponse(res)
+    return (await parseProductsResponse(res)).results
   } catch {
     return []
   }

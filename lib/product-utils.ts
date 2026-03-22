@@ -33,6 +33,7 @@ export const CATEGORY_NAME_TRANSLATIONS: Record<string, string> = {
   全部: "All",
   花束: "Bouquet",
   "花束多買優惠": "Bouquet Bundle",
+  "多買優惠組合": "Bundle Offer",
   花籃: "Flower Basket",
   花牌: "Flower Board",
   花牌套餐: "Board Set",
@@ -47,7 +48,7 @@ export const CATEGORY_NAME_TRANSLATIONS: Record<string, string> = {
   場地系列: "Venue Series",
 }
 
-export const LOCATION_NAME_TRANSLATIONS: Record<string, string> = {
+const LOCATION_NAME_TRANSLATIONS: Record<string, string> = {
   全部: "All",
   教堂: "Church",
   殯儀館: "FuneralHome",
@@ -106,6 +107,8 @@ export function publicLogo(fileName: string) {
 
 export const CATEGORY_LOGOS: Record<string, string> = {
   全部: "All.png",
+
+  // Chinese -> English filenames (examples)
   花束: "Bouquets.png",
   花籃: "Flower Baskets.png",
   花束多買優惠: "Bouquet Bundle Offers.png",
@@ -120,4 +123,6 @@ export const CATEGORY_LOGOS: Record<string, string> = {
   櫈花: "Chair Flower Arrangements.png",
   講台花: "Podium Flower Arrangements.png",
   花牌套餐: "Funeral Flower Set.png",
+
+
 }
