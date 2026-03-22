@@ -289,7 +289,7 @@
     "totalProducts": "共 {count} 件商品",
     "clear": "清除",
     "sort": "排序",
-    "sortDefault": "預設排序",
+    "sortDefault": "推薦",
     "sortPriceAsc": "價格：由低至高",
     "sortPriceDesc": "價格：由高至低",
     "previousPage": "上一頁",

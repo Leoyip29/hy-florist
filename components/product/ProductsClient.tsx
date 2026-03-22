@@ -56,6 +56,7 @@ export default function ProductsClient() {
   const [totalCount, setTotalCount] = useState(0)
   const pageSize = 12
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [itemsInView, setItemsInView] = useState<boolean[]>([])
   const [sortOption, setSortOption] = useState<"recommended" | "price_asc" | "price_desc">("recommended")
   const [selectedProduct, setSelectedProduct] = useState<UiProduct | null>(null)
@@ -115,6 +116,8 @@ export default function ProductsClient() {
     const fetchProducts = async () => {
       try {
         setIsLoading(true)
+        setError(null)
+
         const url = buildFilterUrl(
           `${API_BASE_URL}/api/products/`,
           selectedCategory,
@@ -131,7 +134,7 @@ export default function ProductsClient() {
             setCurrentPage(1)
             return
           }
-          throw new Error(`${res.status}`)
+          throw new Error(`${t("errorLoadProducts")} (${res.status})`)
         }
 
         const response = await res.json() as { count: number; results: ApiProduct[] }
@@ -142,7 +145,7 @@ export default function ProductsClient() {
           setCurrentPage(1)
         }
       } catch (e) {
-        console.error("Failed to fetch products:", e)
+        setError(e instanceof Error ? e.message : t("errorLoadProducts"))
       } finally {
         setIsLoading(false)
       }
@@ -246,6 +249,14 @@ export default function ProductsClient() {
             <div className="text-center py-16">
               <p className="text-neutral-500 text-lg">{t("loading")}</p>
             </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <p className="text-red-600 text-lg mb-4">{t("errorLoadProducts")}</p>
+              <p className="text-neutral-500 text-sm">{error}</p>
+              <p className="text-neutral-500 text-sm mt-2">
+                {t("errorBackendCheck")} {API_BASE_URL}/api/products/
+              </p>
+            </div>
           ) : products.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-neutral-500 text-lg">{t("noProductsInCategory")}</p>
@@ -268,7 +279,7 @@ export default function ProductsClient() {
       </section>
 
       {/* ===== PAGINATION ===== */}
-      {!isLoading && products.length > 0 && (
+      {!isLoading && !error && products.length > 0 && (
         <section className="pb-16">
           <div className="mx-auto max-w-7xl px-4 md:px-8 flex items-center justify-center gap-3">
             <button
