@@ -83,12 +83,12 @@ export default function ProductCard({
         )}
 
         {/* Add to Cart Button Overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-end justify-center p-4">
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-end justify-center p-3 md:p-4">
           <button
             onClick={handleAddToCart}
-            className="opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 bg-white text-neutral-900 px-6 py-2.5 rounded-full font-medium text-sm flex items-center gap-2 hover:bg-neutral-100 shadow-lg"
+            className="opacity-100 translate-y-0 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300 bg-white text-neutral-900 px-4 py-2 md:px-6 md:py-2.5 rounded-full font-medium text-xs md:text-sm flex items-center gap-1.5 md:gap-2 hover:bg-neutral-100 shadow-lg"
           >
-            <ShoppingCart className="w-4 h-4" />
+            <ShoppingCart className="w-3.5 h-3.5 md:w-4 md:h-4" />
             {t("addToCart")}
           </button>
         </div>
