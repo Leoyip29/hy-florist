@@ -1,7 +1,6 @@
 "use client"
 
 import Image from "next/image"
-import Link from "next/link"
 import { ShoppingCart } from "lucide-react"
 import { useCart } from "@/contexts/CartContext"
 import { useTranslations } from "next-intl"
@@ -96,18 +95,16 @@ export default function ProductCard({
       </div>
 
       {/* Product Info */}
-      <Link href={`/products/${product.id}`} className="block">
-        <div className="text-center space-y-1">
-          <h3
-            className={`${playfairClassName} text-base font-light text-neutral-900 group-hover:text-neutral-600 transition-colors line-clamp-2 min-h-[3rem]`}
-          >
-            {product.name}
-          </h3>
-          <p className="text-sm font-medium text-neutral-900">
-            HK${displayPrice.toLocaleString()}
-          </p>
-        </div>
-      </Link>
+      <div className="text-center space-y-1">
+        <h3
+          className={`${playfairClassName} text-base font-light text-neutral-900 group-hover:text-neutral-600 transition-colors line-clamp-2 min-h-[3rem]`}
+        >
+          {product.name}
+        </h3>
+        <p className="text-sm font-medium text-neutral-900">
+          HK${displayPrice.toLocaleString()}
+        </p>
+      </div>
     </div>
   )
 }
