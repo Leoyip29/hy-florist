@@ -66,15 +66,15 @@ interface MethodCard {
 }
 
 const PAYMENT_METHODS: MethodCard[] = [
-    {
-        id: "stripe",
-        icon: "💳",
-        labelZh: "信用卡 / AliPay / WeChat Pay",
-        labelEn: "Card / AliPay / WeChat Pay",
-        descZh: "Visa、Mastercard、Apple Pay、Google Pay、AliPay、WeChat Pay",
-        descEn: "Visa, Mastercard, Apple Pay, Google Pay, AliPay, WeChat Pay",
-        accent: "border-neutral-300",
-    },
+    // {
+    //     id: "stripe",
+    //     icon: "💳",
+    //     labelZh: "信用卡 / AliPay / WeChat Pay",
+    //     labelEn: "Card / AliPay / WeChat Pay",
+    //     descZh: "Visa、Mastercard、Apple Pay、Google Pay、AliPay、WeChat Pay",
+    //     descEn: "Visa, Mastercard, Apple Pay, Google Pay, AliPay, WeChat Pay",
+    //     accent: "border-neutral-300",
+    // },
     // {
     //     id: "payme",
     //     icon: "📱",
@@ -145,11 +145,13 @@ function CheckoutForm({
     initialFormData,
     expectedAmount,
     conversionDetails,
+    totalPrice,
 }: {
     clientSecret: string
     initialFormData: any
     expectedAmount: number
     conversionDetails: { amountHKD: number; amountUSD: number; exchangeRate: number } | null
+    totalPrice: number
 }) {
     const t = useTranslations("Checkout")
     const stripe = useStripe()
@@ -252,9 +254,14 @@ function CheckoutForm({
                     <p className="text-green-800">{t("securityNotice")}</p>
                 </div>
             </div>
+            {(!stripe || totalPrice < 1000) && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-amber-800">{t("minimumOrderNotice")}</p>
+                </div>
+            )}
             <button
                 type="submit"
-                disabled={!stripe || isProcessing}
+                disabled={!stripe || isProcessing || totalPrice < 1000}
                 className="w-full bg-neutral-900 text-white py-4 rounded-lg font-medium hover:bg-neutral-800 disabled:bg-neutral-400 transition-colors flex items-center justify-center gap-2"
             >
                 {isProcessing ? (
@@ -271,49 +278,90 @@ function CheckoutForm({
 
 // ─── Main Checkout Component ──────────────────────────────────────────────────
 
-// Hong Kong regions and districts
-const HONG_KONG_REGIONS = [
-    { id: "hong-kong-island", nameZh: "香港島", nameEn: "Hong Kong Island" },
-    { id: "kowloon", nameZh: "九龍", nameEn: "Kowloon" },
-    { id: "new-territories", nameZh: "新界", nameEn: "New Territories" },
+// ─── Location dropdowns ─────────────────────────────────────────────────────────
+
+type LocationCategory = "funeral_parlour" | "church"
+
+interface LocationOption {
+    id: string
+    nameZh: string
+    nameEn: string
+    category: LocationCategory
+}
+
+const LOCATION_OPTIONS: LocationOption[] = [
+    // 港島區 — 殯儀館
+    { id: "hk-island-hkf", nameZh: "香港殯儀館（北角）", nameEn: "Hong Kong Funeral Parlour (North Point)", category: "funeral_parlour" },
+
+    // 九龍區 — 殯儀館
+    { id: "kowloon-world", nameZh: "世界殯儀館", nameEn: "World Funeral Parlour", category: "funeral_parlour" },
+    { id: "kowloon-international", nameZh: "萬國殯儀館", nameEn: "International Funeral Parlour", category: "funeral_parlour" },
+    { id: "kowloon-cosmos", nameZh: "寰宇殯儀館", nameEn: "Cosmos Funeral Parlour", category: "funeral_parlour" },
+    { id: "kowloon-kowloon", nameZh: "九龍殯儀館", nameEn: "Kowloon Funeral Parlour", category: "funeral_parlour" },
+    { id: "kowloon-diamond-hill", nameZh: "鑽石山殯儀館", nameEn: "Diamond Hill Funeral Parlour", category: "funeral_parlour" },
+
+    // 新界區 — 殯儀館
+    { id: "nt-po-fook", nameZh: "寶福紀念館（大圍）", nameEn: "Po Fook Memorial Hall (Sha Tin)", category: "funeral_parlour" },
+
+    // 九龍區 — 教堂
+    { id: "kowloon-st-andrew", nameZh: "聖安德烈堂", nameEn: "St. Andrew's Church", category: "church" },
+    { id: "kowloon-st-john", nameZh: "聖公會聖匠堂", nameEn: "St. John's Church", category: "church" },
+    { id: "kowloon-shum-ao", nameZh: "中華基督教會深愛堂", nameEn: "Shum Ao Church", category: "church" },
+
+    // 港島區 — 教堂
+    { id: "hk-island-wan-chai", nameZh: "灣仔聯合教會國際禮拜堂", nameEn: "Wan Chai United Church International Chapel", category: "church" },
+    { id: "hk-island-north-point", nameZh: "北角衛斯理堂", nameEn: "North Point Wesley Church", category: "church" },
+    { id: "hk-island-pokfulam", nameZh: "薄扶林上路教堂", nameEn: "Pokfulam Road Church", category: "church" },
+    { id: "hk-island-hk-union", nameZh: "香港佑寧堂", nameEn: "Hong Kong Union Church", category: "church" },
+
+    // 將軍澳區 — 教堂
+    { id: "tko-haven", nameZh: "靈實禮拜堂", nameEn: "Haven of Hope Chapel", category: "church" },
+    { id: "tko-st-john-baptist", nameZh: "施洗聖約翰堂", nameEn: "St. John the Baptist Church", category: "church" },
+
+    // 新界區 — 教堂
+    { id: "nt-tuen-mun", nameZh: "屯門神召會神學院", nameEn: "Tuen Mun Christian Academy", category: "church" },
+    { id: "nt-jockey-club", nameZh: "賽馬會善寧之家", nameEn: "Jockey Club Tseng's Home", category: "church" },
 ]
 
-const HONG_KONG_DISTRICTS: Record<string, Array<{ id: string; nameZh: string; nameEn: string }>> = {
-    "hong-kong-island": [
-        { id: "central-and-western", nameZh: "中西區", nameEn: "Central & Western" },
-        { id: "eastern", nameZh: "東區", nameEn: "Eastern" },
-        { id: "southern", nameZh: "南區", nameEn: "Southern" },
-        { id: "wan-chai", nameZh: "灣仔區", nameEn: "Wan Chai" },
-    ],
-    "kowloon": [
-        { id: "sham-shui-po", nameZh: "深水埗區", nameEn: "Sham Shui Po" },
-        { id: "yau-tsim-mong", nameZh: "油尖旺區", nameEn: "Yau Tsim Mong" },
-        { id: "shatin", nameZh: "沙田區", nameEn: "Sha Tin" },
-        { id: "kowloon-city", nameZh: "九龍城區", nameEn: "Kowloon City" },
-        { id: "wong-tai-sin", nameZh: "黃大仙區", nameEn: "Wong Tai Sin" },
-        { id: "kwun-tong", nameZh: "觀塘區", nameEn: "Kwun Tong" },
-    ],
-    "new-territories": [
-        { id: "kwai-tsing", nameZh: "葵青區", nameEn: "Kwai Tsing" },
-        { id: "tsuen-wan", nameZh: "荃灣區", nameEn: "Tsuen Wan" },
-        { id: "tuen-mun", nameZh: "屯門區", nameEn: "Tuen Mun" },
-        { id: "yuen-long", nameZh: "元朗區", nameEn: "Yuen Long" },
-        { id: "north", nameZh: "北區", nameEn: "North" },
-        { id: "tai-po", nameZh: "大埔區", nameEn: "Tai Po" },
-        { id: "sha-tin", nameZh: "沙田區", nameEn: "Sha Tin" },
-        { id: "sai-kung", nameZh: "西貢區", nameEn: "Sai Kung" },
-        { id: "islands", nameZh: "離島區", nameEn: "Islands" },
-    ],
+export const LOCATION_GROUPS_ZH: Record<LocationCategory, Record<string, LocationOption[]>> = {
+    funeral_parlour: {
+        "港島區": LOCATION_OPTIONS.filter(o => o.category === "funeral_parlour" && o.id.startsWith("hk-island")),
+        "九龍區": LOCATION_OPTIONS.filter(o => o.category === "funeral_parlour" && o.id.startsWith("kowloon")),
+        "新界區": LOCATION_OPTIONS.filter(o => o.category === "funeral_parlour" && o.id.startsWith("nt")),
+    },
+    church: {
+        "九龍區": LOCATION_OPTIONS.filter(o => o.category === "church" && o.id.startsWith("kowloon")),
+        "港島區": LOCATION_OPTIONS.filter(o => o.category === "church" && o.id.startsWith("hk-island")),
+        "將軍澳區": LOCATION_OPTIONS.filter(o => o.category === "church" && o.id.startsWith("tko")),
+        "新界區": LOCATION_OPTIONS.filter(o => o.category === "church" && o.id.startsWith("nt")),
+    },
 }
+
+export const LOCATION_GROUPS_EN: Record<LocationCategory, Record<string, LocationOption[]>> = {
+    funeral_parlour: {
+        "Hong Kong Island": LOCATION_OPTIONS.filter(o => o.category === "funeral_parlour" && o.id.startsWith("hk-island")),
+        "Kowloon": LOCATION_OPTIONS.filter(o => o.category === "funeral_parlour" && o.id.startsWith("kowloon")),
+        "New Territories": LOCATION_OPTIONS.filter(o => o.category === "funeral_parlour" && o.id.startsWith("nt")),
+    },
+    church: {
+        "Kowloon": LOCATION_OPTIONS.filter(o => o.category === "church" && o.id.startsWith("kowloon")),
+        "Hong Kong Island": LOCATION_OPTIONS.filter(o => o.category === "church" && o.id.startsWith("hk-island")),
+        "Tseung Kwan O": LOCATION_OPTIONS.filter(o => o.category === "church" && o.id.startsWith("tko")),
+        "New Territories": LOCATION_OPTIONS.filter(o => o.category === "church" && o.id.startsWith("nt")),
+    },
+}
+
+export { LOCATION_OPTIONS }
+export type { LocationCategory }
 
 export default function CheckoutWrapper() {
     const t = useTranslations("Checkout")
-    const { items, totalPrice, isLoading } = useCart()
+    const { items, totalPrice, deliveryFee, grandTotal, isLoading, hasBoardSet } = useCart()
     const router = useRouter()
     const locale = useLocale()
 
     // Which top-level payment method is selected
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>("stripe")
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethodId>("whatsapp")
 
     // Stripe flow state
     const [showPaymentForm, setShowPaymentForm] = useState(false)
@@ -343,13 +391,15 @@ export default function CheckoutWrapper() {
     const [errorMessage, setErrorMessage] = useState("")
     const [isPreparingPayment, setIsPreparingPayment] = useState(false)
 
+    const [errors, setErrors] = useState<Record<string, string>>({})
+
     const [formData, setFormData] = useState({
         customer_name: "",
         customer_email: "",
         customer_phone: "",
-        delivery_region: "",
+        deceased_name: "",
+        delivery_region: "" as LocationCategory | "",
         delivery_district: "",
-        delivery_address: "",
         delivery_date: "",
         delivery_notes: "",
     })
@@ -361,32 +411,31 @@ export default function CheckoutWrapper() {
         }
     }, [items.length, router, isLoading, locale, paymeData, whatsappData, showPaymentForm])
 
-    if (isLoading) {
-        return (
-            <main className="min-h-screen bg-neutral-50 py-12 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-neutral-900" />
-            </main>
-        )
-    }
-    if (items.length === 0 && !paymeData && !whatsappData) return null
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target
+        setErrors(prev => ({ ...prev, [name]: "" }))
         if (name === "delivery_region") {
-            setFormData(prev => ({ ...prev, delivery_region: value, delivery_district: "" }))
+            setFormData(prev => ({ ...prev, delivery_region: value as LocationCategory, delivery_district: "" }))
         } else {
             setFormData(prev => ({ ...prev, [name]: value }))
         }
     }
 
     const validateForm = () => {
-        if (formData.customer_name.length < 2) throw new Error(t("validation.nameRequired"))
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customer_email)) throw new Error(t("validation.emailRequired"))
-        if (formData.customer_phone.length < 8) throw new Error(t("validation.phoneRequired"))
-        if (!formData.delivery_region) throw new Error(locale === "en" ? "Please select a region" : "請選擇地區")
-        if (!formData.delivery_district) throw new Error(locale === "en" ? "Please select a district" : "請選擇區域")
-        if (formData.delivery_address.length < 5) throw new Error(t("validation.addressRequired"))
-        if (!formData.delivery_date) throw new Error(t("validation.dateRequired"))
+        const newErrors: Record<string, string> = {}
+        if (!formData.customer_name.trim()) newErrors.customer_name = t("validation.nameRequired")
+        else if (formData.customer_name.trim().length < 2) newErrors.customer_name = t("validation.nameTooShort")
+        if (!formData.customer_email.trim()) newErrors.customer_email = t("validation.emailRequired")
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customer_email.trim())) newErrors.customer_email = t("validation.emailInvalid")
+        if (!formData.customer_phone.trim()) newErrors.customer_phone = t("validation.phoneRequired")
+        else if (formData.customer_phone.replace(/\s|-|\(|\)/g, "").length < 8) newErrors.customer_phone = t("validation.phoneTooShort")
+        if (!formData.deceased_name.trim()) newErrors.deceased_name = t("validation.deceasedNameRequired")
+        else if (formData.deceased_name.trim().length < 2) newErrors.deceased_name = t("validation.deceasedNameTooShort")
+        if (!formData.delivery_region) newErrors.delivery_region = t("validation.locationTypeRequired")
+        if (!formData.delivery_district) newErrors.delivery_district = t("validation.locationRequired")
+        if (!formData.delivery_date) newErrors.delivery_date = t("validation.dateRequired")
+        setErrors(newErrors)
+        return Object.keys(newErrors).length === 0
     }
 
     const handleProceedToPayment = async (e: React.FormEvent) => {
@@ -395,7 +444,10 @@ export default function CheckoutWrapper() {
         setErrorMessage("")
 
         try {
-            validateForm()
+            if (!validateForm()) {
+                setIsPreparingPayment(false)
+                return
+            }
 
             const orderData = {
                 ...formData,
@@ -497,7 +549,7 @@ export default function CheckoutWrapper() {
     }
 
     return (
-        <main className="min-h-screen bg-neutral-50 py-12">
+        <main className="mt-[150px] min-h-screen bg-neutral-50 py-12">
             <div className="max-w-7xl mx-auto px-4 md:px-8">
                 <h1 className={`${playfair.className} text-4xl font-light mb-8`}>{t("title")}</h1>
                 <div className="grid lg:grid-cols-3 gap-8">
@@ -513,20 +565,30 @@ export default function CheckoutWrapper() {
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("name")} <span className="text-red-600">*</span></label>
                                             <input type="text" name="customer_name" value={formData.customer_name} onChange={handleChange} required minLength={2}
-                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900"
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 ${errors.customer_name ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                                 placeholder={t("placeholders.name")} />
+                                            {errors.customer_name && <p className="mt-1 text-sm text-red-600">{errors.customer_name}</p>}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("email")} <span className="text-red-600">*</span></label>
                                             <input type="email" name="customer_email" value={formData.customer_email} onChange={handleChange} required
-                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900"
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 ${errors.customer_email ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                                 placeholder={t("placeholders.email")} />
+                                            {errors.customer_email && <p className="mt-1 text-sm text-red-600">{errors.customer_email}</p>}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("phone")} <span className="text-red-600">*</span></label>
                                             <input type="tel" name="customer_phone" value={formData.customer_phone} onChange={handleChange} required minLength={8}
-                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900"
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 ${errors.customer_phone ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                                 placeholder={t("placeholders.phone")} />
+                                            {errors.customer_phone && <p className="mt-1 text-sm text-red-600">{errors.customer_phone}</p>}
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">{t("deceasedName")} <span className="text-red-600">*</span></label>
+                                            <input type="text" name="deceased_name" value={formData.deceased_name} onChange={handleChange} required minLength={2}
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 ${errors.deceased_name ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
+                                                placeholder={t("placeholders.deceasedName")} />
+                                            {errors.deceased_name && <p className="mt-1 text-sm text-red-600">{errors.deceased_name}</p>}
                                         </div>
                                     </div>
                                 </div>
@@ -535,70 +597,77 @@ export default function CheckoutWrapper() {
                                 <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
                                     <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>{t("deliveryInfo")}</h2>
                                     <div className="space-y-4">
-                                        {/* Region Dropdown */}
+                                        {/* Location Type Dropdown */}
                                         <div>
                                             <label className="block text-sm font-medium mb-2">
-                                                {locale === "en" ? "Region" : "地區"} <span className="text-red-600">*</span>
+                                                {locale === "en" ? "Location Type" : "地點類別"} <span className="text-red-600">*</span>
                                             </label>
                                             <select
                                                 name="delivery_region"
                                                 value={formData.delivery_region}
                                                 onChange={handleChange}
                                                 required
-                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 bg-white"
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 bg-white ${errors.delivery_region ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                             >
                                                 <option value="">
-                                                    {locale === "en" ? "Select Region" : "選擇地區"}
+                                                    {locale === "en" ? "Select Type" : "選擇類別"}
                                                 </option>
-                                                {HONG_KONG_REGIONS.map((region) => (
-                                                    <option key={region.id} value={region.id}>
-                                                        {locale === "en" ? region.nameEn : region.nameZh}
-                                                    </option>
-                                                ))}
+                                                <option value="funeral_parlour">
+                                                    {locale === "en" ? "Funeral Parlour" : "殯儀館"}
+                                                </option>
+                                                <option value="church">
+                                                    {locale === "en" ? "Church / Chapel" : "教堂 / 禮拜堂"}
+                                                </option>
                                             </select>
+                                            {errors.delivery_region && <p className="mt-1 text-sm text-red-600">{errors.delivery_region}</p>}
                                         </div>
 
-                                        {/* District Dropdown */}
-                                        <div>
-                                            <label className="block text-sm font-medium mb-2">
-                                                {locale === "en" ? "District" : "區域"} <span className="text-red-600">*</span>
-                                            </label>
-                                            <select
-                                                name="delivery_district"
-                                                value={formData.delivery_district}
-                                                onChange={handleChange}
-                                                required
-                                                disabled={!formData.delivery_region}
-                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 bg-white disabled:bg-neutral-100 disabled:cursor-not-allowed"
-                                            >
-                                                <option value="">
-                                                    {locale === "en" ? "Select District" : "選擇區域"}
-                                                </option>
-                                                {formData.delivery_region && HONG_KONG_DISTRICTS[formData.delivery_region]?.map((district) => (
-                                                    <option key={district.id} value={district.id}>
-                                                        {locale === "en" ? district.nameEn : district.nameZh}
+                                        {/* Location Dropdown */}
+                                        {formData.delivery_region && (
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">
+                                                    {locale === "en" ? "Location" : "地點"} <span className="text-red-600">*</span>
+                                                </label>
+                                                <select
+                                                    name="delivery_district"
+                                                    value={formData.delivery_district}
+                                                    onChange={handleChange}
+                                                    required
+                                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 bg-white ${errors.delivery_district ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
+                                                >
+                                                    <option value="">
+                                                        {locale === "en" ? "Select location" : "選擇地點"}
                                                     </option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                                    {LOCATION_OPTIONS
+                                                        .filter(o => o.category === formData.delivery_region)
+                                                        .map((opt) => (
+                                                            <option key={opt.id} value={opt.id}>
+                                                                {locale === "en" ? opt.nameEn : opt.nameZh}
+                                                            </option>
+                                                        ))}
+                                                </select>
+                                                {errors.delivery_district && <p className="mt-1 text-sm text-red-600">{errors.delivery_district}</p>}
+                                            </div>
+                                        )}
 
-                                        {/* Detailed Address */}
                                         <div>
                                             <label className="block text-sm font-medium mb-2">
-                                                {locale === "en" ? "Detailed Address" : "詳細地址"} <span className="text-red-600">*</span>
+                                                {t("deliveryDate")} <span className="text-red-600">*</span>
                                             </label>
-                                            <textarea
-                                                name="delivery_address"
-                                                value={formData.delivery_address}
-                                                onChange={handleChange}
+                                            <input
+                                                type="date"
+                                                value={formData.delivery_date}
+                                                onChange={(e) => {
+                                                    setFormData({ ...formData, delivery_date: e.target.value })
+                                                    setErrors(prev => ({ ...prev, delivery_date: "" }))
+                                                }}
+                                                min={new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
                                                 required
-                                                minLength={5}
-                                                rows={3}
-                                                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 resize-none"
-                                                placeholder={locale === "en" ? "Flat, Floor, Building name, Street address" : "樓層、室號、大廈名稱、街道地址"}
+                                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 ${errors.delivery_date ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                             />
+                                            <p className="text-xs text-neutral-500 mt-1">{t("datePicker.minDaysNotice", { days: 3 })}</p>
+                                            {errors.delivery_date && <p className="mt-1 text-sm text-red-600">{errors.delivery_date}</p>}
                                         </div>
-                                        <DatePicker value={formData.delivery_date} onChange={(date) => setFormData({ ...formData, delivery_date: date })} />
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("notes")} ({t("optional")})</label>
                                             <textarea name="delivery_notes" value={formData.delivery_notes} onChange={handleChange} maxLength={500} rows={2}
@@ -645,7 +714,13 @@ export default function CheckoutWrapper() {
                                     </div>
                                 )}
 
-                                <button type="submit" disabled={isPreparingPayment}
+                                {totalPrice < 1000 && (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                                        <p className="text-sm text-amber-800">{t("minimumOrderNotice")}</p>
+                                    </div>
+                                )}
+
+                                <button type="submit" disabled={isPreparingPayment || totalPrice < 1000}
                                     className="w-full bg-neutral-900 text-white py-4 rounded-lg font-medium hover:bg-neutral-800 disabled:bg-neutral-400 transition-colors flex items-center justify-center gap-2">
                                     {isPreparingPayment ? (
                                         <><Loader2 className="w-5 h-5 animate-spin" />{t("preparing")}</>
@@ -668,6 +743,7 @@ export default function CheckoutWrapper() {
                                         initialFormData={formData}
                                         expectedAmount={totalPrice}
                                         conversionDetails={conversionDetails}
+                                        totalPrice={totalPrice}
                                     />
                                 </Elements>
                             )
@@ -680,12 +756,15 @@ export default function CheckoutWrapper() {
                             <h2 className={`${playfair.className} text-xl font-semibold mb-4`}>{t("orderSummary")}</h2>
                             <div className="space-y-4 mb-6">
                                 {items.map((item) => (
-                                    <div key={item.id} className="flex gap-3">
+                                    <div key={`${item.id}-${item.selectedOptionId ?? 0}`} className="flex gap-3">
                                         <div className="relative w-16 h-16 flex-shrink-0 rounded overflow-hidden">
-                                            <Image src={item.image} alt={item.name} fill className="object-cover" />
+                                            <Image src={item.image} alt={item.name} fill className="object-cover" unoptimized />
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm font-medium truncate">{item.name}</p>
+                                            {item.selectedOptionName && (
+                                                <p className="text-xs text-neutral-500">{item.selectedOptionName}</p>
+                                            )}
                                             <p className="text-sm text-neutral-600">{t("quantity")}: {item.quantity}</p>
                                             <p className="text-sm font-medium">HK${(item.price * item.quantity).toFixed(2)}</p>
                                         </div>
@@ -699,11 +778,18 @@ export default function CheckoutWrapper() {
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-neutral-600">{t("deliveryFee")}</span>
-                                    <span className="text-green-600">{t("free")}</span>
+                                    <span className={deliveryFee === 0 ? "text-green-600" : ""}>
+                                        {deliveryFee === 0 ? t("free") : `HK$${deliveryFee.toFixed(2)}`}
+                                    </span>
                                 </div>
+                                {hasBoardSet && deliveryFee === 0 && (
+                                    <p className="text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded text-center">
+                                        花牌套餐包含免費送貨 / Board Set Free Delivery
+                                    </p>
+                                )}
                                 <div className="flex justify-between font-semibold text-lg border-t pt-2">
                                     <span>{t("total")}</span>
-                                    <span>HK${totalPrice.toFixed(2)}</span>
+                                    <span>HK${grandTotal.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>

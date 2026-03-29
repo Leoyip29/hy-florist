@@ -21,12 +21,9 @@ export default function Header() {
   const locale = useLocale()
   const t = useTranslations('Navigation')
 
-  // Get the API category based on locale
+  // Get the API category (always use name_en for filtering)
   const getCategoryForApi = (cat: string) => {
-    if (locale === "zh-HK" || locale === "zh") {
-      return CATEGORY_MAP[cat] || cat
-    }
-    return cat
+    return CATEGORY_MAP[cat] || cat
   }
 
   useEffect(() => {
@@ -139,7 +136,7 @@ export default function Header() {
                   { name: t('allProducts'), category: "all" },
                   { name: t('flowerBasket'), category: "flower-basket" },
                   { name: t('bouquet'), category: "bouquet" },
-                  { name: t('flowerBoard'), category: "flower-board" },
+                  // { name: t('flowerBoard'), category: "flower-board" },
                   { name: t('heartShapedBoard'), category: "heart-shaped-board" },
                   { name: t('roundBoard'), category: "round-board" },
                   { name: t('crossBoard'), category: "cross-board" },

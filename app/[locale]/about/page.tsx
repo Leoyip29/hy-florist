@@ -20,8 +20,8 @@ export async function generateMetadata({
   return {
     title: isEn ? "About Us" : "關於我們",
     description: isEn
-      ? "Learn about Hyacinth Florist – a Hong Kong premium florist offering bespoke floral arrangements for all occasions including weddings, funerals, and corporate events."
-      : "了解韓雅花店的故事——香港優質花藝師，為婚禮、喪禮、企業活動提供度身訂造的花藝佈置。",
+      ? "Learn about Hyacinth Florist – Hong Kong's trusted sympathy flower specialist. We craft premium wreaths, bouquets, and floral arrangements for funerals, memorial services, and religious venues."
+      : "了解風信子花店——香港專業帛事花店。我們為殯儀館、教堂及祭祀場合提供優質花圈、花束及花藝佈置。",
     alternates: {
       canonical: `https://hy-florist.hk/${locale}/about`,
       languages: {
@@ -30,10 +30,10 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: isEn ? "About Us | Hyacinth Florist" : "關於我們 | HY Florist",
+      title: isEn ? "About Us | Hyacinth Florist" : "關於我們 | Hyacinth Florist 風信子花店",
       description: isEn
-        ? "Learn about Hyacinth Florist – Hong Kong's premium florist."
-        : "了解韓雅花店——香港優質花藝師。",
+        ? "Hong Kong's trusted sympathy flower specialist for funerals and memorial services."
+        : "香港專業帛事花店，為殯儀及祭祀場合提供優質花藝。",
       images: [{ url: "https://hy-florist.hk/hy_about_04.png" }],
     },
   }

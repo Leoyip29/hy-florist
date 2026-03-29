@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { Playfair_Display } from "next/font/google"
 import { useTranslations, useLocale } from "next-intl"
@@ -8,19 +8,14 @@ import ProductCategory from "@/components/product/ProductCategory"
 import ProductCard from "@/components/product/ProductCard"
 import ProductDetail from "@/components/product/ProductDetail"
 import type { CategoryItem } from "@/components/product/ProductCategory"
-import type { ApiProduct, UiProduct } from "@/lib/product-utils"
+import type { ApiProduct, UiProduct, PriceRange } from "@/lib/product-utils"
 import {
-  translateCategory,
-  translateLocation,
   apiToUiProduct,
-  publicLogo,
-  CATEGORY_LOGOS,
-  CATEGORY_NAME_TRANSLATIONS,
   buildFilterUrl,
+  getPriceRangeByLocale,
+  findPriceRangeKey,
+  isEmptyRange,
 } from "@/lib/product-utils"
-import { CATEGORY_MAP } from "@/lib/categories"
-
-const getApiCategory = (urlKey: string): string => CATEGORY_MAP[urlKey] ?? urlKey
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -28,8 +23,40 @@ const playfair = Playfair_Display({
 })
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000"
+// Strip scheme for X-Forwarded-Host (should be host:port only)
+const _apiHost = API_BASE_URL.replace(/^https?:\/\//, "")
 
-export default function ProductsClient() {
+export interface ProductsClientProps {
+  initialData: {
+    categories: { id: number; name: string; name_en: string; logo?: string | null }[]
+    products: UiProduct[]
+    totalCount: number
+    categoryImages: Record<string, string>
+  } | null
+}
+
+function buildInitialCategories(
+  apiCategories: { id: number; name: string; name_en: string; logo?: string | null }[],
+  locale: string,
+  allText: string,
+  categoryImages: Record<string, string>
+): CategoryItem[] {
+  const displayCategories = locale === "en"
+    ? apiCategories.map((cat) => cat.name_en || cat.name)
+    : apiCategories.map((cat) => cat.name)
+
+  return [
+    { name: allText, apiName: "All", image: "/CategoriesLogo/All.png" },
+    ...displayCategories.map((name, idx) => ({
+      id: idx + 1,
+      name,
+      apiName: apiCategories[idx].name_en || apiCategories[idx].name,
+      image: categoryImages[apiCategories[idx].name],
+    })),
+  ]
+}
+
+export default function ProductsClient({ initialData }: ProductsClientProps) {
   const searchParams = useSearchParams()
   const t = useTranslations("Products")
   const locale = useLocale()
@@ -37,131 +64,191 @@ export default function ProductsClient() {
   const allText = locale === "en" ? "All" : "全部"
 
   const urlCategory = searchParams.get("category")
-  const isChineseCategory = urlCategory && /[\u4e00-\u9fa5]/.test(urlCategory)
-  const initialCategory = urlCategory
-    ? locale === "zh-HK" || locale === "zh"
-      ? isChineseCategory ? urlCategory : getApiCategory(urlCategory)
-      : isChineseCategory
-        ? translateCategory(urlCategory)
-        : translateCategory(getApiCategory(urlCategory))
-    : allText
+  const initialCategory = urlCategory ? decodeURIComponent(urlCategory) : "All"
+
+  // Initialize price range from URL
+  const urlPriceMin = searchParams.get("price_min")
+  const urlPriceMax = searchParams.get("price_max")
+  const initialPriceRange: PriceRange = {
+    min: urlPriceMin ? Number(urlPriceMin) : undefined,
+    max: urlPriceMax ? Number(urlPriceMax) : undefined,
+  }
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
   const [searchKeyword, setSearchKeyword] = useState(searchParams.get("search") || "")
-  const [categories, setCategories] = useState<CategoryItem[]>([{ name: allText }])
-  const [selectedLocation, setSelectedLocation] = useState(allText)
-  const [locations, setLocations] = useState<string[]>([allText])
-  const [products, setProducts] = useState<UiProduct[]>([])
+  const [priceRange, setPriceRange] = useState<PriceRange>(initialPriceRange)
+  const [categories, setCategories] = useState<CategoryItem[]>(
+    initialData
+      ? buildInitialCategories(initialData.categories, locale, allText, initialData.categoryImages)
+      : [{ name: allText, apiName: "All" }]
+  )
+  const [products, setProducts] = useState<UiProduct[]>(initialData?.products ?? [])
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalCount, setTotalCount] = useState(0)
+  const [totalCount, setTotalCount] = useState(initialData?.totalCount ?? 0)
   const pageSize = 12
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(!initialData)
   const [error, setError] = useState<string | null>(null)
   const [itemsInView, setItemsInView] = useState<boolean[]>([])
   const [sortOption, setSortOption] = useState<"recommended" | "price_asc" | "price_desc">("recommended")
   const [selectedProduct, setSelectedProduct] = useState<UiProduct | null>(null)
+  const [availablePriceRanges, setAvailablePriceRanges] = useState<string[]>([])
 
-  // Fetch categories and locations once on mount
+  // Track the previous category value to avoid cleaning on initial mount
+  const prevCategory = useRef<string>(initialCategory)
+
+  // Fetch available price ranges for "All" on initial mount
   useEffect(() => {
+    const headers = { "X-Forwarded-Host": _apiHost }
+    fetch(`${API_BASE_URL}/api/products/price-ranges/`, { cache: "no-store", headers })
+      .then((res) => res.ok ? res.json() : { available_ranges: [] })
+      .then((data: { available_ranges: string[] }) => setAvailablePriceRanges(data.available_ranges ?? []))
+      .catch(() => setAvailablePriceRanges([]))
+  }, [])
+
+  // Initialize sort and price range from URL searchParams after mount to avoid SSR hydration mismatch
+  useEffect(() => {
+    const urlSort = searchParams.get("sort")
+    if (urlSort === "price_asc" || urlSort === "price_desc") {
+      setSortOption(urlSort)
+    }
+    const urlMin = searchParams.get("price_min")
+    const urlMax = searchParams.get("price_max")
+    if (urlMin || urlMax) {
+      setPriceRange({
+        min: urlMin ? Number(urlMin) : undefined,
+        max: urlMax ? Number(urlMax) : undefined,
+      })
+    }
+  }, [searchParams])
+
+  // Fetch categories (skip if we have initial data)
+  useEffect(() => {
+    if (initialData) return
+
     const fetchCategories = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/categories/`, { cache: "no-store" })
+        const headers = { "X-Forwarded-Host": _apiHost }
+        const res = await fetch(`${API_BASE_URL}/api/categories/`, { cache: "no-store", headers })
         if (!res.ok) return
 
-        const { categories: apiCategories, locations: apiLocations } = await res.json() as {
-          categories: string[]
-          locations: string[]
+        const { categories: apiCategories } = await res.json() as {
+          categories: { id: number; name: string; name_en: string; logo?: string | null }[]
         }
 
         const displayCategories = locale === "en"
-          ? apiCategories.map((name) => translateCategory(name))
-          : apiCategories
-
-        const displayLocations = locale === "en"
-          ? apiLocations.map((name) => translateLocation(name))
-          : apiLocations
-
-        const filteredLocations = displayLocations.filter((name) => {
-          const englishName = locale === "en" ? name : translateLocation(name)
-          return englishName !== "NotApplicable"
-        })
+          ? apiCategories.map((cat) => cat.name_en || cat.name)
+          : apiCategories.map((cat) => cat.name)
 
         const categoryToImage = new Map<string, string>()
-        for (const originalName of apiCategories) {
-          const logoFile = CATEGORY_LOGOS[originalName]
-          if (logoFile) categoryToImage.set(originalName, publicLogo(logoFile))
+        for (const cat of apiCategories) {
+          if (cat.logo) categoryToImage.set(cat.name, cat.logo)
         }
 
         setCategories([
-          { name: allText, image: publicLogo(CATEGORY_LOGOS["全部"] ?? "All.png") },
-          ...displayCategories.map((name) => ({
+          { name: allText, apiName: "All", image: "/CategoriesLogo/All.png" },
+          ...displayCategories.map((name, idx) => ({
+            id: idx + 1,
             name,
-            image: categoryToImage.get(
-              locale === "en"
-                ? Object.entries(CATEGORY_NAME_TRANSLATIONS).find(([, trans]) => trans === name)?.[0] ?? name
-                : name
-            ),
+            apiName: apiCategories[idx].name_en || apiCategories[idx].name,
+            image: categoryToImage.get(apiCategories[idx].name),
           })),
         ])
-        setLocations([allText, ...filteredLocations])
       } catch (err) {
         console.error("Failed to fetch categories:", err)
       }
     }
     fetchCategories()
-  }, [locale, allText])
+  }, [locale, allText, initialData])
 
   // Fetch products with server-side filtering and pagination
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
+  const fetchProducts = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
 
-        const url = buildFilterUrl(
-          `${API_BASE_URL}/api/products/`,
-          selectedCategory,
-          selectedLocation,
-          searchKeyword,
-          sortOption,
-          currentPage,
-          locale
-        )
-        const res = await fetch(url, { cache: "no-store" })
+      const url = buildFilterUrl(
+        `${API_BASE_URL}/api/products/`,
+        selectedCategory,
+        searchKeyword,
+        sortOption,
+        currentPage,
+        locale,
+        priceRange
+      )
+      const headers = { "X-Forwarded-Host": _apiHost }
+      const res = await fetch(url, { cache: "no-store", headers })
 
-        if (!res.ok) {
-          if (res.status === 404 && currentPage > 1) {
-            setCurrentPage(1)
-            return
-          }
-          throw new Error(`${t("errorLoadProducts")} (${res.status})`)
-        }
-
-        const response = await res.json() as { count: number; results: ApiProduct[] }
-        setProducts(response.results.map((p) => apiToUiProduct(p, locale)))
-        setTotalCount(response.count)
-
-        if (response.results.length === 0 && currentPage > 1) {
+      if (!res.ok) {
+        if (res.status === 404 && currentPage > 1) {
           setCurrentPage(1)
+          return
         }
-      } catch (e) {
-        setError(e instanceof Error ? e.message : t("errorLoadProducts"))
-      } finally {
-        setIsLoading(false)
+        throw new Error(`${t("errorLoadProducts")} (${res.status})`)
       }
+
+      const response = await res.json() as { count: number; results: ApiProduct[] }
+      setProducts(response.results.map((p) => apiToUiProduct(p, locale)))
+      setTotalCount(response.count)
+
+      if (response.results.length === 0 && currentPage > 1) {
+        setCurrentPage(1)
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("errorLoadProducts"))
+    } finally {
+      setIsLoading(false)
     }
+  }, [selectedCategory, searchKeyword, sortOption, currentPage, locale, priceRange, t])
+
+  useEffect(() => {
     fetchProducts()
-  }, [selectedCategory, selectedLocation, searchKeyword, sortOption, currentPage, locale])
+  }, [fetchProducts])
+
+  // Clean filters + URL when category actually changes (not on initial mount)
+  useEffect(() => {
+    if (selectedCategory === prevCategory.current) return
+    prevCategory.current = selectedCategory
+
+    setSortOption("recommended")
+    setPriceRange({})
+    const params = new URLSearchParams(window.location.search)
+    params.delete("sort")
+    params.delete("price_min")
+    params.delete("price_max")
+    if (selectedCategory !== "All" && selectedCategory !== "全部") {
+      params.set("category", selectedCategory)
+    } else {
+      params.delete("category")
+    }
+    window.history.replaceState(null, "", `?${params.toString()}`)
+
+    const categoryForApi = selectedCategory === "All" ? null : selectedCategory
+    const url = new URL(`${API_BASE_URL}/api/products/price-ranges/`)
+    if (categoryForApi) url.searchParams.set("category", categoryForApi)
+    const headers = { "X-Forwarded-Host": _apiHost }
+
+    fetch(url.toString(), { cache: "no-store", headers })
+      .then((res) => res.ok ? res.json() : { available_ranges: [] })
+      .then((data: { available_ranges: string[] }) => setAvailablePriceRanges(data.available_ranges ?? []))
+      .catch(() => setAvailablePriceRanges([]))
+  }, [selectedCategory])
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [selectedCategory, selectedLocation, searchKeyword, sortOption])
+  }, [selectedCategory, searchKeyword, sortOption, priceRange])
 
-  // Sync category from URL when searchParams change
+  // Sync category from URL when searchParams change (but not when category was just changed programmatically)
   useEffect(() => {
-    if (urlCategory) setSelectedCategory(initialCategory)
-  }, [urlCategory, initialCategory])
+    if (urlCategory && urlCategory !== encodeURIComponent(selectedCategory) && urlCategory !== encodeURIComponent("All")) {
+      setSelectedCategory(decodeURIComponent(urlCategory))
+    }
+  }, [urlCategory]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync price range from URL on initial mount only
+  useEffect(() => {
+    setPriceRange(initialPriceRange)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync search from URL
   useEffect(() => {
@@ -171,9 +258,9 @@ export default function ProductsClient() {
   // Reset selections on locale change
   useEffect(() => {
     if (!urlCategory) {
-      setSelectedCategory(allText)
-      setSelectedLocation(allText)
+      setSelectedCategory("All")
     }
+    setPriceRange({})
   }, [locale, allText, urlCategory])
 
   // Intersection Observer for product card animations
@@ -200,9 +287,6 @@ export default function ProductsClient() {
         categories={categories}
         selectedCategory={selectedCategory}
         onSelect={setSelectedCategory}
-        locations={locations}
-        selectedLocation={selectedLocation}
-        onSelectLocation={setSelectedLocation}
       />
 
       {/* ===== PRODUCTS GRID ===== */}
@@ -234,13 +318,60 @@ export default function ProductsClient() {
             <div className="flex items-center gap-2">
               <span className="text-xs sm:text-sm text-neutral-500">{t("sort")}</span>
               <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value as "recommended" | "price_asc" | "price_desc")}
+                value={
+                  !isEmptyRange(priceRange) && availablePriceRanges.includes(findPriceRangeKey(priceRange, locale) ?? "")
+                    ? findPriceRangeKey(priceRange, locale)!
+                    : sortOption
+                }
+                onChange={(e) => {
+                  const val = e.target.value
+                  const priceOpt = getPriceRangeByLocale(locale).find((opt) => opt.key === val)
+                  const params = new URLSearchParams(searchParams.toString())
+
+                  if (priceOpt) {
+                    // Price range selected — clear sort, set price
+                    setSortOption("recommended")
+                    params.delete("sort")
+                    if (priceOpt.value.min !== undefined) {
+                      params.set("price_min", String(priceOpt.value.min))
+                    } else {
+                      params.delete("price_min")
+                    }
+                    if (priceOpt.value.max !== undefined) {
+                      params.set("price_max", String(priceOpt.value.max))
+                    } else {
+                      params.delete("price_max")
+                    }
+                    setPriceRange(priceOpt.value)
+                  } else {
+                    // Sort selected — clear price, set sort
+                    setPriceRange({})
+                    params.delete("price_min")
+                    params.delete("price_max")
+                    const sortVal = val as "recommended" | "price_asc" | "price_desc"
+                    setSortOption(sortVal)
+                    if (sortVal === "recommended") {
+                      params.delete("sort")
+                    } else {
+                      params.set("sort", sortVal)
+                    }
+                  }
+                  window.history.replaceState(null, "", `?${params.toString()}`)
+                }}
                 className="text-xs sm:text-sm border border-neutral-200 rounded-full px-3 py-1.5 bg-white text-neutral-800 focus:outline-none focus:ring-1 focus:ring-neutral-400"
               >
-                <option value="recommended">{t("sortDefault")}</option>
-                <option value="price_asc">{t("sortPriceAsc")}</option>
-                <option value="price_desc">{t("sortPriceDesc")}</option>
+                <optgroup label={locale === "en" ? "Sort" : "排序"}>
+                  <option value="recommended">{t("sortDefault")}</option>
+                  <option value="price_asc">{t("sortPriceAsc")}</option>
+                  <option value="price_desc">{t("sortPriceDesc")}</option>
+                </optgroup>
+                <optgroup label={locale === "en" ? "Price" : "價錢"}>
+                  {getPriceRangeByLocale(locale)
+                    .filter((opt) => availablePriceRanges.includes(opt.key))
+                    .map((opt) => (
+                      <option key={opt.key} value={opt.key}>{opt.label}</option>
+                    ))}
+                </optgroup>
               </select>
             </div>
           </div>
@@ -270,7 +401,7 @@ export default function ProductsClient() {
                   playfairClassName={playfair.className}
                   inView={itemsInView[index] ?? true}
                   index={index}
-                  onClick={setSelectedProduct}
+                  priority={index < 8}
                 />
               ))}
             </div>

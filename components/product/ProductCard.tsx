@@ -13,6 +13,7 @@ interface ProductCardProps {
   playfairClassName: string
   inView: boolean
   index: number
+  priority?: boolean
 }
 
 export default function ProductCard({
@@ -20,25 +21,27 @@ export default function ProductCard({
   playfairClassName,
   inView,
   index,
+  priority = false,
 }: ProductCardProps) {
   const t = useTranslations("ProductCard")
   const { addItem } = useCart()
   const { openProduct } = useProductDetail()
+
+  const hasOptions = product.options && product.options.length > 0
+  const firstOption = product.options?.[0]
+  const displayPrice = product.price + (firstOption?.priceAdjustment ?? 0)
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
     addItem({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: displayPrice,
       image: product.image,
       categories: product.categories,
+      selectedOptionId: firstOption?.id,
+      selectedOptionName: firstOption?.name,
     })
-  }
-
-  const handleImageClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    openProduct(product)
   }
 
   return (
@@ -52,19 +55,31 @@ export default function ProductCard({
       {/* Image Container */}
       <div
         className="relative aspect-[3/4] overflow-hidden bg-neutral-100 mb-3 cursor-pointer"
-        onClick={handleImageClick}
+        onClick={(e) => {
+          e.stopPropagation()
+          openProduct(product)
+        }}
       >
         {product.image ? (
           <Image
             src={product.image}
             alt={product.name}
             fill
+            priority={priority}
+            unoptimized
             className="object-cover transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-neutral-400">
             <span className="text-sm">{t("noImage")}</span>
+          </div>
+        )}
+
+        {/* Options badge */}
+        {hasOptions && (
+          <div className="absolute top-2 left-2 px-2 py-0.5 bg-white/90 backdrop-blur-sm rounded-full text-xs text-neutral-700 font-medium shadow-sm">
+            {product.options!.length} {t("options")}
           </div>
         )}
 
@@ -89,7 +104,7 @@ export default function ProductCard({
             {product.name}
           </h3>
           <p className="text-sm font-medium text-neutral-900">
-            HK${product.price.toFixed(2)}
+            HK${displayPrice.toLocaleString()}
           </p>
         </div>
       </Link>

@@ -66,6 +66,7 @@ export default function SplitScreenShowcase({ initialProducts }: SplitScreenShow
                 fill
                 className="object-cover"
                 priority
+                unoptimized
               />
             </div>
           )}
@@ -105,6 +106,7 @@ export default function SplitScreenShowcase({ initialProducts }: SplitScreenShow
                   alt={mainProduct.name}
                   fill
                   className="object-cover"
+                  unoptimized
                 />
               )}
             </div>

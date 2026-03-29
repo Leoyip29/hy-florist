@@ -14,7 +14,7 @@ const playfair = Playfair_Display({
 
 export default function CartDrawer() {
   const t = useTranslations("CartDrawer")
-  const { items, removeItem, updateQuantity, totalPrice, isOpen, closeCart } = useCart()
+  const { items, removeItem, updateQuantity, totalPrice, deliveryFee, hasBoardSet, totalItems, isOpen, closeCart } = useCart()
 
   if (!isOpen) return null
 
@@ -59,7 +59,7 @@ export default function CartDrawer() {
             <div className="space-y-4">
               {items.map((item) => (
                 <div
-                  key={item.id}
+                  key={`${item.id}-${item.selectedOptionId ?? 0}`}
                   className="flex gap-4 p-4 border border-neutral-200 rounded-lg"
                 >
                   <div className="relative w-20 h-20 flex-shrink-0">
@@ -68,13 +68,19 @@ export default function CartDrawer() {
                       alt={item.name}
                       fill
                       className="object-cover rounded"
+                      unoptimized
                     />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm mb-1 truncate">
+                    <h3 className="font-medium text-sm mb-0.5 truncate">
                       {item.name}
                     </h3>
+                    {item.selectedOptionName && (
+                      <p className="text-xs text-neutral-500 mb-1 truncate">
+                        {item.selectedOptionName}
+                      </p>
+                    )}
                     <p className="text-sm text-neutral-600 mb-2">
                       HK${item.price.toFixed(2)}
                     </p>
@@ -82,7 +88,7 @@ export default function CartDrawer() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
+                          updateQuantity(item.id, item.quantity - 1, item.selectedOptionId)
                         }
                         className="w-7 h-7 flex items-center justify-center border border-neutral-300 rounded hover:bg-neutral-100 transition-colors"
                         aria-label={t("decreaseQuantity")}
@@ -94,7 +100,7 @@ export default function CartDrawer() {
                       </span>
                       <button
                         onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
+                          updateQuantity(item.id, item.quantity + 1, item.selectedOptionId)
                         }
                         className="w-7 h-7 flex items-center justify-center border border-neutral-300 rounded hover:bg-neutral-100 transition-colors"
                         aria-label={t("increaseQuantity")}
@@ -105,7 +111,7 @@ export default function CartDrawer() {
                   </div>
 
                   <button
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => removeItem(item.id, item.selectedOptionId)}
                     className="self-start p-1 hover:bg-neutral-100 rounded transition-colors"
                     aria-label={t("removeItem")}
                   >
@@ -120,9 +126,34 @@ export default function CartDrawer() {
         {/* Footer */}
         {items.length > 0 && (
           <div className="border-t p-6 space-y-4">
-            <div className="flex items-center justify-between text-lg font-semibold">
-              <span>{t("total")}</span>
-              <span>HK${totalPrice.toFixed(2)}</span>
+            {/* Delivery fee info */}
+            <div className="space-y-1.5 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-neutral-500">{t("total")}</span>
+                <span className="font-medium">HK${totalPrice.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-neutral-500">Delivery</span>
+                <span className={deliveryFee === 0 ? "text-green-600 font-medium" : "text-neutral-600"}>
+                  {deliveryFee === 0 ? "Free / 免運費" : `HK$${deliveryFee.toFixed(2)}`}
+                </span>
+              </div>
+              {hasBoardSet && deliveryFee === 0 && (
+                <p className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded text-center">
+                  花牌套餐包含免費送貨 / Board Set Free Delivery
+                </p>
+              )}
+              {!hasBoardSet && totalItems < 8 && totalItems > 0 && (
+                <p className="text-xs text-neutral-400 text-center">
+                  Add {8 - totalItems} more items for free delivery
+                </p>
+              )}
+            </div>
+
+            {/* Total */}
+            <div className="flex items-center justify-between text-lg font-semibold pt-2 border-t">
+              <span>Total</span>
+              <span>HK${(totalPrice + deliveryFee).toFixed(2)}</span>
             </div>
 
             <Link

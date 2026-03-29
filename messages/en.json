@@ -1,4 +1,18 @@
 {
+  "NotificationBanner": {
+    "message1": "Minimum order amount",
+    "highlight1": "HK$1,000",
+    "message2": "Free delivery for",
+    "highlight2": "8+ products"
+  },
+  "SplashBanner": {
+    "title": "Welcome to Hyacinth Florist",
+    "subtitle": "Your trusted sympathy flower specialist in Hong Kong",
+    "highlight": "Minimum order HK$1,000 | 8+ flower boards = Free delivery",
+    "cta": "Browse Products",
+    "ctaLink": "/en/products",
+    "noWorry": "Free delivery on orders of 8+ flower boards"
+  },
   "Navigation": {
     "home": "Home",
     "products": "Products",
@@ -35,13 +49,14 @@
     "preparing": "Preparing...",
     "confirmPayment": "Confirm Payment HK${amount}",
     "proceedToPayment": "Proceed to Payment",
+    "minimumOrderNotice": "Minimum order amount is HK$1,000",
     "termsNotice": "By clicking \"Confirm Payment\", you agree to our Terms of Service and Privacy Policy",
     "securityNotice": "Your payment information is encrypted and protected by Stripe. We do not store your credit card details.",
     "orderSummary": "Order Summary",
     "quantity": "Quantity",
     "subtotal": "Subtotal",
     "deliveryFee": "Delivery Fee",
-    "free": "Provided later",
+    "free": "Free",
     "total": "Total",
     "optional": "Optional",
     "orderNumber": "Order Number",
@@ -50,6 +65,7 @@
     "name": "Name",
     "email": "Email",
     "phone": "Phone",
+    "deceasedName": "Deceased's Name",
     "deliveryAddress": "Delivery Address",
     "deliveryDate": "Delivery Date",
     "notes": "Notes",
@@ -58,6 +74,7 @@
       "name": "Enter your name",
       "email": "your@email.com",
       "phone": "9123 4567",
+      "deceasedName": "Enter the deceased's name",
       "address": "Enter your full delivery address",
       "notes": "Special requests or notes"
     },
@@ -104,9 +121,16 @@
       "networkError": "Network error, please check your connection and try again"
     },
     "validation": {
-      "nameRequired": "Please enter a valid name",
-      "emailRequired": "Please enter a valid email address",
-      "phoneRequired": "Please enter a valid phone number",
+      "nameRequired": "Please enter your name",
+      "nameTooShort": "Name must be at least 2 characters",
+      "emailRequired": "Please enter your email address",
+      "emailInvalid": "Please enter a valid email address",
+      "phoneRequired": "Please enter your phone number",
+      "phoneTooShort": "Phone number must be at least 8 digits",
+      "deceasedNameRequired": "Please enter the deceased's name",
+      "deceasedNameTooShort": "Deceased's name must be at least 2 characters",
+      "locationTypeRequired": "Please select a location type",
+      "locationRequired": "Please select a delivery location",
       "addressRequired": "Please enter a complete delivery address",
       "dateRequired": "Please select a delivery date"
     }
@@ -168,6 +192,7 @@
     "name": "Name",
     "email": "Email",
     "phone": "Phone",
+    "deceasedName": "Deceased's Name",
     "deliveryAddress": "Delivery Address",
     "deliveryDate": "Delivery Date",
     "notes": "Notes",
@@ -234,14 +259,16 @@
   },
   "ProductCard": {
     "noImage": "No Image",
-    "addToCart": "Add to Cart"
+    "addToCart": "Add to Cart",
+    "options": "options"
   },
   "ProductDetail": {
     "noImage": "No Image",
     "quantity": "Quantity",
     "addToCart": "Add to Cart",
     "localDelivery": "Local Flower Delivery in Hong Kong",
-    "freshDaily": "Freshly Made Daily"
+    "freshDaily": "Freshly Made Daily",
+    "selectOption": "Select Type"
   },
   "Footer": {
     "description": "We believe every bouquet carries a unique meaning, perfectly conveying our feelings and care.",
@@ -253,10 +280,10 @@
     "copyright": "Copyright © 2026 Hyacinth Florist. All rights reserved."
   },
   "Home": {
-    "title": "HY Florist - Hong Kong Floristry Specialist",
-    "subtitle": "Professional floral designs to add beauty and warmth to every moment of your life",
+    "title": "Hyacinth Florist - Hong Kong Sympathy Flower Specialist",
+    "subtitle": "Professional sympathy floral designs for funerals and memorial services in Hong Kong",
     "hero": {
-      "ctaButton": "Explore Floristry",
+      "ctaButton": "Explore Our Products",
       "slides": [
         {
           "title": "Flowers Speak\nTribute to Life",
@@ -270,11 +297,11 @@
     }
   },
   "HomePage": {
-    "heroSlide1Title": "Honoring Life\nWith Flowers",
-    "heroSlide1Desc": "With heartfelt devotion and professional artistry, we deliver sincere blessings for every precious moment.",
-    "heroSlide2Title": "Sincere Condolences\nEternal Memories",
-    "heroSlide2Desc": "Expressing deepest respect and care through elegant floral designs.",
-    "exploreButton": "Explore Floristry"
+    "heroSlide1Title": "Hyacinth Florist\nSympathy Flower Shop",
+    "heroSlide1Desc": "Premium sympathy flowers and floral arrangements for funerals and memorial services in Hong Kong.",
+    "heroSlide2Title": "Hyacinth Florist\nSympathy Flower Specialist",
+    "heroSlide2Desc": "Premium sympathy flowers and floral arrangements for funerals and memorial services in Hong Kong.",
+    "exploreButton": "Explore Our Products"
   },
   "Products": {
     "pageTitle": "Floral Shop",
@@ -399,7 +426,7 @@
     "ourLocation": "Our Location"
   },
   "SEO": {
-    "homeTitle": "HY Florist - Funeral Flower Specialist in Hong Kong",
+    "homeTitle": "Hyacinth Florist - Hong Kong Sympathy Flower Specialist",
     "homeDescription": "Professional memorial flower arrangements and funeral floral delivery in Hong Kong. Shop our collection of condolence flower stands, wreaths, and custom memorial arrangements."
   },
   "ProductCategory": {
@@ -418,7 +445,7 @@
       "花牌": "Flower Board",
       "花牌套餐": "Board Set",
       "十字架花牌": "Cross Board",
-      "圓形花牌": "Round Board",
+      "圓型花牌": "Round Board",
       "心型花牌": "Heart-shaped Board",
       "棺面花": "Casket Decoration",
       "場地裝飾": "Venue Decoration",

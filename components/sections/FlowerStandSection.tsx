@@ -3,6 +3,7 @@ import { getTranslations, getLocale } from "next-intl/server"
 import ProductCard from "@/components/product/ProductCard"
 import { fetchProductsByIds } from "@/lib/api"
 import { apiToUiProduct } from "@/lib/product-utils"
+import { CATEGORY_MAP } from "@/lib/categories"
 
 const FLOWER_STAND_PRODUCT_IDS = [97, 98, 101, 109]
 
@@ -14,6 +15,7 @@ export default async function FlowerStandSection() {
   ])
 
   const products = apiProducts.map((p) => apiToUiProduct(p, locale))
+  const categoryParam = CATEGORY_MAP["cross-board"] ?? "Cross Boards"
 
   if (products.length === 0) return null
 
@@ -51,7 +53,7 @@ export default async function FlowerStandSection() {
 
         <div className="mt-16 text-center">
           <Link
-            href={`/${locale}/products?category=十字架花牌`}
+            href={`/${locale}/products?category=${encodeURIComponent(categoryParam)}`}
             className="inline-block text-sm tracking-widest text-stone-300 border border-stone-500 px-8 py-3 hover:bg-white hover:text-[#5c4d3c] hover:border-white transition-all duration-300"
           >
             {t("viewAll")}

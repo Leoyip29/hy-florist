@@ -20,8 +20,8 @@ export async function generateMetadata({
   return {
     title: isEn ? "Contact Us" : "聯絡我們",
     description: isEn
-      ? "Contact Hyacinth Florist in Hong Kong. Visit us at Lai Chi Kok, call or email for enquiries and orders."
-      : "聯絡韓雅花店。歡迎蒞臨荔枝角門市，或致電及電郵查詢及落單。",
+      ? "Contact Hyacinth Florist in Hong Kong. Call or email for enquiries and orders."
+      : "聯絡風信子花店。歡迎蒞臨門市，或致電及電郵查詢及落單。",
     alternates: {
       canonical: `https://hy-florist.hk/${locale}/contact`,
       languages: {
@@ -30,10 +30,10 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: isEn ? "Contact Us | Hyacinth Florist" : "聯絡我們 | HY Florist",
+      title: isEn ? "Contact Us | Hyacinth Florist" : "聯絡我們 | Hyacinth Florist",
       description: isEn
         ? "Get in touch with Hyacinth Florist Hong Kong."
-        : "聯絡韓雅花店香港。",
+        : "聯絡風信子花店香港。",
     },
   }
 }
@@ -90,8 +90,8 @@ export default async function ContactPage({
                 {t("phone")}
               </h3>
               <p className="text-neutral-600">
-                <a href="tel:+85296846901" className="hover:text-neutral-900 transition-colors">
-                  +852 9684 6901
+                <a href="tel:+85294568292" className="hover:text-neutral-900 transition-colors">
+                  +852 9456 8292
                 </a>
               </p>
             </div>

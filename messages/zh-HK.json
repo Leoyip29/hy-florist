@@ -1,4 +1,18 @@
 {
+  "NotificationBanner": {
+    "message1": "最低消費為港幣",
+    "highlight1": "$1,000",
+    "message2": "8個花牌或以上",
+    "highlight2": "免運費"
+  },
+  "SplashBanner": {
+    "title": "歡迎來到風信子花店",
+    "subtitle": "香港專業帛事花店",
+    "highlight": "最低消費港幣$1,000 | 8個花牌或以上免運費",
+    "cta": "瀏覽商品",
+    "ctaLink": "/zh-HK/products",
+    "noWorry": "8個花牌或以上訂單免運費"
+  },
   "Navigation": {
     "home": "首頁",
     "products": "所有商品",
@@ -35,13 +49,14 @@
     "preparing": "準備中...",
     "confirmPayment": "確認付款 HK${amount}",
     "proceedToPayment": "前往付款",
+    "minimumOrderNotice": "最低消費為港幣 $1,000",
     "termsNotice": "點擊「確認付款」即表示您同意我們的服務條款及私隱政策",
     "securityNotice": "您的付款資料受到 Stripe 加密保護，我們不會儲存您的信用卡資料。",
     "orderSummary": "訂單摘要",
     "quantity": "數量",
     "subtotal": "小計",
     "deliveryFee": "運費",
-    "free": "稍後提供",
+    "free": "免運費",
     "total": "總計",
     "optional": "選填",
     "orderNumber": "訂單編號",
@@ -50,6 +65,7 @@
     "name": "姓名",
     "email": "電郵",
     "phone": "電話",
+    "deceasedName": "先人的姓名",
     "deliveryAddress": "送貨地址",
     "deliveryDate": "送貨日期",
     "notes": "備註",
@@ -58,6 +74,7 @@
       "name": "請輸入您的姓名",
       "email": "your@email.com",
       "phone": "9123 4567",
+      "deceasedName": "請輸入先人姓名",
       "address": "請輸入完整送貨地址",
       "notes": "特別要求或備註"
     },
@@ -104,9 +121,16 @@
       "networkError": "網絡錯誤，請檢查連接後再試"
     },
     "validation": {
-      "nameRequired": "請輸入有效的姓名",
-      "emailRequired": "請輸入有效的電郵地址",
-      "phoneRequired": "請輸入有效的電話號碼",
+      "nameRequired": "請輸入您的姓名",
+      "nameTooShort": "姓名至少需要2個字符",
+      "emailRequired": "請輸入電郵地址",
+      "emailInvalid": "請輸入有效的電郵地址",
+      "phoneRequired": "請輸入電話號碼",
+      "phoneTooShort": "電話號碼至少需要8位數字",
+      "deceasedNameRequired": "請輸入先人的姓名",
+      "deceasedNameTooShort": "先人姓名至少需要2個字符",
+      "locationTypeRequired": "請選擇地點類別",
+      "locationRequired": "請選擇送貨地點",
       "addressRequired": "請輸入完整的送貨地址",
       "dateRequired": "請選擇送貨日期"
     }
@@ -168,6 +192,7 @@
     "name": "姓名",
     "email": "電郵",
     "phone": "電話",
+    "deceasedName": "先人的姓名",
     "deliveryAddress": "送貨地址",
     "deliveryDate": "送貨日期",
     "notes": "備註",
@@ -234,14 +259,16 @@
   },
   "ProductCard": {
     "noImage": "暫無圖片",
-    "addToCart": "加入購物車"
+    "addToCart": "加入購物車",
+    "options": "款式"
   },
   "ProductDetail": {
     "noImage": "暫無圖片",
     "quantity": "數量",
     "addToCart": "加入購物車",
     "localDelivery": "香港本地送花服務",
-    "freshDaily": "當日新鮮製作"
+    "freshDaily": "當日新鮮製作",
+    "selectOption": "選擇款式"
   },
   "Footer": {
     "description": "我們相信，每一束花都有其獨特的意義，能夠完美傳遞出我們的心意和關懷。",
@@ -253,8 +280,8 @@
     "copyright": "Copyright © 2026 風信子花店. All rights reserved."
   },
   "Home": {
-    "title": "HY Florist - 香港花藝專門店",
-    "subtitle": "專業花藝設計，為生活的每一刻增添美麗與溫度",
+    "title": "Hyacinth Florist - 香港帛事花店",
+    "subtitle": "專業帛事花藝設計，為殯儀及祭祀場合送上真摯的慰問",
     "hero": {
       "ctaButton": "探索花藝",
       "slides": [
@@ -270,14 +297,14 @@
     }
   },
   "HomePage": {
-    "heroSlide1Title": "以花傳意\n致敬生命",
+    "heroSlide1Title": "風信子花店\n帛事花牌專門店",
     "heroSlide1Desc": "用心意與專業，為每一個珍重時刻送上真摯的祝福。",
     "heroSlide2Title": "真摯的慰問\n永恆的紀念",
     "heroSlide2Desc": "以優雅花藝，表達最深切的敬意與關懷。",
-    "exploreButton": "探索花藝"
+    "exploreButton": "花牌種類"
   },
   "Products": {
-    "pageTitle": "花藝商城",
+    "pageTitle": "花牌種類",
     "pageSubtitle": "探索我們精心挑選的花藝作品，為生活的每一刻增添美麗與溫度。",
     "loading": "載入中...",
     "errorLoadProducts": "無法載入商品",
@@ -418,7 +445,7 @@
       "花牌": "花牌",
       "花牌套餐": "花牌套餐",
       "十字架花牌": "十字架花牌",
-      "圓形花牌": "圓形花牌",
+      "圓型花牌": "圓型花牌",
       "心型花牌": "心型花牌",
       "棺面花": "棺面花",
       "場地裝飾": "場地裝飾",

@@ -1,12 +1,18 @@
 import Image from "next/image"
 import Link from "next/link"
 import { getTranslations, getLocale } from "next-intl/server"
+import { CATEGORY_MAP } from "@/lib/categories"
 
 export default async function SeriesSection() {
   const [t, locale] = await Promise.all([
     getTranslations("SeriesSection"),
     getLocale(),
   ])
+
+  const benchCategory = CATEGORY_MAP["bench-flower"] ?? "Bench Flowers"
+  const casketCategory = CATEGORY_MAP["casket-decoration"] ?? "Casket Decorations"
+  const podiumCategory = CATEGORY_MAP["podium-flower"] ?? "Podium Flowers"
+  const standCategory = CATEGORY_MAP["stand-flower"] ?? "Stand Flowers"
 
   const series = [
     {
@@ -15,6 +21,7 @@ export default async function SeriesSection() {
       desc: t("items.bench.desc"),
       image: "/series-chair.jpg",
       cta: t("items.bench.cta"),
+      category: benchCategory,
     },
     {
       tag: "CASKET FLOWERS",
@@ -22,6 +29,7 @@ export default async function SeriesSection() {
       desc: t("items.casket.desc"),
       image: "/series-casket1.jpg",
       cta: t("items.casket.cta"),
+      category: casketCategory,
     },
     {
       tag: "PULPIT FLOWERS",
@@ -29,6 +37,7 @@ export default async function SeriesSection() {
       desc: t("items.pulpit.desc"),
       image: "/pulpit_flower.jpg",
       cta: t("items.pulpit.cta"),
+      category: podiumCategory,
     },
     {
       tag: "STAND FLOWERS",
@@ -36,6 +45,7 @@ export default async function SeriesSection() {
       desc: t("items.stand.desc"),
       image: "/series_stand.jpg",
       cta: t("items.stand.cta"),
+      category: standCategory,
     },
   ]
 
@@ -79,7 +89,7 @@ export default async function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[0].desc}
             </p>
-            <Link href={`/${locale}/products?category=櫈花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=${encodeURIComponent(series[0].category)}`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[0].cta} →
             </Link>
           </div>
@@ -103,7 +113,7 @@ export default async function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[1].desc}
             </p>
-            <Link href={`/${locale}/products?category=棺面花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=${encodeURIComponent(series[1].category)}`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[1].cta} →
             </Link>
           </div>
@@ -127,7 +137,7 @@ export default async function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[2].desc}
             </p>
-            <Link href={`/${locale}/products?category=講台花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=${encodeURIComponent(series[2].category)}`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[2].cta} →
             </Link>
           </div>
@@ -151,7 +161,7 @@ export default async function SeriesSection() {
             <p className="text-[#78716C] font-light text-sm mb-4 leading-relaxed">
               {series[3].desc}
             </p>
-            <Link href={`/${locale}/products?category=台花`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
+            <Link href={`/${locale}/products?category=${encodeURIComponent(series[3].category)}`} className="text-xs tracking-widest text-[#57534E] hover:text-[#9CAFA3] transition-colors duration-300">
               {series[3].cta} →
             </Link>
           </div>

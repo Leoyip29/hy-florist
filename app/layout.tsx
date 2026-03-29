@@ -13,8 +13,12 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-    title: "HY Florist - 香港花藝專門店",
-    description: "專業花藝設計,為生活的每一刻增添美麗與溫度",
+    title: "Hyacinth Florist  - 香港帛事花店",
+    description: "專業帛事花藝設計，為殯儀及祭祀場合送上真摯的慰問與敬意",
+    icons: {
+        icon: "/logo.svg",
+        shortcut: "/logo.svg",
+    },
 }
 
 export default function RootLayout({

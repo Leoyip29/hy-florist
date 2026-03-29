@@ -25,7 +25,7 @@ export default function Navbar({ isScrolled }: { isScrolled?: boolean }) {
     { name: t('allProducts'), href: `/${locale}/products` },
     { name: t('flowerBasket'), href: `/${locale}/products?category=${getCategoryForApi("flower-basket")}` },
     { name: t('bouquet'), href: `/${locale}/products?category=${getCategoryForApi("bouquet")}` },
-    { name: t('flowerBoard'), href: `/${locale}/products?category=${getCategoryForApi("flower-board")}` },
+    // { name: t('flowerBoard'), href: `/${locale}/products?category=${getCategoryForApi("flower-board")}` },
     { name: t('heartShapedBoard'), href: `/${locale}/products?category=${getCategoryForApi("heart-shaped-board")}` },
     { name: t('roundBoard'), href: `/${locale}/products?category=${getCategoryForApi("round-board")}` },
     { name: t('crossBoard'), href: `/${locale}/products?category=${getCategoryForApi("cross-board")}` },

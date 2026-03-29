@@ -8,7 +8,8 @@ import Footer from "@/components/layout/Footer"
 import { CartProvider } from "@/contexts/CartContext"
 import { ProductDetailProvider } from "@/contexts/ProductDetailContext"
 import CartDrawer from "@/components/cart/CartDrawer"
-import Header from "@/components/layout/Header"
+import Header from "@/components/layout/SiteHeader"
+import SplashBanner from "@/components/layout/SplashBanner"
 import Script from "next/script"
 
 const geistSans = Geist({
@@ -32,13 +33,13 @@ export async function generateMetadata({
     metadataBase: new URL("https://hy-florist.hk"),
     title: {
       default: isEn
-        ? "Hyacinth Florist – Hong Kong Premium Floral Arrangements"
-        : "HY Florist 韓雅花店 – 香港優質鮮花服務",
-      template: isEn ? "%s | Hyacinth Florist" : "%s | HY Florist",
-    },
+        ? "Hyacinth Florist – Hong Kong Sympathy Flower Specialist"
+        : "Hyacinth Florist 風信子花店 – 香港帛事花店",
+      template: isEn ? "%s | Hyacinth Florist" : "%s | Hyacinth Florist",
+    },  
     description: isEn
-      ? "Premium floral arrangements for funerals, weddings, and all occasions in Hong Kong. Bouquets, flower boards, baskets, wreaths and more."
-      : "香港優質花藝服務，提供花束、花籃、花牌、花圈等各種鮮花佈置，適合各種場合。",
+      ? "Premium sympathy flowers and floral arrangements for funerals and memorial services in Hong Kong. Wreaths, bouquets, flower boards, and baskets for churches, funeral homes, and temples."
+      : "香港專業帛事花店，提供帛事花圈、花束、花牌、花籃等花藝佈置，適用於殯儀館、教堂及寺廟。",
     robots: {
       index: true,
       follow: true,
@@ -52,15 +53,15 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      siteName: isEn ? "Hyacinth Florist" : "HY Florist",
-      locale: isEn ? "en_US" : "zh_HK",
+      siteName: isEn ? "Hyacinth Florist" : "Hyacinth Florist",
+      locale: isEn ? "en_US" : "zh_HK", 
       type: "website",
       images: [
         {
           url: "https://hy-florist.hk/hy_01.webp",
           width: 1200,
           height: 630,
-          alt: isEn ? "Hyacinth Florist Hong Kong" : "HY Florist 韓雅花店",
+          alt: isEn ? "Hyacinth Florist Hong Kong" : "Hyacinth Florist 風信子花店",
         },
       ],
     },
@@ -74,13 +75,13 @@ export async function generateMetadata({
 const localBusinessSchema = {
   "@context": "https://schema.org",
   "@type": "FloristShop",
-  name: "HY Florist 韓雅花店",
+  name: "Hyacinth Florist 風信子花店",
   url: "https://hy-florist.hk",
   image: "https://hy-florist.hk/hy_01.webp",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "長義街9號 永遠大廈地下",
-    addressLocality: "荔枝角",
+    streetAddress: "必嘉街18號嘉麗閣 地下3號舖",
+    addressLocality: "紅磡",
     addressRegion: "九龍",
     addressCountry: "HK",
   },
@@ -128,6 +129,7 @@ export default async function LocaleLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextIntlClientProvider messages={messages}>
+          <SplashBanner />
           <CartProvider>
             <ProductDetailProvider>
               <Header />

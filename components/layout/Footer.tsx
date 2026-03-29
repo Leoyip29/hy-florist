@@ -32,7 +32,7 @@ export default async function Footer() {
         
         <div className="flex items-start gap-3">
             <span className="text-base leading-none">📞</span>
-            <span>{t("phone")}: +852 9684 6901</span>
+            <span>{t("phone")}: +852 9456 8292</span>
         </div>
 
         <div className="flex items-start gap-3">

@@ -5,7 +5,11 @@ const withNextIntl = createNextIntlPlugin()
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    unoptimized: process.env.NODE_ENV === 'development', // Disable optimization for local dev
+    // Disable Next.js image proxy — browser fetches images directly.
+    // This is necessary when the image source (e.g. http://127.0.0.1:8000) is
+    // a private IP that the dev server proxy blocks.
+    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: 'http',
@@ -15,6 +19,12 @@ const nextConfig = {
       },
       {
         protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '8000',
+        pathname: '/media/**',
+      },
+      {
+        protocol: 'https',
         hostname: '127.0.0.1',
         port: '8000',
         pathname: '/media/**',

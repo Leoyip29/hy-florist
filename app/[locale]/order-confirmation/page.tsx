@@ -256,6 +256,7 @@ function OrderConfirmationContent() {
                               alt={item.product_name}
                               fill
                               className="object-cover rounded"
+                              unoptimized
                           />
                         </div>
                     )}

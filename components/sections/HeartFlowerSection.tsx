@@ -3,6 +3,7 @@ import { getTranslations, getLocale } from "next-intl/server"
 import ProductCard from "@/components/product/ProductCard"
 import { fetchProductsByIds } from "@/lib/api"
 import { apiToUiProduct } from "@/lib/product-utils"
+import { CATEGORY_MAP } from "@/lib/categories"
 
 const HEART_FLOWER_PRODUCT_IDS = [244, 265, 267, 283]
 
@@ -14,6 +15,7 @@ export default async function HeartFlowerSection() {
   ])
 
   const products = apiProducts.map((p) => apiToUiProduct(p, locale))
+  const categoryParam = CATEGORY_MAP["heart-shaped-board"] ?? "Heart-shaped Boards"
 
   if (products.length === 0) return null
 
@@ -62,7 +64,7 @@ export default async function HeartFlowerSection() {
 
         <div className="mt-16 text-center">
           <Link
-            href={`/${locale}/products?category=心型花牌`}
+            href={`/${locale}/products?category=${encodeURIComponent(categoryParam)}`}
             className="inline-block text-sm tracking-widest text-rose-200 border border-rose-400/50 px-8 py-3 hover:bg-white hover:text-[#8B6B6B] hover:border-white transition-all duration-300"
           >
             {t("viewAll")}
