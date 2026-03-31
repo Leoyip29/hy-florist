@@ -53,7 +53,7 @@ export default function ProductCard({
     >
       {/* Image Container */}
       <div
-        className="relative aspect-[3/4] overflow-hidden bg-neutral-100 mb-3 cursor-pointer"
+        className="relative aspect-[3/4] overflow-hidden bg-neutral-100 mb-3 cursor-pointer rounded-lg"
         onClick={(e) => {
           e.stopPropagation()
           openProduct(product)
@@ -71,37 +71,37 @@ export default function ProductCard({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-neutral-400">
-            <span className="text-sm">{t("noImage")}</span>
+            <span className="text-base">No Image</span>
           </div>
         )}
 
-        {/* Options badge */}
+        {/* Options badge - larger for visibility */}
         {hasOptions && (
-          <div className="absolute top-2 left-2 px-2 py-0.5 bg-white/90 backdrop-blur-sm rounded-full text-xs text-neutral-700 font-medium shadow-sm">
+          <div className="absolute top-3 left-3 px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-full text-sm text-neutral-700 font-medium shadow-md">
             {product.options!.length} {t("options")}
           </div>
         )}
 
-        {/* Add to Cart Button Overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-end justify-center p-3 md:p-4">
+        {/* Add to Cart Button - always visible on mobile, hover on desktop */}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/30 to-transparent p-3 md:p-4 flex justify-center">
           <button
             onClick={handleAddToCart}
-            className="opacity-100 translate-y-0 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300 bg-white text-neutral-900 px-4 py-2 md:px-6 md:py-2.5 rounded-full font-medium text-xs md:text-sm flex items-center gap-1.5 md:gap-2 hover:bg-neutral-100 shadow-lg"
+            className="w-full md:w-auto opacity-100 translate-y-0 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300 bg-white text-neutral-900 px-3 py-2 md:px-5 md:py-2.5 rounded-full font-medium text-sm md:text-sm flex items-center justify-center gap-2 hover:bg-neutral-100 shadow-lg min-h-[40px]"
           >
-            <ShoppingCart className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <ShoppingCart className="w-4 h-4 md:w-4 md:h-4" />
             {t("addToCart")}
           </button>
         </div>
       </div>
 
-      {/* Product Info */}
-      <div className="text-center space-y-1">
+      {/* Product Info - larger text for accessibility */}
+      <div className="text-center space-y-1.5 px-1">
         <h3
-          className={`${playfairClassName} text-base font-light text-neutral-900 group-hover:text-neutral-600 transition-colors line-clamp-2 min-h-[3rem]`}
+          className={`${playfairClassName} text-lg md:text-base font-light text-neutral-900 group-hover:text-neutral-600 transition-colors line-clamp-2 min-h-[3.5rem]`}
         >
           {product.name}
         </h3>
-        <p className="text-sm font-medium text-neutral-900">
+        <p className="text-lg md:text-base font-semibold text-neutral-900">
           HK${displayPrice.toLocaleString()}
         </p>
       </div>

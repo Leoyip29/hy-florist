@@ -51,6 +51,33 @@ function ErrorAlert({ message, onClose }: { message: string; onClose: () => void
     )
 }
 
+function MultipleErrorAlert({ messages, onClose }: { messages: string[]; onClose: () => void }) {
+    const locale = useLocale()
+    if (messages.length === 0) return null
+    const title = messages.length === 1
+        ? (locale === "en" ? "Please fix the following error:" : "請修正以下錯誤：")
+        : (locale === "en" ? `Please fix the following ${messages.length} errors:` : `請修正以下 ${messages.length} 個錯誤：`)
+    return (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3 mb-2">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                    <p className="text-sm font-medium text-red-800">{title}</p>
+                </div>
+                <button onClick={onClose} className="text-red-400 hover:text-red-600"><X className="w-4 h-4" /></button>
+            </div>
+            <ul className="ml-8 space-y-1">
+                {messages.map((msg, idx) => (
+                    <li key={idx} className="text-sm text-red-700 flex items-start gap-2">
+                        <span className="text-red-400 mt-1">•</span>
+                        <span>{msg}</span>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    )
+}
+
 // ─── Payment Method Selector ──────────────────────────────────────────────────
 
 type PaymentMethodId = "stripe" | "payme" | "whatsapp"
@@ -386,9 +413,11 @@ export default function CheckoutWrapper() {
         orderNumber: string
         whatsappLink: string
         amountHkd: number
+        customerEmail?: string
+        customerPhone?: string
     } | null>(null)
 
-    const [errorMessage, setErrorMessage] = useState("")
+    const [errorMessages, setErrorMessages] = useState<string[]>([])
     const [isPreparingPayment, setIsPreparingPayment] = useState(false)
 
     const [errors, setErrors] = useState<Record<string, string>>({})
@@ -414,6 +443,7 @@ export default function CheckoutWrapper() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target
         setErrors(prev => ({ ...prev, [name]: "" }))
+        setErrorMessages([])
         if (name === "delivery_region") {
             setFormData(prev => ({ ...prev, delivery_region: value as LocationCategory, delivery_district: "" }))
         } else {
@@ -423,14 +453,11 @@ export default function CheckoutWrapper() {
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {}
+        // Basic frontend validation - backend will do full validation
         if (!formData.customer_name.trim()) newErrors.customer_name = t("validation.nameRequired")
-        else if (formData.customer_name.trim().length < 2) newErrors.customer_name = t("validation.nameTooShort")
         if (!formData.customer_email.trim()) newErrors.customer_email = t("validation.emailRequired")
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customer_email.trim())) newErrors.customer_email = t("validation.emailInvalid")
         if (!formData.customer_phone.trim()) newErrors.customer_phone = t("validation.phoneRequired")
-        else if (formData.customer_phone.replace(/\s|-|\(|\)/g, "").length < 8) newErrors.customer_phone = t("validation.phoneTooShort")
         if (!formData.deceased_name.trim()) newErrors.deceased_name = t("validation.deceasedNameRequired")
-        else if (formData.deceased_name.trim().length < 2) newErrors.deceased_name = t("validation.deceasedNameTooShort")
         if (!formData.delivery_region) newErrors.delivery_region = t("validation.locationTypeRequired")
         if (!formData.delivery_district) newErrors.delivery_district = t("validation.locationRequired")
         if (!formData.delivery_date) newErrors.delivery_date = t("validation.dateRequired")
@@ -441,14 +468,14 @@ export default function CheckoutWrapper() {
     const handleProceedToPayment = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsPreparingPayment(true)
-        setErrorMessage("")
+        setErrorMessages([])
+
+        if (!validateForm()) {
+            setIsPreparingPayment(false)
+            return
+        }
 
         try {
-            if (!validateForm()) {
-                setIsPreparingPayment(false)
-                return
-            }
-
             const orderData = {
                 ...formData,
                 payment_method: paymentMethod === "payme" ? "payme" : paymentMethod === "whatsapp" ? "whatsapp" : "card_pay",
@@ -460,6 +487,66 @@ export default function CheckoutWrapper() {
                 })),
             }
 
+            // Map backend field names to frontend field names
+            const fieldMapping: Record<string, string> = {
+                'customer_name': 'customer_name',
+                'customer_email': 'customer_email',
+                'customer_phone': 'customer_phone',
+                'deceased_name': 'deceased_name',
+                'delivery_region': 'delivery_region',
+                'delivery_district': 'delivery_district',
+                'delivery_date': 'delivery_date',
+                'delivery_address': 'delivery_address',
+            }
+
+            const handleApiError = (err: any): string[] => {
+                const allErrors: string[] = []
+                // Handle DRF ValidationError with detail: [...] format
+                if (err.detail) {
+                    const detailMsg = typeof err.detail === 'string'
+                        ? err.detail
+                        : Array.isArray(err.detail)
+                            ? err.detail.map((d: any) => typeof d === 'string' ? d : (d as any)?.message || String(d)).join('; ')
+                            : (err.detail as any)?.message || JSON.stringify(err.detail)
+                    allErrors.push(detailMsg)
+                    return allErrors
+                }
+                // Handle backend { "error": { "field": ["msg"] } } wrapper
+                if (err.error && typeof err.error === 'object') {
+                    for (const [field, messages] of Object.entries(err.error)) {
+                        const msgs = Array.isArray(messages) ? messages : [messages]
+                        for (const msg of msgs) {
+                            const str = typeof msg === 'string' ? msg : (msg as any)?.message || JSON.stringify(msg)
+                            allErrors.push(str)
+                        }
+                    }
+                    return allErrors.length > 0 ? allErrors : [t("errors.createPaymentFailed")]
+                }
+                // Handle field-level errors
+                if (typeof err === 'object' && !Array.isArray(err)) {
+                    const mappedErrors: Record<string, string> = {}
+
+                    for (const [field, messages] of Object.entries(err)) {
+                        const msgs = Array.isArray(messages) ? messages : [messages]
+                        const strs: string[] = []
+                        for (const msg of msgs) {
+                            const str = typeof msg === 'string' ? msg : (msg as any)?.message || JSON.stringify(msg)
+                            if (str && str.trim()) strs.push(str)
+                        }
+                        if (strs.length > 0) {
+                            const mappedField = fieldMapping[field] || field
+                            mappedErrors[mappedField] = strs.join('; ')
+                            allErrors.push(...strs)
+                        }
+                    }
+
+                    if (Object.keys(mappedErrors).length > 0) {
+                        setErrors(prev => ({ ...prev, ...mappedErrors }))
+                    }
+                }
+                return allErrors.length > 0 ? allErrors : [t("errors.createPaymentFailed")]
+            }
+
             if (paymentMethod === "payme") {
                 const res = await fetch(`${API_BASE_URL}/api/orders/payme/create/`, {
                     method: "POST",
@@ -467,8 +554,11 @@ export default function CheckoutWrapper() {
                     body: JSON.stringify(orderData),
                 })
                 if (!res.ok) {
-                    const err = await res.json()
-                    throw new Error(err.error || t("errors.createPaymentFailed"))
+                    const err = await res.json().catch(() => ({}))
+                    const errors = handleApiError(err)
+                    setErrorMessages(errors.length > 0 ? errors : [t("errors.createPaymentFailed")])
+                    setIsPreparingPayment(false)
+                    return
                 }
                 const data = await res.json()
                 setPaymeData({
@@ -487,14 +577,19 @@ export default function CheckoutWrapper() {
                     body: JSON.stringify(orderData),
                 })
                 if (!res.ok) {
-                    const err = await res.json()
-                    throw new Error(err.error || t("errors.createPaymentFailed"))
+                    const err = await res.json().catch(() => ({}))
+                    const errors = handleApiError(err)
+                    setErrorMessages(errors.length > 0 ? errors : [t("errors.createPaymentFailed")])
+                    setIsPreparingPayment(false)
+                    return
                 }
                 const data = await res.json()
                 setWhatsappData({
                     orderNumber: data.order_number,
                     whatsappLink: data.whatsapp_link,
                     amountHkd: data.amount_hkd,
+                    customerEmail: formData.customer_email,
+                    customerPhone: formData.customer_phone,
                 })
                 window.scrollTo({ top: 0, behavior: "smooth" })
 
@@ -506,8 +601,11 @@ export default function CheckoutWrapper() {
                     body: JSON.stringify(orderData),
                 })
                 if (!res.ok) {
-                    const err = await res.json()
-                    throw new Error(err.error || t("errors.createPaymentFailed"))
+                    const err = await res.json().catch(() => ({}))
+                    const errors = handleApiError(err)
+                    setErrorMessages(errors.length > 0 ? errors : [t("errors.createPaymentFailed")])
+                    setIsPreparingPayment(false)
+                    return
                 }
                 const data = await res.json()
                 setClientSecret(data.clientSecret)
@@ -517,7 +615,7 @@ export default function CheckoutWrapper() {
             }
 
         } catch (error: any) {
-            setErrorMessage(error.message || t("errors.networkError"))
+            setErrorMessages([error.message || t("errors.networkError")])
         } finally {
             setIsPreparingPayment(false)
         }
@@ -544,6 +642,8 @@ export default function CheckoutWrapper() {
                 orderNumber={whatsappData.orderNumber}
                 whatsappLink={whatsappData.whatsappLink}
                 amountHkd={whatsappData.amountHkd}
+                customerEmail={whatsappData.customerEmail}
+                customerPhone={whatsappData.customerPhone}
             />
         )
     }
@@ -556,7 +656,7 @@ export default function CheckoutWrapper() {
                     <div className="lg:col-span-2">
                         {!showPaymentForm ? (
                             <form onSubmit={handleProceedToPayment} className="space-y-6">
-                                {errorMessage && <ErrorAlert message={errorMessage} onClose={() => setErrorMessage("")} />}
+                                {(errorMessages.length > 0) && <MultipleErrorAlert messages={errorMessages} onClose={() => setErrorMessages([])} />}
 
                                 {/* Customer Info */}
                                 <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
@@ -564,28 +664,28 @@ export default function CheckoutWrapper() {
                                     <div className="space-y-4">
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("name")} <span className="text-red-600">*</span></label>
-                                            <input type="text" name="customer_name" value={formData.customer_name} onChange={handleChange} required minLength={2}
+                                            <input type="text" name="customer_name" value={formData.customer_name} onChange={handleChange} minLength={2}
                                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 ${errors.customer_name ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                                 placeholder={t("placeholders.name")} />
                                             {errors.customer_name && <p className="mt-1 text-sm text-red-600">{errors.customer_name}</p>}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("email")} <span className="text-red-600">*</span></label>
-                                            <input type="email" name="customer_email" value={formData.customer_email} onChange={handleChange} required
+                                            <input type="text" name="customer_email" value={formData.customer_email} onChange={handleChange}
                                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 ${errors.customer_email ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                                 placeholder={t("placeholders.email")} />
                                             {errors.customer_email && <p className="mt-1 text-sm text-red-600">{errors.customer_email}</p>}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("phone")} <span className="text-red-600">*</span></label>
-                                            <input type="tel" name="customer_phone" value={formData.customer_phone} onChange={handleChange} required minLength={8}
+                                            <input type="text" name="customer_phone" value={formData.customer_phone} onChange={handleChange}
                                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 ${errors.customer_phone ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                                 placeholder={t("placeholders.phone")} />
                                             {errors.customer_phone && <p className="mt-1 text-sm text-red-600">{errors.customer_phone}</p>}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium mb-2">{t("deceasedName")} <span className="text-red-600">*</span></label>
-                                            <input type="text" name="deceased_name" value={formData.deceased_name} onChange={handleChange} required minLength={2}
+                                            <input type="text" name="deceased_name" value={formData.deceased_name} onChange={handleChange} minLength={2}
                                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 ${errors.deceased_name ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                                 placeholder={t("placeholders.deceasedName")} />
                                             {errors.deceased_name && <p className="mt-1 text-sm text-red-600">{errors.deceased_name}</p>}
@@ -606,7 +706,6 @@ export default function CheckoutWrapper() {
                                                 name="delivery_region"
                                                 value={formData.delivery_region}
                                                 onChange={handleChange}
-                                                required
                                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 bg-white ${errors.delivery_region ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                             >
                                                 <option value="">
@@ -632,7 +731,6 @@ export default function CheckoutWrapper() {
                                                     name="delivery_district"
                                                     value={formData.delivery_district}
                                                     onChange={handleChange}
-                                                    required
                                                     className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 bg-white ${errors.delivery_district ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                                 >
                                                     <option value="">
@@ -661,8 +759,6 @@ export default function CheckoutWrapper() {
                                                     setFormData({ ...formData, delivery_date: e.target.value })
                                                     setErrors(prev => ({ ...prev, delivery_date: "" }))
                                                 }}
-                                                min={new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
-                                                required
                                                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-neutral-900 ${errors.delivery_date ? "border-red-500 focus:ring-red-500" : "border-neutral-300"}`}
                                             />
                                             <p className="text-xs text-neutral-500 mt-1">{t("datePicker.minDaysNotice", { days: 3 })}</p>
@@ -728,6 +824,8 @@ export default function CheckoutWrapper() {
                                         t("proceedToPayment")
                                     )}
                                 </button>
+
+                                {(errorMessages.length > 0) && <MultipleErrorAlert messages={errorMessages} onClose={() => setErrorMessages([])} />}
                             </form>
                         ) : (
                             clientSecret && (

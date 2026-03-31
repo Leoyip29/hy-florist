@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { MessageCircle, ExternalLink, ArrowLeft } from "lucide-react"
 import { useLocale } from "next-intl"
@@ -10,27 +10,33 @@ interface WhatsAppPageProps {
     orderNumber: string
     whatsappLink: string
     amountHkd: number
+    customerEmail?: string
+    customerPhone?: string
 }
 
 export default function WhatsAppPaymentPage({
     orderNumber,
     whatsappLink,
     amountHkd,
+    customerEmail,
+    customerPhone,
 }: WhatsAppPageProps) {
     const router = useRouter()
     const locale = useLocale()
     const { clearCart } = useCart()
     const [isRedirecting, setIsRedirecting] = useState(false)
     const [countdown, setCountdown] = useState(3)
+    const hasRedirected = useRef(false)
 
     // Auto-redirect to WhatsApp after countdown
     useEffect(() => {
         if (countdown > 0) {
             const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
             return () => clearTimeout(timer)
-        } else {
-            setIsRedirecting(true)
+        } else if (!hasRedirected.current) {
+            hasRedirected.current = true
             window.location.href = whatsappLink
+            setIsRedirecting(true)
         }
     }, [countdown, whatsappLink])
 
@@ -90,6 +96,22 @@ export default function WhatsAppPaymentPage({
                                 </span>
                                 <span className="font-medium">{orderNumber}</span>
                             </div>
+                            {customerEmail && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-neutral-600">
+                                        {locale === "en" ? "Email:" : "電郵:"}
+                                    </span>
+                                    <span className="font-medium">{customerEmail}</span>
+                                </div>
+                            )}
+                            {customerPhone && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-neutral-600">
+                                        {locale === "en" ? "Phone:" : "電話:"}
+                                    </span>
+                                    <span className="font-medium">{customerPhone}</span>
+                                </div>
+                            )}
                             <div className="flex justify-between text-sm">
                                 <span className="text-neutral-600">
                                     {locale === "en" ? "Order Amount:" : "訂單金額:"}
@@ -101,6 +123,10 @@ export default function WhatsAppPaymentPage({
                         {/* Manual redirect button */}
                         <a
                             href={whatsappLink}
+                            onClick={(e) => {
+                                if (hasRedirected.current) e.preventDefault()
+                                hasRedirected.current = true
+                            }}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white py-4 rounded-xl font-medium hover:bg-[#128C7E] transition-colors"

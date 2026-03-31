@@ -295,7 +295,7 @@ export default function ProductsClient({ initialData }: ProductsClientProps) {
           <div className="flex items-center justify-between gap-3 mb-4">
             {searchKeyword ? (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-neutral-500">
+                <span className="text-base md:text-sm text-neutral-600 font-medium">
                   {t("searchResults", { searchKeyword, count: totalCount })}
                 </span>
                 <button
@@ -305,31 +305,34 @@ export default function ProductsClient({ initialData }: ProductsClientProps) {
                     params.delete("search")
                     window.history.replaceState(null, "", `?${params.toString()}`)
                   }}
-                  className="text-sm text-neutral-500 hover:text-neutral-800 underline"
+                  className="text-base md:text-sm text-neutral-500 hover:text-neutral-800 underline underline-offset-2"
                 >
                   {t("clear")}
                 </button>
               </div>
             ) : (
-              <p className="text-xs sm:text-sm text-neutral-500">
+              <p className="text-base md:text-sm text-neutral-500 font-medium">
                 {t("totalProducts", { count: totalCount })}
               </p>
             )}
             <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm text-neutral-500">{t("sort")}</span>
+              <span className="text-base md:text-sm text-neutral-600 font-medium">{t("sort")}</span>
               <select
                 value={
                   !isEmptyRange(priceRange) && availablePriceRanges.includes(findPriceRangeKey(priceRange, locale) ?? "")
                     ? findPriceRangeKey(priceRange, locale)!
-                    : sortOption
+                    : sortOption !== "recommended"
+                    ? sortOption
+                    : ""
                 }
                 onChange={(e) => {
                   const val = e.target.value
+                  if (!val) return
+
                   const priceOpt = getPriceRangeByLocale(locale).find((opt) => opt.key === val)
                   const params = new URLSearchParams(searchParams.toString())
 
                   if (priceOpt) {
-                    // Price range selected — clear sort, set price
                     setSortOption("recommended")
                     params.delete("sort")
                     if (priceOpt.value.min !== undefined) {
@@ -344,24 +347,21 @@ export default function ProductsClient({ initialData }: ProductsClientProps) {
                     }
                     setPriceRange(priceOpt.value)
                   } else {
-                    // Sort selected — clear price, set sort
                     setPriceRange({})
                     params.delete("price_min")
                     params.delete("price_max")
-                    const sortVal = val as "recommended" | "price_asc" | "price_desc"
+                    const sortVal = val as "price_asc" | "price_desc"
                     setSortOption(sortVal)
-                    if (sortVal === "recommended") {
-                      params.delete("sort")
-                    } else {
-                      params.set("sort", sortVal)
-                    }
+                    params.set("sort", sortVal)
                   }
                   window.history.replaceState(null, "", `?${params.toString()}`)
                 }}
-                className="text-xs sm:text-sm border border-neutral-200 rounded-full px-3 py-1.5 bg-white text-neutral-800 focus:outline-none focus:ring-1 focus:ring-neutral-400"
+                className="text-base md:text-sm border-2 border-neutral-200 rounded-xl px-4 py-3 md:px-3 md:py-2 bg-white text-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-400 min-h-[48px]"
               >
+                <option value="" disabled>
+                  {locale === "en" ? "Price Options" : "價格選項"}
+                </option>
                 <optgroup label={locale === "en" ? "Sort" : "排序"}>
-                  <option value="recommended">{t("sortDefault")}</option>
                   <option value="price_asc">{t("sortPriceAsc")}</option>
                   <option value="price_desc">{t("sortPriceDesc")}</option>
                 </optgroup>
@@ -412,19 +412,19 @@ export default function ProductsClient({ initialData }: ProductsClientProps) {
       {/* ===== PAGINATION ===== */}
       {!isLoading && !error && products.length > 0 && (
         <section className="pb-16">
-          <div className="mx-auto max-w-7xl px-4 md:px-8 flex items-center justify-center gap-3">
+          <div className="mx-auto max-w-7xl px-4 md:px-8 flex items-center justify-center gap-4 md:gap-3">
             <button
-              className="px-4 py-2 text-sm border border-neutral-200 rounded-full bg-white text-neutral-700 hover:bg-[#E8B4B8] hover:text-neutral-800 hover:border-[#E8B4B8] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-neutral-200"
+              className="px-5 py-3 md:px-4 md:py-2 text-base md:text-sm border-2 border-neutral-300 rounded-xl bg-white text-neutral-700 hover:bg-[#E8B4B8] hover:text-neutral-800 hover:border-[#E8B4B8] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-neutral-300 min-h-[48px] min-w-[100px] md:min-w-[auto]"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             >
               {t("previousPage")}
             </button>
-            <span className="text-sm text-neutral-600 px-2">
+            <span className="text-lg md:text-base text-neutral-600 px-3 font-medium">
               {t("pageOf", { current: currentPage, total: totalPages })}
             </span>
             <button
-              className="px-4 py-2 text-sm border border-neutral-200 rounded-full bg-white text-neutral-700 hover:bg-[#E8B4B8] hover:text-neutral-800 hover:border-[#E8B4B8] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-neutral-200"
+              className="px-5 py-3 md:px-4 md:py-2 text-base md:text-sm border-2 border-neutral-300 rounded-xl bg-white text-neutral-700 hover:bg-[#E8B4B8] hover:text-neutral-800 hover:border-[#E8B4B8] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-neutral-300 min-h-[48px] min-w-[100px] md:min-w-[auto]"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             >
