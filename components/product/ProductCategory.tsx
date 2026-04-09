@@ -146,12 +146,12 @@ export default function ProductCategory({
         {/* Special Selection Categories - Horizontal Scrollable Row */}
         {specialCategories.length > 0 && (
           <div className="mt-5 pt-4 border-t border-neutral-100">
-            <div className="flex md:flex-wrap md:justify-center gap-3 overflow-x-auto pb-3 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="flex justify-center md:justify-center md:flex-wrap gap-3 overflow-x-auto pb-3 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
               {specialCategories.map((cat) => (
                 <button
                   key={cat.id ?? cat.name}
                   onClick={() => onSelect(cat.apiName)}
-                  className={`px-5 py-3 rounded-xl transition-all duration-200 shrink-0 touch-manipulation text-base md:text-sm font-semibold whitespace-nowrap ${
+                  className={` px-5 py-3 rounded-xl transition-all duration-200 shrink-0 touch-manipulation text-base md:text-sm font-semibold whitespace-nowrap ${
                     selectedCategory === cat.apiName
                       ? "bg-neutral-900 text-white"
                       : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
