@@ -60,6 +60,7 @@ export default function ProductsClient({ initialData }: ProductsClientProps) {
   const searchParams = useSearchParams()
   const t = useTranslations("Products")
   const locale = useLocale()
+  const productsSectionRef = useRef<HTMLElement>(null)
 
   const allText = locale === "en" ? "All" : "全部"
 
@@ -92,6 +93,21 @@ export default function ProductsClient({ initialData }: ProductsClientProps) {
   const [sortOption, setSortOption] = useState<"recommended" | "price_asc" | "price_desc">("recommended")
   const [selectedProduct, setSelectedProduct] = useState<UiProduct | null>(null)
   const [availablePriceRanges, setAvailablePriceRanges] = useState<string[]>([])
+
+  // Scroll to products section when category changes
+  const handleCategorySelect = useCallback((apiName: string) => {
+    setSelectedCategory(apiName)
+    if (productsSectionRef.current) {
+      const headerOffset = 125 // Matches the pt-[125px] on the main element
+      const elementPosition = productsSectionRef.current.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      })
+    }
+  }, [])
 
   // Track the previous category value to avoid cleaning on initial mount
   const prevCategory = useRef<string>(initialCategory)
@@ -286,11 +302,11 @@ export default function ProductsClient({ initialData }: ProductsClientProps) {
       <ProductCategory
         categories={categories}
         selectedCategory={selectedCategory}
-        onSelect={setSelectedCategory}
+        onSelect={handleCategorySelect}
       />
 
       {/* ===== PRODUCTS GRID ===== */}
-      <section className="py-10 bg-white">
+      <section ref={productsSectionRef} className="py-10 bg-white">
         <div className="mx-auto px-4">
           <div className="flex items-center justify-between gap-3 mb-4">
             {searchKeyword ? (
@@ -333,7 +349,7 @@ export default function ProductsClient({ initialData }: ProductsClientProps) {
                   const params = new URLSearchParams(searchParams.toString())
 
                   if (priceOpt) {
-                    setSortOption("recommended")
+                    setSortOption("price_asc")
                     params.delete("sort")
                     if (priceOpt.value.min !== undefined) {
                       params.set("price_min", String(priceOpt.value.min))

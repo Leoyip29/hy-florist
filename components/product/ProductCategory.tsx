@@ -151,42 +151,14 @@ export default function ProductCategory({
                 <button
                   key={cat.id ?? cat.name}
                   onClick={() => onSelect(cat.apiName)}
-                  className={`group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 shrink-0 min-h-[56px] touch-manipulation ${
+                  className={`m-auto px-5 py-3 rounded-xl transition-all duration-200 shrink-0 touch-manipulation text-base md:text-sm font-semibold whitespace-nowrap ${
                     selectedCategory === cat.apiName
                       ? "bg-neutral-900 text-white"
                       : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
                   }`}
                   aria-label={cat.name}
                 >
-                  <div
-                    className={`relative overflow-hidden transition-all duration-300 ${
-                      selectedCategory === cat.apiName ? "" : "grayscale-[30%] group-hover:grayscale-0"
-                    }`}
-                    style={{
-                      width: 40,
-                      height: 40,
-                    }}
-                  >
-                    {cat.image && (
-                      <Image
-                        src={cat.image}
-                        alt={cat.name}
-                        fill
-                        sizes="48px"
-                        unoptimized
-                        className="object-contain p-1"
-                      />
-                    )}
-                  </div>
-                  <span
-                    className={`text-base md:text-sm font-semibold transition-colors duration-200 whitespace-nowrap ${
-                      selectedCategory === cat.apiName
-                        ? "text-white"
-                        : "text-neutral-700"
-                    }`}
-                  >
-                    {cat.name}
-                  </span>
+                  {cat.name}
                 </button>
               ))}
             </div>
