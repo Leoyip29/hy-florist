@@ -151,7 +151,7 @@ export default function ProductCategory({
                 <button
                   key={cat.id ?? cat.name}
                   onClick={() => onSelect(cat.apiName)}
-                  className={`m-auto px-5 py-3 rounded-xl transition-all duration-200 shrink-0 touch-manipulation text-base md:text-sm font-semibold whitespace-nowrap ${
+                  className={`px-5 py-3 rounded-xl transition-all duration-200 shrink-0 touch-manipulation text-base md:text-sm font-semibold whitespace-nowrap ${
                     selectedCategory === cat.apiName
                       ? "bg-neutral-900 text-white"
                       : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
