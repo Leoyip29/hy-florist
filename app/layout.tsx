@@ -13,11 +13,23 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-    title: "Hyacinth Florist  - 香港帛事花店",
-    description: "專業帛事花藝設計，為殯儀及祭祀場合送上真摯的慰問與敬意",
+    title: "風信子花店 - 香港帛事花店",
+    description: "專業帛事花藝設計。提供帛事花牌、花籃、花圈、慰問花束及各式祭奠花藝。用心意與專業，為每一個珍重時刻送上真摯的祝福。",
     icons: {
         icon: "/logo.svg",
         shortcut: "/logo.svg",
+    },
+    openGraph: {
+        title: "風信子花店 - 香港帛事花店",
+        description: "專業帛事花藝設計。提供帛事花牌、花籃、花圈、慰問花束及各式祭奠花藝。",
+        images: [
+            {
+                url: "/logo.svg",
+                width: 115,
+                height: 70,
+                alt: "風信子花店 Hyacinth Florist",
+            },
+        ],
     },
 }
 
