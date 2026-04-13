@@ -32,9 +32,7 @@ export async function generateMetadata({
   return {
     metadataBase: new URL("https://hy-florist.hk"),
     title: {
-      default: isEn
-        ? "帛事花店 | 帛事花牌 花籃 花圈 | 風信子花店 香港"
-        : "帛事花店 | 帛事花牌 花籃 花圈 | 風信子花店 香港",
+      default: "帛事花店 | 帛事花牌 花籃 花圈 | 風信子花店 香港",
       template: "%s | 風信子花店",
     },
     description: isEn
