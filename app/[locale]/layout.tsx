@@ -33,13 +33,16 @@ export async function generateMetadata({
     metadataBase: new URL("https://hy-florist.hk"),
     title: {
       default: isEn
-        ? "Hyacinth Florist – Hong Kong Sympathy Flower Specialist"
-        : "Hyacinth Florist 風信子花店 – 香港帛事花店",
-      template: isEn ? "%s | Hyacinth Florist" : "%s | Hyacinth Florist",
-    },  
+        ? "帛事花店 | 帛事花牌 花籃 花圈 | 風信子花店 香港"
+        : "帛事花店 | 帛事花牌 花籃 花圈 | 風信子花店 香港",
+      template: "%s | 風信子花店",
+    },
     description: isEn
-      ? "Premium sympathy flowers and floral arrangements for funerals and memorial services in Hong Kong. Wreaths, bouquets, flower boards, and baskets for churches, funeral homes, and temples."
-      : "香港專業帛事花店，提供帛事花圈、花束、花牌、花籃等花藝佈置，適用於殯儀館、教堂及寺廟。",
+      ? "香港帛事花店首選。提供優質帛事花牌、花籃、花圈、慰問花束及各式祭奠花藝。用心意與專業，為每一個珍重時刻送上真摯的祝福。"
+      : "香港帛事花店首選。提供優質帛事花牌、花籃、花圈、慰問花束及各式祭奠花藝。用心意與專業，為每一個珍重時刻送上真摯的祝福。",
+    keywords: isEn
+      ? ["帛事花店", "帛事花", "花牌", "花籃", "花圈", "香港花店", "風信子花店", "紅磡花店", "慰問花", "喪禮花", "祭奠花", "帛事��圈"]
+      : ["帛事花店", "帛事花", "花牌", "花籃", "花圈", "香港花店", "風信子花店", "紅磡花店", "慰問花", "喪禮花", "祭奠花", "帛事花圈"],
     robots: {
       index: true,
       follow: true,
@@ -53,20 +56,24 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      siteName: isEn ? "Hyacinth Florist" : "Hyacinth Florist",
-      locale: isEn ? "en_US" : "zh_HK", 
+      siteName: "風信子花店 Hyacinth Florist",
+      locale: isEn ? "en_US" : "zh_HK",
       type: "website",
+      title: "帛事花店 | 風信子花店 香港",
+      description: "香港帛事花店首選。提供優質帛事花牌、花籃、花圈、慰問花束及各式祭奠花藝。",
       images: [
         {
           url: "https://hy-florist.hk/hy_01.webp",
           width: 1200,
           height: 630,
-          alt: isEn ? "Hyacinth Florist Hong Kong" : "Hyacinth Florist 風信子花店",
+          alt: "風信子花店 Hyacinth Florist - 帛事花店",
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
+      title: "帛事花店 | 風信子花店",
+      description: "香港帛事花店首選。提供優質帛事花牌、花籃、花圈。",
       images: ["https://hy-florist.hk/hy_01.webp"],
     },
   }

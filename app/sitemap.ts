@@ -4,14 +4,19 @@ const BASE_URL = "https://hy-florist.hk"
 const locales = ["en", "zh-HK"]
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPages = ["", "/about", "/contact", "/products"]
+  const staticPages = [
+    { path: "", changefreq: "weekly" as const, priority: 1.0 },
+    { path: "/about", changefreq: "monthly" as const, priority: 0.7 },
+    { path: "/contact", changefreq: "monthly" as const, priority: 0.8 },
+    { path: "/products", changefreq: "daily" as const, priority: 0.9 },
+  ]
 
-  return staticPages.flatMap((path) =>
+  return staticPages.flatMap((page) =>
     locales.map((locale) => ({
-      url: `${BASE_URL}/${locale}${path}`,
+      url: `${BASE_URL}/${locale}${page.path}`,
       lastModified: new Date(),
-      changeFrequency: path === "/products" ? ("daily" as const) : ("monthly" as const),
-      priority: path === "" ? 1.0 : path === "/products" ? 0.9 : 0.7,
+      changeFrequency: page.changefreq,
+      priority: page.priority,
     }))
   )
 }
