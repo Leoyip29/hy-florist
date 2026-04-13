@@ -156,10 +156,11 @@ export default async function ContactPage({
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="h-[400px] w-full">
               <iframe
-                title="Google Map"
-                src="https://www.google.com/maps?q=九龍+紅磡+必嘉街18號+嘉麗閣+地下3號舖&output=embed"
+                title="恩福殯儀 PARADISE SE"
+                src="https://www.google.com/maps?q=PARADISE+SE+%E6%81%A9%E7%A6%8F%E6%AE%AF%E5%84%80,+%E7%B4%97%E7%A3%A1%E5%BF%85%E5%98%89%E8%A1%9718%E8%99%9F%E5%98%89%E9%BA%97%E9%96%A3&z=17&output=embed"
                 className="h-full w-full border-0"
                 loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
           </div>
