@@ -57,11 +57,12 @@ export async function generateMetadata({
       siteName: "風信子花店 Hyacinth Florist",
       locale: isEn ? "en_US" : "zh_HK",
       type: "website",
+      url: `https://hy-florist.hk/${locale}`,
       title: "帛事花店 | 風信子花店 香港",
       description: "香港帛事花店首選。提供優質帛事花牌、花籃、花圈、慰問花束及各式祭奠花藝。",
       images: [
         {
-          url: "https://hy-florist.hk/logo.png",
+          url: "https://hy-florist.hk/og-image.png",
           width: 1200,
           height: 630,
           alt: "風信子花店 Hyacinth Florist - 帛事花店",
@@ -72,7 +73,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: "帛事花店 | 風信子花店",
       description: "香港帛事花店首選。提供優質帛事花牌、花籃、花圈。",
-      images: ["https://hy-florist.hk/logo.png"],
+      images: ["https://hy-florist.hk/og-image.png"],
     },
     icons: {
       icon: "/logo.png",
@@ -87,7 +88,7 @@ const localBusinessSchema = {
   "@type": "FloristShop",
   name: "Hyacinth Florist 風信子花店",
   url: "https://hy-florist.hk",
-  image: "https://hy-florist.hk/logo.png",
+  image: "https://hy-florist.hk/og-image.png",
   address: {
     "@type": "PostalAddress",
     streetAddress: "必嘉街18號嘉麗閣 地下3號舖",
