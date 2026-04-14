@@ -87,7 +87,6 @@ export default function Header() {
             width={120}
             height={120}
             priority
-            className={isTransparent ? "brightness-0 invert" : ""}
           />
         </Link>
 
