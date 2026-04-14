@@ -16,17 +16,18 @@ export const metadata: Metadata = {
     title: "風信子花店 - 香港帛事花店",
     description: "專業帛事花藝設計。提供帛事花牌、花籃、花圈、慰問花束及各式祭奠花藝。用心意與專業，為每一個珍重時刻送上真摯的祝福。",
     icons: {
-        icon: "/logo.svg",
-        shortcut: "/logo.svg",
+        icon: "/logo.png",
+        shortcut: "/logo.png",
+        apple: "/logo.png",
     },
     openGraph: {
         title: "風信子花店 - 香港帛事花店",
         description: "專業帛事花藝設計。提供帛事花牌、花籃、花圈、慰問花束及各式祭奠花藝。",
         images: [
             {
-                url: "/logo.svg",
-                width: 115,
-                height: 70,
+                url: "https://hy-florist.hk/logo.png",
+                width: 1200,
+                height: 630,
                 alt: "風信子花店 Hyacinth Florist",
             },
         ],
